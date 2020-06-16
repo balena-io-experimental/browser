@@ -13,13 +13,13 @@ if [[ -z ${FLAGS+x} ]]
     export FLAGS="--disable-dev-shm-usage --autoplay-policy=no-user-gesture-required --noerrdialogs"
 
     # if DISABLE_GPU is NOT set, add the GPU flags
-    if [[ -z ${DISABLE_GPU+x} ]]
+    if [[ ! -z ${DISABLE_GPU+x} ]] && [[ "$DISABLE_GPU" -eq "1" ]]
       then
-        echo "Enabling GPU acceleration"
-        FLAGS="$FLAGS --enable-features=WebRTC-H264WithOpenH264FFmpeg --ignore-gpu-blacklist --enable-gpu-rasterization --force-gpu-rasterization --gpu-sandbox-failures-fatal=no --enable-native-gpu-memory-buffers"
-      else
         # don't add the GPU flags
         echo "Disabling GPU acceleration"
+      else
+        echo "Enabling GPU acceleration"
+        FLAGS="$FLAGS --enable-features=WebRTC-H264WithOpenH264FFmpeg --ignore-gpu-blacklist --enable-gpu-rasterization --force-gpu-rasterization --gpu-sandbox-failures-fatal=no --enable-native-gpu-memory-buffers"
     fi
 fi
 
