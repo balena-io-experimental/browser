@@ -46,6 +46,20 @@ if [[ -z ${WINDOW_SIZE+x} ]]
     echo "Using fullscreen: $WINDOW_SIZE"
 fi
 
+# Set whether to run Chromium in config mode or not
+# This sets the cursor to show by default
+if [ ! -z ${KIOSK+x} ] && [ "$KIOSK" -eq "1" ]
+  then
+    export KIOSK='--kiosk --start-fullscreen'
+    echo "Enabling kiosk mode"
+    export CHROME_LAUNCH_URL="--app=$LAUNCH_URL"
+  else
+    export KIOSK=''
+    export CHROME_LAUNCH_URL="$LAUNCH_URL"
+    export CURSOR=''
+    echo "Enabling cursor"
+fi
+
 #Set whether to show a cursor or not
 if [[ ! -z $SHOW_CURSOR ]] && [[ "$SHOW_CURSOR" -eq "1" ]]
   then
@@ -54,22 +68,6 @@ if [[ ! -z $SHOW_CURSOR ]] && [[ "$SHOW_CURSOR" -eq "1" ]]
   else
     export CURSOR='-- -nocursor'
     echo "Disabling cursor"
-fi
-
-# Set whether to run Chromium in config mode or not
-# This sets the cursor to show by default
-if [ ! -z ${CONFIG_MODE+x} ] && [ "$CONFIG_MODE" -eq "1" ]
-  then
-    export KIOSK=''
-    echo "Enabling config mode"
-    export CHROME_LAUNCH_URL="$LAUNCH_URL"
-    export CURSOR=''
-    echo "Enabling cursor"
-	
-  else
-    export KIOSK='--kiosk --start-fullscreen'
-    echo "Disabling config mode"
-    export CHROME_LAUNCH_URL="--app=$LAUNCH_URL"
 fi
 
 # Allow users to turn the chromium std out and error on
