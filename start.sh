@@ -53,21 +53,21 @@ if [ ! -z ${KIOSK+x} ] && [ "$KIOSK" -eq "1" ]
     export KIOSK='--kiosk --start-fullscreen'
     echo "Enabling kiosk mode"
     export CHROME_LAUNCH_URL="--app=$LAUNCH_URL"
+
+    #Set whether to show a cursor or not
+    if [[ ! -z $SHOW_CURSOR ]] && [[ "$SHOW_CURSOR" -eq "1" ]]
+      then
+        export CURSOR=''
+        echo "Enabling cursor"
+      else
+        export CURSOR='-- -nocursor'
+        echo "Disabling cursor"
+    fi
   else
     export KIOSK=''
     export CHROME_LAUNCH_URL="$LAUNCH_URL"
     export CURSOR=''
     echo "Enabling cursor"
-fi
-
-#Set whether to show a cursor or not
-if [[ ! -z $SHOW_CURSOR ]] && [[ "$SHOW_CURSOR" -eq "1" ]]
-  then
-    export CURSOR=''
-    echo "Enabling cursor"
-  else
-    export CURSOR='-- -nocursor'
-    echo "Disabling cursor"
 fi
 
 # Allow users to turn the chromium std out and error on
