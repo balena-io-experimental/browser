@@ -29,3 +29,4 @@ RUN useradd chromium -m -s /bin/bash -G root && \
 RUN echo 'SUBSYSTEM=="vchiq",GROUP="video",MODE="0660"' > /etc/udev/rules.d/10-vchiq-permissions.rules
 RUN usermod -a -G audio,video,tty chromium
 
+CMD ["bash", "start.sh"]
