@@ -6,6 +6,28 @@ sed -i -e 's/console/anybody/g' /etc/X11/Xwrapper.config
 echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
 dpkg-reconfigure xserver-xorg-legacy
 
+# work out what to display
+if [[ -z ${LAUNCH_URL+x} ]]
+  # no launch URL, so try to find a local port 80
+  then
+    # if a delay period has been set
+    if [[ ! -z ${LOCAL_HTTP_DELAY+x} ]]
+      then
+        echo "Waiting for $LOCAL_HTTP_DELAY seconds before checking for a local HTTP service."
+        sleep "$LOCAL_HTTP_DELAY"
+    fi
+
+    # if HTTP 200 is returned from curl'ing the localhost - requires host networking
+    if [ "$(curl -o /dev/null -s -w "%{http_code}\n" http://localhost)" -eq "200" ]
+      then
+        echo "Local HTTP service found. Redirecting to http://localhost"
+        LAUNCH_URL="http://localhost"
+      else
+      echo "No LAUNCH_URL set and no local HTTP service found. Displaying default page."
+        LAUNCH_URL="file:///home/chromium/index.html"
+      fi
+fi
+
 # if FLAGS env var is not set, use default 
 if [[ -z ${FLAGS+x} ]]
   then
