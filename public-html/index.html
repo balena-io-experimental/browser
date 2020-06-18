@@ -8,7 +8,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>Scrolling Nav - Start Bootstrap Template</title>
+  <title>balenalabs-browser</title>
 
   <!-- Bootstrap core CSS -->
   <link href="vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -30,65 +30,27 @@
     </div>
   </nav>
 
-  <header class="bg-primary text-white">
-    <div class="container text-center">
+  <header class="my-auto bg-primary text-white">
+    <div class="container text-center ">
       <h1>balenalabs-browser</h1>
       <p class="lead">A primitive block for browsing HTML</p>
     </div>
-  </header>
-  <main id="about" >
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-lg-8 mx-auto">
-          <h2>Choosing what to display</h2>
-          <p class="lead">You have a few options for choosing what to display here:</p>
-          <ul>
-            <li>You can create a service on this device serving HTTP over port 80, and it'll display here automatically! **</li>
-            <li>You can set a Device Variable called <code>LAUNCH_URL</code></li>
-          </ul>
-          <blockquote>** The balenalabs-browser service will need <code>network_mode: host</code> set.
-        </blockquote>
+    </header>
+
+    <section id="description" class="my-auto">
+        <div class="container-fluid ">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+            <h2>Choosing what to display</h2>
+            <p class="lead">You have a few options for choosing what to display here:</p>
+            <ul>
+                <li>You can create a service on this device serving HTTP over port 80, and it'll display here automatically! **</li>
+                <li>You can set a Device Variable called <code>LAUNCH_URL</code></li>
+            </ul>
+            <blockquote>** The balenalabs-browser service will need <code>network_mode: host</code> set.</blockquote>
+            </div>
         </div>
-      </div>
-      <div class="row">
-        <div class="col-lg-8 mx-auto">
-          <h2>More options</h2>
-          <p class="lead">Here are a few more Device Variables you can set:</p>
-          <table class="table">
-            <thead>
-                <th>Variable</th><th>Values</th><th>Default</th><th>Description</th>
-                </thead>
-                <tr>
-                    <td>LAUNCH_URL</td><td>http or https URLs</td><td>N\A</td><td>Run in kiosk mode with no menus or status bars</td>
-                </tr>
-                <tr>
-                    <td>LOCAL_HTTP_DELAY</td><td>Number (seconds)</td><td>0</td><td>Number of seconds to wait for a local HTTP service to start before trying to detect it</td>
-                </tr>
-                <tr>
-                    <td>KIOSK</td><td>0 = off, 1 = on</td><td>0</td><td>Run in kiosk mode with no menus or status bars</td>
-                </tr>
-                <tr>
-                    <td>SHOW_CURSOR</td><td>0 = off, 1 = on</td><td>0</td><td>Enables/disables the cursor when in kiosk mode</td>
-                </tr>
-                <tr>
-                    <td>FLAGS</td><td>N/A</td><td>N/A</td><td>Overrides the flags chromium is started with. <b>Use with caution!</b></td>
-                </tr>
-                <tr>
-                    <td>PERSISTENT</td><td>0 = off, 1 = on</td><td>0</td><td>Enables/disables user profile data being stored on the device.</td>
-                </tr>
-                <tr>
-                    <td>ROTATE_DISPLAY</td><td>normal, left, right, inverted</td><td>normal</td><td>Rotates the display (Pi4 only)</td>
-                </tr>
-                <tr>
-                    <td>DEBUG</td><td>0 = off, 1 = on</td><td>0</td><td>Enables/disables Chromium's logging on the device</td>
-                </tr>
-                <tr>
-                    <td>DISABLE_GPU</td><td>0 = off, 1 = on</td><td>0</td><td>Disables the GPU rendering. Necessary for Pi3B+ to display YouTube videos.</td>
-                </tr> 
-          </table>
-        </div>
-    </div>
-  </main>
+    </section>
 
     <!-- Footer -->
   <footer class="py-5 bg-dark">
