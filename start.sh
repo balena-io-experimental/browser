@@ -106,18 +106,10 @@ echo "chromium-browser $CHROME_LAUNCH_URL $FLAGS  --window-size=$WINDOW_SIZE $OU
 chmod 770 /home/chromium/*.sh 
 chown chromium:chromium /home/chromium/xstart.sh
 
-# decide whether to use CEC to switch a connected TV on or not
-# this will crash the device if no TV is connected, unless HDMI_hotplug is set in config.txt
-if [ ! -z ${CONTROL_TV+x} ] && [ "$CONTROL_TV" -eq "1" ]
-  then
-    # Set the TV input to the device
-    echo 'as' | cec-client -s -d 1
-fi
-
 # make sure any lock on the Chromium profile is released
 chown -R chromium:chromium /data
 rm -f /data/SingletonLock
 
 
 # run script as chromium user
-su -c "export DISPLAY=:0 && startx /home/chromium/xstart.sh $CURSOR $OUTPUT" - chromium
+su -c "$1 && startx /home/chromium/xstart.sh $CURSOR $OUTPUT" - chromium
