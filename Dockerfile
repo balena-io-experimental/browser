@@ -32,4 +32,5 @@ COPY public-html /home/chromium
 RUN echo 'SUBSYSTEM=="vchiq",GROUP="video",MODE="0660"' > /etc/udev/rules.d/10-vchiq-permissions.rules
 RUN usermod -a -G audio,video,tty chromium
 
-CMD ["bash", "start.sh"]
+ENTRYPOINT ["bash", "start.sh"]
+CMD ["export DISPLAY=:0"]
