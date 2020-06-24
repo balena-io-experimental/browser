@@ -1,4 +1,4 @@
-FROM balenalib/intel-nuc-debian:buster-run
+FROM balenalib/amd64-debian:buster-run
 
 RUN install_packages \
     chromium \
