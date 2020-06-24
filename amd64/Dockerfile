@@ -1,0 +1,38 @@
+FROM balenalib/intel-nuc-debian:buster-run
+
+RUN install_packages \
+    chromium \
+    libgles2-mesa \
+    lsb-release \
+    mesa-vdpau-drivers \
+    wget \
+    x11-xserver-utils \
+    xserver-xorg-input-evdev \
+    xserver-xorg-legacy \
+    xserver-xorg-video-fbdev \
+    xserver-xorg xinit \
+    xterm 
+
+# Setting working directory
+WORKDIR /usr/src/app
+
+COPY ../start.sh ./
+
+
+ENV UDEV=1
+
+# Add chromium user
+RUN useradd chromium -m -s /bin/bash -G root && \
+    groupadd -r -f chromium && id -u chromium \
+    && chown -R chromium:chromium /home/chromium
+
+COPY ../public-html /home/chromium  
+
+# udev rule to set specific permissions 
+RUN echo 'SUBSYSTEM=="vchiq",GROUP="video",MODE="0660"' > /etc/udev/rules.d/10-vchiq-permissions.rules
+RUN usermod -a -G audio,video,tty chromium
+
+RUN ln -s /usr/bin/chromium /usr/bin/chromium-browser
+
+ENTRYPOINT ["bash", "start.sh"]
+CMD ["export DISPLAY=:0"]
