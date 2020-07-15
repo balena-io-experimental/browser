@@ -35,7 +35,11 @@ fi
 if [[ -z ${FLAGS+x} ]]
   then
     echo "Using default chromium flags"
-    export FLAGS="--disable-dev-shm-usage --autoplay-policy=no-user-gesture-required --noerrdialogs"
+    # --disable-dev-shm-usage = disable shared memory. Necessary because default size is too small for Chromium and causes crashes.
+    # --autoplay-policy=no-user-gesture-required = stops you needing to click play on videos
+    # --check-for-update-interval = stop Chromium complaining about not being able to auto-update
+    # --noerrdialogs --disable-session-crashed-bubble = turn off error pop-ups
+    export FLAGS="--disable-dev-shm-usage --autoplay-policy=no-user-gesture-required --noerrdialogs --disable-session-crashed-bubble --check-for-update-interval=31536000"
 
     # if DISABLE_GPU is NOT set, add the GPU flags
     if [[ ! -z ${DISABLE_GPU+x} ]] && [[ "$DISABLE_GPU" -eq "1" ]]
@@ -53,6 +57,10 @@ if [[ ! -z $PERSISTENT ]] && [[ "$PERSISTENT" -eq "1" ]]
   then
     echo "Adding user settings directory"
     FLAGS="$FLAGS --user-data-dir=/data"
+
+    # make sure any lock on the Chromium profile is released
+    chown -R chromium:chromium /data
+    rm -f /data/SingletonLock
 fi
 
 #create start script for X11
@@ -109,9 +117,7 @@ echo "chromium-browser $CHROME_LAUNCH_URL $FLAGS  --window-size=$WINDOW_SIZE $OU
 chmod 770 /home/chromium/*.sh 
 chown chromium:chromium /home/chromium/xstart.sh
 
-# make sure any lock on the Chromium profile is released
-chown -R chromium:chromium /data
-rm -f /data/SingletonLock
+
 
 
 # run script as chromium user

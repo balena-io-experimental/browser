@@ -1,4 +1,4 @@
-FROM balenalib/amd64-debian:buster-run
+FROM balenalib/%%BALENA_MACHINE_NAME%%-debian:buster-run
 
 RUN install_packages \
     chromium \
