@@ -79,7 +79,7 @@ The following environment variables allow configuration of the `browser` primiti
 |`KIOSK`|`0`, `1`|`0`|Run in kiosk mode with no menus or status bars. <br/> `0` = off, `1` = on|
 |`SHOW_CURSOR`|`0`, `1`|`0`|Enables/disables the cursor when in kiosk mode<br/> `0` = off, `1` = on|
 |`FLAGS`|[many!](https://peter.sh/experiments/chromium-command-line-switches/)|N/A|Overrides the flags chromium is started with. **Use with caution!**|
-|`PERSISTENT`|`0`, `1`|`0`|Enables/disables user profile data being stored on the device. <br/> `0` = off, `1` = on|
+|`PERSISTENT`|`0`, `1`|`0`|Enables/disables user profile data being stored on the device. **Note: you'll need to create a settings volume. See example above** <br/> `0` = off, `1` = on|
 |`ROTATE_DISPLAY`|`normal`, `left`, `right`, `inverted`|`normal`|Rotates the display (Pi4 only)|
 |`DEBUG`|`0`, `1`|0|Enables/disables Chromium's logging on the device. <br/> `0` = off, `1` = on|
 |`DISABLE_GPU`|`0`, `1`|0|Disables the GPU rendering. Necessary for Pi3B+ to display YouTube videos. <br/> `0` = off, `1` = on|
