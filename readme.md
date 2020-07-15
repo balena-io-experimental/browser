@@ -96,7 +96,7 @@ volumes:
 services:
   browser:
     restart: always
-    build: ./browser
+    image: balenaplayground/balenalabs-browser:raspberrypi4-64
     network_mode: host
     privileged: true
     volumes:
