@@ -110,7 +110,7 @@ services:
 ```
 
 ## Supported devices
-The audio primitive has been tested to work on the following devices:
+The `browser` primitive has been tested to work on the following devices:
 
 | Device Type  | Status |
 | ------------- | ------------- |
