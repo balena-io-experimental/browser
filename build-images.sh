@@ -18,7 +18,7 @@ function build_and_push_image () {
   docker buildx build -t $DOCKER_REPO/balenalabs-browser:$BALENA_MACHINE_NAME --platform $DOCKER_ARCH --file Dockerfile.$BALENA_MACHINE_NAME .
 
   echo "Publishing..."
-  docker push balenaplayground/balenalabs-browser:$BALENA_MACHINE_NAME
+  docker push $DOCKER_REPO/balenalabs-browser:$BALENA_MACHINE_NAME
 
   echo "Cleaning up..."
   rm Dockerfile.$BALENA_MACHINE_NAME
