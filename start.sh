@@ -99,7 +99,7 @@ if [[ ! -z "$ROTATE_DISPLAY" ]]; then
   echo "(sleep 3 && xrandr -o $ROTATE_DISPLAY) &" >> /home/chromium/xstart.sh
 
   #If the display is rotated to left or right, we need to reverse the size and position coords
-  if [[ "$ROTATE_DISPLAY" -eq "left" ]] || [[ "$ROTATE_DISPLAY" -eq "right" ]]; then
+  if [[ "$ROTATE_DISPLAY" == "left" ]] || [[ "$ROTATE_DISPLAY" == "right" ]]; then
     
     echo "Display rotated to portait. Reversing screen coordinates"
     
