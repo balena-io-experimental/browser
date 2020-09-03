@@ -126,8 +126,6 @@ if [ ! -z ${KIOSK+x} ] && [ "$KIOSK" -eq "1" ]
     export CHROME_LAUNCH_URL="--app=$LAUNCH_URL" 
   else
     export CHROME_LAUNCH_URL="$LAUNCH_URL"
-    export CURSOR=''
-    echo "Enabling cursor"
 fi
 
  #Set whether to show a cursor or not
