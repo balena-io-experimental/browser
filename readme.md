@@ -1,12 +1,12 @@
-# balena browser primitive
+# balenablocks/browser
 
 Provides a hardware accelerated web browser to present internal and external URLs on a connected display.
-The `browser` primitive is a docker image that runs a [Chromium](https://www.chromium.org/Home) browser via X11, optimized for balenaOS.
+The `browser` block is a docker image that runs a [Chromium](https://www.chromium.org/Home) browser via X11, optimized for balenaOS.
 
 ## Features
 
 - Chromium browser optimised for device arch
-- Hardware video acceleration enabled
+- Hardware video acceleration (if enabled)
 - Optional KIOSK mode
 - Remotely configurable launch URL
 - Automatically displays local HTTP (port 80) service endpoints (e.g. Grafana dashboard)
@@ -25,7 +25,7 @@ volumes:
 services:
 
   browser:
-    image: balenaplayground/balenalabs-browser:raspberrypi4-64
+    image: balenablocks/browser:raspberrypi4-64
     privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
     network_mode: host
     volumes:
@@ -53,24 +53,24 @@ services:
 *dockerfile.template*
 
 ```dockerfile
-FROM balenaplayground/balenalabs-browser:%%BALENA_MACHINE_NAME%%
+FROM balenablocks/browser:%%BALENA_MACHINE_NAME%%
 ```
 
 ## Customisation
 ### Extend image configuration
 
-By default the `browser` primitive uses the first local display (i.e. `DISPLAY=:0`) which would typically be a connected monitor, TV or a Pi Display. However for custom configurations you can overload the `CMD` directive, as such:
+By default the `browser` block uses the first local display (i.e. `DISPLAY=:0`) which would typically be a connected monitor, TV or a Pi Display. However for custom configurations you can overload the `CMD` directive, as such:
 
 *dockerfile.template*
 ```Dockerfile
-FROM balenaplayground/balenalabs-browser:%%BALENA_MACHINE_NAME%%
+FROM balenablocks/browser:%%BALENA_MACHINE_NAME%%
 
 CMD ["export DISPLAY=:1"]
 ```
 
 ### Environment variables
 
-The following environment variables allow configuration of the `browser` primitive:
+The following environment variables allow configuration of the `browser` block:
 
 | Environment variable | Options | Default | Description | 
 | --- | --- | --- | --- |
@@ -82,7 +82,9 @@ The following environment variables allow configuration of the `browser` primiti
 |`PERSISTENT`|`0`, `1`|`0`|Enables/disables user profile data being stored on the device. **Note: you'll need to create a settings volume. See example above** <br/> `0` = off, `1` = on|
 |`ROTATE_DISPLAY`|`normal`, `left`, `right`, `inverted`|`normal`|Rotates the display (Pi4 only)|
 |`DEBUG`|`0`, `1`|0|Enables/disables Chromium's logging on the device. <br/> `0` = off, `1` = on|
-|`DISABLE_GPU`|`0`, `1`|0|Disables the GPU rendering. Necessary for Pi3B+ to display YouTube videos. <br/> `0` = off, `1` = on|
+|`ENABLE_GPU`|`0`, `1`|0|Enables the GPU rendering. Necessary for Pi3B+ to display YouTube videos. <br/> `0` = off, `1` = on|
+|`WINDOW_SIZE`|`x,y`, `1`|Detected screen resolution|Sets the browser window size, such as `800,600`|
+|`WINDOW_POSITION`|`x,y`|`0,0`|Specifies the browser window position on the screen|
 
 
 ## Choosing what to display
@@ -96,7 +98,7 @@ volumes:
 services:
   browser:
     restart: always
-    image: balenaplayground/balenalabs-browser:raspberrypi4-64
+    image: balenablocks/browser:raspberrypi4-64
     network_mode: host
     privileged: true
     volumes:
@@ -110,11 +112,13 @@ services:
 ```
 
 ## Supported devices
-The `browser` primitive has been tested to work on the following devices:
+The `browser` block has been tested to work on the following devices:
 
 | Device Type  | Status |
 | ------------- | ------------- |
 | Raspberry Pi 3b+ | ✔ |
+| Raspberry Pi 3b+ (64-bit OS) | ✔ |
+| balena Fin | ✔ |
 | Raspberry Pi 4 | ✔ |
 | Intel NUC | ✔ |
 | Generic AMD64 | ✔ |
