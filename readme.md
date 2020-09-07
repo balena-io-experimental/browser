@@ -5,7 +5,7 @@ The `browser` block is a docker image that runs a [Chromium](https://www.chromiu
 
 ## Features
 
-- Chromium browser optimised for device arch
+- Chromium browser optimized for device arch
 - Hardware video acceleration (if enabled)
 - Optional KIOSK mode
 - Remotely configurable launch URL
@@ -20,7 +20,7 @@ To use this image, create a container in your `docker-compose.yml` file as shown
 version: '2'
 
 volumes:
-  settings:                          # Only required if using PERSISTANT flag (see below)
+  settings:                          # Only required if using PERSISTENT flag (see below)
 
 services:
 
@@ -29,7 +29,7 @@ services:
     privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
     network_mode: host
     volumes:
-      - 'settings:/data' # Only required if using PERSISTANT flag (see below)
+      - 'settings:/data' # Only required if using PERSISTENT flag (see below)
 ```
 
 You can also set your `docker-compose.yml` to build a `dockerfile.template` file, and use the build variable `%%BALENA_MACHINE_NAME%%` so that the correct image is automatically built for your device type (see [supported devices](#Supported-devices)):
@@ -39,7 +39,7 @@ You can also set your `docker-compose.yml` to build a `dockerfile.template` file
 version: '2'
 
 volumes:
-  settings:                          # Only required if using PERSISTANT flag (see below)
+  settings:                          # Only required if using PERSISTENT flag (see below)
 
 services:
 
@@ -48,7 +48,7 @@ services:
     privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
     network_mode: host
     volumes:
-      - 'settings:/data' # Only required if using PERSISTANT flag (see below)
+      - 'settings:/data' # Only required if using PERSISTENT flag (see below)
 ```
 *dockerfile.template*
 
@@ -56,7 +56,7 @@ services:
 FROM balenablocks/browser:%%BALENA_MACHINE_NAME%%
 ```
 
-## Customisation
+## Customization
 ### Extend image configuration
 
 By default the `browser` block uses the first local display (i.e. `DISPLAY=:0`) which would typically be a connected monitor, TV or a Pi Display. However for custom configurations you can overload the `CMD` directive, as such:
