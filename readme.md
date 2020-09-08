@@ -83,7 +83,7 @@ The following environment variables allow configuration of the `browser` block:
 |`ROTATE_DISPLAY`|`normal`, `left`, `right`, `inverted`|`normal`|Rotates the display|
 |`DEBUG`|`0`, `1`|0|Enables/disables Chromium's logging on the device. <br/> `0` = off, `1` = on|
 |`ENABLE_GPU`|`0`, `1`|0|Enables the GPU rendering. Necessary for Pi3B+ to display YouTube videos. <br/> `0` = off, `1` = on|
-|`WINDOW_SIZE`|`x,y`, `1`|Detected screen resolution|Sets the browser window size, such as `800,600`|
+|`WINDOW_SIZE`|`x,y`|Detected screen resolution|Sets the browser window size, such as `800,600`|
 |`WINDOW_POSITION`|`x,y`|`0,0`|Specifies the browser window position on the screen|
 
 
