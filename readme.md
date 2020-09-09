@@ -123,4 +123,13 @@ The `browser` block has been tested to work on the following devices:
 | Intel NUC | ✔ |
 | Generic AMD64 | ✔ |
 
+## Troubleshooting
+This section provides some guidance for common issues encountered:
 
+#### Black border on HDMI display
+Thanks to 1980's CRT televisions, manufacturers had to invent a method for cutting off the edges of a picture to ensure the "important" bits were displayed nicely on the screen. This is called `overscan` and there's a good article on it [here](https://www.howtogeek.com/252193/hdtv-overscan-what-it-is-and-why-you-should-probably-turn-it-off/).
+If, when you plug one of the supported devices into your HDMI screen, you find black borders around the picture, you need to disable overscan. For the device this can be achieved by setting a [Device Configuration variable](https://www.balena.io/docs/learn/manage/configuration/#:~:text=Define%20fleet%2Dwide%3A-,Managing%20device%20configuration%20variables,of%20the%20device%20configuration%20variable.) called `BALENA_HOST_CONFIG_disable_overscan` and setting the value to `1`:
+
+![overscan-setting](https://i.ibb.co/sCQ8Dwy/Capture.jpg)
+
+You may also need to turn it off on the screen itself (check your device instructions for details).
