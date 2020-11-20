@@ -72,7 +72,7 @@ CMD ["export DISPLAY=:1"]
 
 The following environment variables allow configuration of the `browser` block:
 
-| Environment variable | Options | Default | Description | 
+| Environment variable | Options | Default | Description |
 | --- | --- | --- | --- |
 |`LAUNCH_URL`|`http` or `https` URL|N\A|Web page to display|
 |`LOCAL_HTTP_DELAY`|Number (seconds)|0|Number of seconds to wait for a local HTTP service to start before trying to detect it|
@@ -88,7 +88,7 @@ The following environment variables allow configuration of the `browser` block:
 
 
 ## Choosing what to display
-If you want the `browser` to display a wesite, you can set the `LAUNCH_URL` as noted above. However, you can also drop the `browser` into a multicontainer app, and use it to display the (HTTP, port 80) output of another service, such as a Grafana dashboard. The `browser` will automatically detect that a service is running a HTTP server on port 80 and display that. Just make sure that you don't set a `LAUNCH_URL` environment variable, as they take precedence. Example:
+If you want the `browser` to display a website, you can set the `LAUNCH_URL` as noted above. However, you can also drop the `browser` into a multicontainer app, and use it to display the (HTTP, port 80) output of another service, such as a Grafana dashboard. The `browser` will automatically detect that a service is running a HTTP server on port 80 and display that. Just make sure that you don't set a `LAUNCH_URL` environment variable, as they take precedence. Example:
 
 *docker-compose.yml*
 ```yaml
