@@ -111,6 +111,27 @@ services:
       - "80"
 ```
 
+## Choosing audio output device
+By default the `browser` block will output audio via HDMI. If you want to route audio through a different interface you can do it with the help of the [`audio` block]((https://github.com/balenablocks/audio)). The `browser` block is pre-configured to use it if present so you only need to add it to your `docker-compose.yml` file and then use `AUDIO_OUTPUT` environment variable to select the desired output. Check out the `audio` block [documentation](https://github.com/balenablocks/audio#environment-variables) to learn more about it.
+
+In this example we add the `audio` block and route the `browser` audio to the Raspberry Pi headphone jack:
+
+```yaml
+services:
+  browser:
+    image: balenablocks/browser:raspberrypi4-64
+    network_mode: host
+  audio:
+    image: balenablocks/audio:raspberrypi4-64
+    privileged: true
+    ports:
+      - 4317:4317
+    environment:
+      AUDIO_OUTPUT: RPI_HEADPHONES
+```
+
+**Note**: The `browser` block expects the `audio` block to be named as such. If you change it's service name you'll need to override the `PULSE_SERVER` environment variable value to match it in the `browser` dockerfile. For example add `ENV PULSE_SERVER=tcp:not-audio:4317`.
+
 ## Supported devices
 The `browser` block has been tested to work on the following devices:
 

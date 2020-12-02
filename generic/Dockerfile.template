@@ -34,5 +34,9 @@ RUN usermod -a -G audio,video,tty chromium
 
 RUN ln -s /usr/bin/chromium /usr/bin/chromium-browser
 
+# Set up the audio block. This won't have any effect if the audio block is not being used.
+RUN curl -skL https://raw.githubusercontent.com/balenablocks/audio/master/scripts/alsa-bridge/debian-setup.sh| sh
+ENV PULSE_SERVER=tcp:audio:4317
+
 ENTRYPOINT ["bash", "start.sh"]
 CMD ["export DISPLAY=:0"]
