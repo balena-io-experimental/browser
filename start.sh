@@ -21,6 +21,13 @@ sed -i -e 's/console/anybody/g' /etc/X11/Xwrapper.config
 echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
 dpkg-reconfigure xserver-xorg-legacy
 
+# if a setup.sh file has been copied into the container, run it.
+# these will contain arch-specific commands to be run.
+if [ -f 'setup.sh' ]; 
+  then
+    bash setup.sh
+fi
+
 # work out what to display
 if [[ -z ${LAUNCH_URL+x} ]]
   # no launch URL, so try to find a local port 80
@@ -156,9 +163,6 @@ echo "chromium-browser $CHROME_LAUNCH_URL $FLAGS  --window-size=$WINDOW_SIZE --w
 
 chmod 770 /home/chromium/*.sh 
 chown chromium:chromium /home/chromium/xstart.sh
-
-
-
 
 # run script as chromium user
 su -c "$1 && startx /home/chromium/xstart.sh $CURSOR $OUTPUT" - chromium

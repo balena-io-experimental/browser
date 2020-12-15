@@ -11,6 +11,7 @@ RUN install_packages wget \
     chromium-browser \
     rpi-chromium-mods \ 
     libgles2-mesa \
+    libsemanage1 \
     lsb-release
 
 # Setting working directory
@@ -18,8 +19,12 @@ WORKDIR /usr/src/app
 
 COPY ../start.sh ./
 
+COPY ./rpi/setup.sh .
+RUN chmod +x ./setup.sh
 
 ENV UDEV=1
+
+
 
 # Add chromium user
 RUN useradd chromium -m -s /bin/bash -G root && \
