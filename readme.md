@@ -81,7 +81,6 @@ The following environment variables allow configuration of the `browser` block:
 |`FLAGS`|[many!](https://peter.sh/experiments/chromium-command-line-switches/)|N/A|Overrides the flags chromium is started with. **Use with caution!**|
 |`PERSISTENT`|`0`, `1`|`0`|Enables/disables user profile data being stored on the device. **Note: you'll need to create a settings volume. See example above** <br/> `0` = off, `1` = on|
 |`ROTATE_DISPLAY`|`normal`, `left`, `right`, `inverted`|`normal`|Rotates the display|
-|`DEBUG`|`0`, `1`|0|Enables/disables Chromium's logging on the device. <br/> `0` = off, `1` = on|
 |`ENABLE_GPU`|`0`, `1`|0|Enables the GPU rendering. Necessary for Pi3B+ to display YouTube videos. <br/> `0` = off, `1` = on|
 |`WINDOW_SIZE`|`x,y`|Detected screen resolution|Sets the browser window size, such as `800,600`|
 |`WINDOW_POSITION`|`x,y`|`0,0`|Specifies the browser window position on the screen|
@@ -154,3 +153,9 @@ If, when you plug one of the supported devices into your HDMI screen, you find b
 ![overscan-setting](https://i.ibb.co/sCQ8Dwy/Capture.jpg)
 
 You may also need to turn it off on the screen itself (check your device instructions for details).
+
+#### Partial display output
+Occasionally users report that only a portion of the browser screen appears on their display. The things to try here are:
+
+* Setting the WINDOW_SIZE manually to your display's resolution (e.g. `1980,1080`) - the display may be mis-reporting it's resolution to the device
+* Increase the memory being allocated to the GPU with the [configuration variable](https://www.balena.io/docs/learn/manage/configuration/) - for large displays the device may need to allocate more memory to displaying the output
