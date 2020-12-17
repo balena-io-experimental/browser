@@ -2,12 +2,18 @@
 
 const express = require('express');
 const bodyParser = require('body-parser');
-const ChromeLauncher = require('chrome-launcher');
-const _apiPort = parseInt(process.env.API_PORT) || 5011;
-const _windowSize = process.env.WINDOW_SIZE || "800,600";
-const _windowPosition = process.env.WINDOW_POSITION || "0,0";
-const _enableGpu = process.env.ENABLE_GPU || '0';
-const _persistentProfile = process.env.PERSISTENT || '0';
+const chromeLauncher = require('chrome-launcher');
+
+const API_PORT = parseInt(process.env.API_PORT) || 5011;
+const WINDOW_SIZE = process.env.WINDOW_SIZE || "800,600";
+const WINDOW_POSITION = process.env.WINDOW_POSITION || "0,0";
+const PERSISTENT_DATA = process.env.PERSISTENT || '0';
+const REMOTE_DEBUG_PORT = process.env.REMOTE_DEBUG_PORT || 35173;
+var DEFAULT_FLAGS = [];
+
+var enableGpu = process.env.ENABLE_GPU || '0';
+var currentUrl = '';
+var kioskMode = process.env.KIOSK || '0';
 
 let Scan = function() {
   var launchUrl = process.env.LAUNCH_URL || null;
@@ -19,46 +25,62 @@ let Scan = function() {
   //TODO: find local services
 
   return "file:///home/chromium/index.html";
-
 }
 
 let Launch = function(url) {
-  ChromeLauncher.killAll().then(() => { 
+  chromeLauncher.killAll().then(() => { 
 
-    var flags = [
-      '--no-sandbox',
-        '--window-size=' + _windowSize,
-        '--window-position=' + _windowPosition,
+    var flags = 
+      [
+        '--no-sandbox',
+        '--window-size=' + WINDOW_SIZE,
+        '--window-position=' + WINDOW_POSITION,
         '--autoplay-policy=no-user-gesture-required',
         '--noerrdialogs',
         '--disable-session-crashed-bubble',
         '--check-for-update-interval=31536000',
         '--disable-dev-shm-usage'
+        
     ];
 
-    if (_enableGpu != '1')
+    if (enableGpu != '1')
     {
       flags.push('--disable-gpu')
     }
 
-    if (_persistentProfile == '1')
+    if (PERSISTENT_DATA == '1')
     {
       flags.push('--user-data-dir=/data')
     }
 
-    ChromeLauncher.launch({
-      startingUrl: url,
+    var startingUrl = url;
+    if (kioskMode == '1')
+    {
+      startingUrl = '--app=' + url
+    }
+
+    chromeLauncher.launch({
+      //the startingUrl argument is not used here, because we can't run as KIOSK using it
+      startingUrl: startingUrl,
+      ignoreDefaultFlags: true,
       chromeFlags: flags,
-      port:35173 //this is the remote debugging port
+      port: REMOTE_DEBUG_PORT
     }).then(chrome => {
-      console.log(`Chrome debugging port running on ${chrome.port}`);
+      console.log(`Chromium debugging port running on ${chrome.port}`);
+      currentUrl = url;
     });
-});
+  });
 }
 
+let SetDefaultFlags = function() {
+  DEFAULT_FLAGS = [...chromeLauncher.Launcher.defaultFlags().filter(flag => flag !== '--disable-extensions' && flag !== '--mute-audio')]
+}
+
+//SetDefaultFlags();
 var url = Scan();
 Launch(url);
 const app = express();
+console.log("Browser block running....")
 
 const errorHandler = (err, req, res, next) => {
   res.status(500);
@@ -67,7 +89,6 @@ const errorHandler = (err, req, res, next) => {
   });
 };
 
-// app.use(compression());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: true
@@ -90,12 +111,52 @@ app.post('/url/set', (req, res) => {
     return res.status(400).send('Bad URL Request');
   }
 
-  Launch(req.body.url);
+  var url = req.body.url;
+
+  if ((!url.toLowerCase().startsWith("http://")) && (!url.toLowerCase().startsWith("https://")))
+  {
+    url = "http://" + url;
+  }
+
+  Launch(url);
   return res.status(200).send('ok');
 });
 
-app.listen(_apiPort, () => {
-  console.log('server listening on port ' + _apiPort);
+app.post('/refresh', (req, res) => {
+ 
+  Launch(currentUrl);
+  return res.status(200).send('ok');
+});
+
+app.post('/gpu/set', (req, res) => {
+  if (!req.body.gpu) {
+    return res.status(400).send('Bad Request');
+  }
+
+  enableGpu = req.body.gpu;
+  Launch(currentUrl);
+  return res.status(200).send('ok');
+});
+
+app.post('/kiosk/set', (req, res) => {
+  if (!req.body.kiosk) {
+    return res.status(400).send('Bad Request');
+  }
+
+  kioskMode = req.body.kiosk;
+  Launch(currentUrl);
+  return res.status(200).send('ok');
+});
+
+app.post('/scan', (req, res) => {
+ 
+  var url = Scan();
+  Launch(url);
+  return res.status(200).send('ok');
+});
+
+app.listen(API_PORT, () => {
+  console.log('server listening on port ' + API_PORT);
 });
 
 process.on('SIGINT', () => {
