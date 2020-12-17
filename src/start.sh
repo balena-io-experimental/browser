@@ -12,8 +12,6 @@ dpkg-reconfigure xserver-xorg-legacy
 PULSE_SERVER=${PULSE_SERVER:-tcp:audio:4317}
 export PULSE_SERVER=$PULSE_SERVER
 
-export WINDOW_SIZE=$( cat /sys/class/graphics/fb0/virtual_size )
-
  #Set whether to show a cursor or not
 if [[ ! -z $SHOW_CURSOR ]] && [[ "$SHOW_CURSOR" -eq "1" ]]
   then
@@ -23,5 +21,7 @@ if [[ ! -z $SHOW_CURSOR ]] && [[ "$SHOW_CURSOR" -eq "1" ]]
     export CURSOR='-- -nocursor'
     echo "Disabling cursor"
 fi
+
+echo "SHOW_CURSOR set to $SHOW_CURSOR"
 
 export DISPLAY=:0 && startx /usr/src/app/startx.sh $CURSOR

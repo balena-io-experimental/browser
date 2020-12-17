@@ -60,7 +60,6 @@ let Launch = function(url) {
     }
 
     chromeLauncher.launch({
-      //the startingUrl argument is not used here, because we can't run as KIOSK using it
       startingUrl: startingUrl,
       ignoreDefaultFlags: true,
       chromeFlags: flags,
@@ -76,7 +75,7 @@ let SetDefaultFlags = function() {
   DEFAULT_FLAGS = [...chromeLauncher.Launcher.defaultFlags().filter(flag => flag !== '--disable-extensions' && flag !== '--mute-audio')]
 }
 
-//SetDefaultFlags();
+//SetDefaultFlags(); //TODO: fix this
 var url = Scan();
 Launch(url);
 const app = express();
@@ -122,6 +121,11 @@ app.post('/url/set', (req, res) => {
   return res.status(200).send('ok');
 });
 
+app.get('/url/get', (req, res) => {
+    
+  return res.status(200).send(currentUrl);
+});
+
 app.post('/refresh', (req, res) => {
  
   Launch(currentUrl);
@@ -138,6 +142,11 @@ app.post('/gpu/set', (req, res) => {
   return res.status(200).send('ok');
 });
 
+app.get('/gpu/get', (req, res) => {
+    
+  return res.status(200).send(enableGpu);
+});
+
 app.post('/kiosk/set', (req, res) => {
   if (!req.body.kiosk) {
     return res.status(400).send('Bad Request');
@@ -146,6 +155,11 @@ app.post('/kiosk/set', (req, res) => {
   kioskMode = req.body.kiosk;
   Launch(currentUrl);
   return res.status(200).send('ok');
+});
+
+app.get('/kiosk/get', (req, res) => {
+    
+  return res.status(200).send(kioskMode);
 });
 
 app.post('/scan', (req, res) => {
