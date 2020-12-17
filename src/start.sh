@@ -14,4 +14,14 @@ export PULSE_SERVER=$PULSE_SERVER
 
 export WINDOW_SIZE=$( cat /sys/class/graphics/fb0/virtual_size )
 
-export DISPLAY=:0 && startx /usr/src/app/startx.sh
+ #Set whether to show a cursor or not
+if [[ ! -z $SHOW_CURSOR ]] && [[ "$SHOW_CURSOR" -eq "1" ]]
+  then
+    export CURSOR=''
+    echo "Enabling cursor"
+  else
+    export CURSOR='-- -nocursor'
+    echo "Disabling cursor"
+fi
+
+export DISPLAY=:0 && startx /usr/src/app/startx.sh $CURSOR
