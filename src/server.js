@@ -9,6 +9,7 @@ const WINDOW_SIZE = process.env.WINDOW_SIZE || "800,600";
 const WINDOW_POSITION = process.env.WINDOW_POSITION || "0,0";
 const PERSISTENT_DATA = process.env.PERSISTENT || '0';
 const REMOTE_DEBUG_PORT = process.env.REMOTE_DEBUG_PORT || 35173;
+const FLAGS = process.env.FLAGS || null;
 var DEFAULT_FLAGS = [];
 
 var enableGpu = process.env.ENABLE_GPU || '0';
@@ -30,8 +31,14 @@ let Scan = function() {
 let Launch = function(url) {
   chromeLauncher.killAll().then(() => { 
 
-    var flags = 
-      [
+    var flags = [];
+    if (null != FLAGS)
+    {
+      flags = FLAGS.split(' ');
+    }
+    else
+    {
+      flags = [
         '--no-sandbox',
         '--window-size=' + WINDOW_SIZE,
         '--window-position=' + WINDOW_POSITION,
@@ -42,6 +49,7 @@ let Launch = function(url) {
         '--disable-dev-shm-usage'
         
     ];
+  }
 
     if (enableGpu != '1')
     {
