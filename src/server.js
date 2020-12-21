@@ -3,6 +3,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const chromeLauncher = require('chrome-launcher');
+const bent = require('bent')
 
 const API_PORT = parseInt(process.env.API_PORT) || 5011;
 const WINDOW_SIZE = process.env.WINDOW_SIZE || "800,600";
@@ -10,35 +11,100 @@ const WINDOW_POSITION = process.env.WINDOW_POSITION || "0,0";
 const PERSISTENT_DATA = process.env.PERSISTENT || '0';
 const REMOTE_DEBUG_PORT = process.env.REMOTE_DEBUG_PORT || 35173;
 const FLAGS = process.env.FLAGS || null;
-var DEFAULT_FLAGS = [];
 
+var DEFAULT_FLAGS = [];
 var enableGpu = process.env.ENABLE_GPU || '0';
 var currentUrl = '';
 var kioskMode = process.env.KIOSK || '0';
 
-let Scan = function() {
-  var launchUrl = process.env.LAUNCH_URL || null;
-  if (null != launchUrl)
-  {
-    return launchUrl;
+// Returns the URL to display, adhering to the hieracrchy:
+// 1) the configured LAUNCH_URL
+// 2) a discovered HTTP service on the device
+// 3) the default static HTML
+async function getUrlToDisplayAsync() {
+    var launchUrl = process.env.LAUNCH_URL || null;
+    if (null != launchUrl)
+    {
+      launchUrl;
+    }
+
+    console.log("LAUNCH_URL not set.")
+    console.log("Looking for local HTTP services.")
+
+    // Check each HTTP/S port
+    var ports = [80,443,8080];
+    var returnURL = null;
+    await Promise.all(ports.map(async (port) => 
+    {
+      var url = '';
+      if(port == 443)
+      {
+        url = 'https://'
+      }
+      else
+      {
+        url = 'http://'
+      }
+      url = url + 'localhost:' + port;
+      
+      console.log("Trying " + url);
+
+      try 
+      {
+        //request the URL
+        const request = bent(url);
+        const response = await request();
+        //If OK
+        if (200 == response.statusCode)
+        {
+          console.log("HTTP services found on URL: " + url)
+          return url;
+        }
+      }
+      catch(error)
+      {
+        //TODO: Handle expected connection errors, but re-throw anything else
+      }
+    })).then((urls) =>
+    {
+      // An array of the promise resolves will be returned. The discovered services
+      // will have their URL in the array. The others will be null.
+      var filteredUrls = urls.filter(function (el) {
+        // Only keep the non-null items
+        return el != null;
+      });
+
+      // If we found a URL
+      if(filteredUrls.length > 0)
+      {
+        returnURL = filteredUrls[0];
+      }
+      // Otherwise send the default HTML
+      else
+      {
+        console.log("Using default HTML page");
+       returnURL = "file:///home/chromium/index.html";
+      }
+    });
+
+    return returnURL;
   }
-
-  //TODO: find local services
-
-  return "file:///home/chromium/index.html";
-}
-
-let Launch = function(url) {
+       
+// Launch the browser with the URL specified
+let launchChromium = function(url) {
   chromeLauncher.killAll().then(() => { 
 
     var flags = [];
+    // If the user has set the flags, use them
     if (null != FLAGS)
     {
       flags = FLAGS.split(' ');
     }
     else
     {
-      flags = [
+      // User the default flags from chrome-launcher, plus our own.
+      flags = DEFAULT_FLAGS;
+      var balenaFlags = [
         '--no-sandbox',
         '--window-size=' + WINDOW_SIZE,
         '--window-position=' + WINDOW_POSITION,
@@ -47,9 +113,10 @@ let Launch = function(url) {
         '--disable-session-crashed-bubble',
         '--check-for-update-interval=31536000',
         '--disable-dev-shm-usage'
-        
-    ];
-  }
+      ];
+
+      flags = flags.concat(balenaFlags);
+    }
 
     if (enableGpu != '1')
     {
@@ -67,6 +134,8 @@ let Launch = function(url) {
       startingUrl = '--app=' + url
     }
 
+    console.log("Starting Chromium with the following flags: " + flags)
+
     chromeLauncher.launch({
       startingUrl: startingUrl,
       ignoreDefaultFlags: true,
@@ -79,15 +148,23 @@ let Launch = function(url) {
   });
 }
 
-let SetDefaultFlags = function() {
-  DEFAULT_FLAGS = [...chromeLauncher.Launcher.defaultFlags().filter(flag => flag !== '--disable-extensions' && flag !== '--mute-audio')]
+// Get's the chrome-launcher default flags, minus the extensions and audio muting ones.
+async function SetDefaultFlags() {
+  DEFAULT_FLAGS =  await chromeLauncher.Launcher.defaultFlags().filter(flag => flag !== '--disable-extensions' && flag !== '--mute-audio');
 }
 
-//SetDefaultFlags(); //TODO: fix this
-var url = Scan();
-Launch(url);
+async function main(){
+  await SetDefaultFlags();
+  var url = await getUrlToDisplayAsync();
+  console.log("Scan resulted in " + url)
+  launchChromium(url);
+}
+
+main().catch("Main error: " + console.log);
+
+// Start the API
 const app = express();
-console.log("Browser block running....")
+console.log("Browser block running.")
 
 const errorHandler = (err, req, res, next) => {
   res.status(500);
@@ -125,7 +202,7 @@ app.post('/url/set', (req, res) => {
     url = "http://" + url;
   }
 
-  Launch(url);
+  launchChromium(url);
   return res.status(200).send('ok');
 });
 
@@ -136,7 +213,7 @@ app.get('/url/get', (req, res) => {
 
 app.post('/refresh', (req, res) => {
  
-  Launch(currentUrl);
+  launchChromium(currentUrl);
   return res.status(200).send('ok');
 });
 
@@ -146,7 +223,7 @@ app.post('/gpu/set', (req, res) => {
   }
 
   enableGpu = req.body.gpu;
-  Launch(currentUrl);
+  launchChromium(currentUrl);
   return res.status(200).send('ok');
 });
 
@@ -161,7 +238,7 @@ app.post('/kiosk/set', (req, res) => {
   }
 
   kioskMode = req.body.kiosk;
-  Launch(currentUrl);
+  launchChromium(currentUrl);
   return res.status(200).send('ok');
 });
 
@@ -173,7 +250,7 @@ app.get('/kiosk/get', (req, res) => {
 app.post('/scan', (req, res) => {
  
   var url = Scan();
-  Launch(url);
+  launchChromium(url);
   return res.status(200).send('ok');
 });
 
