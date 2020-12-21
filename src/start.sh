@@ -12,6 +12,14 @@ dpkg-reconfigure xserver-xorg-legacy
 PULSE_SERVER=${PULSE_SERVER:-tcp:audio:4317}
 export PULSE_SERVER=$PULSE_SERVER
 
+# # if the PERSISTENT enVar is set, add the appropriate flag
+# if [[ ! -z $PERSISTENT ]] && [[ "$PERSISTENT" -eq "1" ]]
+#   then
+#     # make sure any lock on the Chromium profile is released
+#     chown -R chromium:chromium /data
+#     rm -f /data/SingletonLock
+# fi
+
  #Set whether to show a cursor or not
 if [[ ! -z $SHOW_CURSOR ]] && [[ "$SHOW_CURSOR" -eq "1" ]]
   then
@@ -21,7 +29,5 @@ if [[ ! -z $SHOW_CURSOR ]] && [[ "$SHOW_CURSOR" -eq "1" ]]
     export CURSOR='-- -nocursor'
     echo "Disabling cursor"
 fi
-
-echo "SHOW_CURSOR set to $SHOW_CURSOR"
 
 export DISPLAY=:0 && startx /usr/src/app/startx.sh $CURSOR
