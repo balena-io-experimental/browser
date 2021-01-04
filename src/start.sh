@@ -12,13 +12,16 @@ dpkg-reconfigure xserver-xorg-legacy
 PULSE_SERVER=${PULSE_SERVER:-tcp:audio:4317}
 export PULSE_SERVER=$PULSE_SERVER
 
-# # if the PERSISTENT enVar is set, add the appropriate flag
-# if [[ ! -z $PERSISTENT ]] && [[ "$PERSISTENT" -eq "1" ]]
-#   then
-#     # make sure any lock on the Chromium profile is released
-#     chown -R chromium:chromium /data
-#     rm -f /data/SingletonLock
-# fi
+# if the PERSISTENT enVar is set, add the appropriate flag
+if [[ ! -z $PERSISTENT ]] && [[ "$PERSISTENT" -eq "1" ]]
+  then
+    # make sure any lock on the Chromium profile is released
+    chown -R chromium:chromium /data
+    rm -f /data/SingletonLock
+fi
+
+echo "Setting CPU Scaling Governor to 'performance'"
+echo 'performance' > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 
 
  #Set whether to show a cursor or not
 if [[ ! -z $SHOW_CURSOR ]] && [[ "$SHOW_CURSOR" -eq "1" ]]
