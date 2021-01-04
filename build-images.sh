@@ -10,7 +10,7 @@ function build_and_push_image () {
 
   # The RPIs all use the same dockerfile for now
   if [[ $BALENA_MACHINE_NAME = raspberry* ]]; then
-    cp ./Dockerfile.raspberrypi ./Dockerfile.$BALENA_MACHINE_NAME
+    sed "s/%%BALENA_MACHINE_NAME%%/$BALENA_MACHINE_NAME/g" ./Dockerfile.raspberrypi > ./Dockerfile.$BALENA_MACHINE_NAME
   else
     sed "s/%%BALENA_MACHINE_NAME%%/$BALENA_MACHINE_NAME/g" ./Dockerfile.template > ./Dockerfile.$BALENA_MACHINE_NAME
   fi
@@ -39,12 +39,11 @@ function retag_and_push_image () {
 # YOu can pass in a repo (such as a test docker repo) or accept the default
 DOCKER_REPO=${1:-balenablocks}
 
-#RPI4 is built as ARMv7 because the base Raspian image is 32-bit
-build_and_push_image $DOCKER_REPO "raspberrypi3" "linux/arm/v7"
-
 #only need to build once per arch, and retag & push for clones
+build_and_push_image $DOCKER_REPO "raspberrypi3" "linux/arm/v7"
+#RPI4 is built as ARMv7 because there are currently (jan 2021) no 64-bit chromium sources from RPI
 retag_and_push_image $DOCKER_REPO "raspberrypi3" "raspberrypi4-64"
-# retag_and_push_image $DOCKER_REPO "raspberrypi3" "raspberrypi3-64"
+retag_and_push_image $DOCKER_REPO "raspberrypi3" "raspberrypi3-64"
 retag_and_push_image $DOCKER_REPO "raspberrypi3" "fincm3"
 
-# build_and_push_image $DOCKER_REPO "genericx86-64-ext" "linux/amd64"
+build_and_push_image $DOCKER_REPO "genericx86-64-ext" "linux/amd64"

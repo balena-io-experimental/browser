@@ -25,7 +25,7 @@ async function getUrlToDisplayAsync() {
     var launchUrl = process.env.LAUNCH_URL || null;
     if (null != launchUrl)
     {
-      launchUrl;
+      return launchUrl;
     }
 
     console.log("LAUNCH_URL not set.")
@@ -249,8 +249,7 @@ app.get('/kiosk/get', (req, res) => {
 
 app.post('/scan', (req, res) => {
  
-  var url = Scan();
-  launchChromium(url);
+  main().catch("Main error: " + console.log);
   return res.status(200).send('ok');
 });
 
