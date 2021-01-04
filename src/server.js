@@ -190,7 +190,7 @@ app.get('/ping', (req, res) => {
     return res.status(200).send('ok');
 });
 
-app.post('/url/set', (req, res) => {
+app.post('/url', (req, res) => {
   if (!req.body.url) {
     return res.status(400).send('Bad URL Request');
   }
@@ -202,11 +202,19 @@ app.post('/url/set', (req, res) => {
     url = "http://" + url;
   }
 
+  if (req.body.kiosk) {
+    kioskMode = req.params.kiosk;
+  }
+
+  if (req.body.gpu) {
+    enableGpu = req.params.gpu;
+  }
+
   launchChromium(url);
   return res.status(200).send('ok');
 });
 
-app.get('/url/get', (req, res) => {
+app.get('/url', (req, res) => {
     
   return res.status(200).send(currentUrl);
 });
@@ -217,32 +225,37 @@ app.post('/refresh', (req, res) => {
   return res.status(200).send('ok');
 });
 
-app.post('/gpu/set', (req, res) => {
-  if (!req.body.gpu) {
+app.post('/gpu/:gpu', (req, res) => {
+  if (!req.params.gpu) {
     return res.status(400).send('Bad Request');
   }
 
-  enableGpu = req.body.gpu;
+  if(req.params.gpu != '1' && req.params.gpu != '0')
+  {
+    return res.status(400).send('Bad Request');
+  }
+
+  enableGpu = req.params.gpu;
   launchChromium(currentUrl);
   return res.status(200).send('ok');
 });
 
-app.get('/gpu/get', (req, res) => {
+app.get('/gpu', (req, res) => {
     
   return res.status(200).send(enableGpu);
 });
 
-app.post('/kiosk/set', (req, res) => {
-  if (!req.body.kiosk) {
+app.post('/kiosk/:kiosk', (req, res) => {
+  if (!req.params.kiosk) {
     return res.status(400).send('Bad Request');
   }
 
-  kioskMode = req.body.kiosk;
+  kioskMode = req.params.kiosk;
   launchChromium(currentUrl);
   return res.status(200).send('ok');
 });
 
-app.get('/kiosk/get', (req, res) => {
+app.get('/kiosk', (req, res) => {
     
   return res.status(200).send(kioskMode);
 });
