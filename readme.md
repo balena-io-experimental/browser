@@ -3,6 +3,7 @@
 Provides a hardware accelerated web browser to present internal and external URLs on a connected display.
 The `browser` block is a docker image that runs a [Chromium](https://www.chromium.org/Home) browser via X11, optimized for balenaOS.
 
+---
 ## Features
 
 - Chromium browser optimized for device arch
@@ -12,6 +13,7 @@ The `browser` block is a docker image that runs a [Chromium](https://www.chromiu
 - Automatically displays local HTTP (port 80 or 8080) or HTTPS (443) service endpoints.
 - API for remote configuration and management
 - Chromium remote debugging port
+---
 
 ## Usage
 
@@ -63,6 +65,7 @@ services:
 ```dockerfile
 FROM balenablocks/browser:%%BALENA_MACHINE_NAME%%
 ```
+---
 
 ## Customization
 ### Extend image configuration
@@ -75,6 +78,7 @@ FROM balenablocks/browser:%%BALENA_MACHINE_NAME%%
 
 CMD ["export DISPLAY=:1"]
 ```
+---
 
 ### Environment variables
 
@@ -93,6 +97,7 @@ The following environment variables allow configuration of the `browser` block:
 |`WINDOW_SIZE`|`x,y`|Detected screen resolution|Sets the browser window size, such as `800,600`|
 |`WINDOW_POSITION`|`x,y`|`0,0`|Specifies the browser window position on the screen|
 
+---
 
 ## Choosing what to display
 If you want the `browser` to display a website, you can set the `LAUNCH_URL` as noted above. However, you can also drop the `browser` into a multicontainer app, and use it to display the (HTTP, port 80 or 8080, or HTTPS port 443) output of another service, such as a Grafana dashboard. The `browser` will automatically detect that a service is running a HTTP server  and display that. Just make sure that you don't set a `LAUNCH_URL` environment variable, as they take precedence. Example:
@@ -117,6 +122,7 @@ services:
     ports:
       - "80"
 ```
+---
 
 ## Choosing audio output device
 By default the `browser` block will output audio via HDMI. If you want to route audio through a different interface you can do it with the help of the [`audio` block]((https://github.com/balenablocks/audio)). The `browser` block is pre-configured to use it if present so you only need to add it to your `docker-compose.yml` file and then use `AUDIO_OUTPUT` environment variable to select the desired output. Check out the `audio` block [documentation](https://github.com/balenablocks/audio#environment-variables) to learn more about it.
@@ -139,37 +145,39 @@ services:
 
 **Note**: The `browser` block expects the `audio` block to be named as such. If you change it's service name you'll need to override the `PULSE_SERVER` environment variable value to match it in the `browser` dockerfile. For example add `ENV PULSE_SERVER=tcp:not-audio:4317`.
 
+---
+
 ## API
 The `browser` block exposes an HTTP API running on port 5011. The following endpoints are available:
 
-### **GET** /ping
+#### **GET** /ping
 Returns HTTP 200 if the `browser` block is ready
 
-### **POST** /refresh
+#### **POST** /refresh
 Refreshes the currently displayed page
 
-### **POST** /scan
+#### **POST** /scan
 Re-scans the device to find local HTTP or HTTPS services to display. This can be used by the HTTP/S service to notify the `browser` block that it is ready to be displayed, should there be a startup race.
 
 *note*: the `LAUNCH_URL` must not be set for local services to be detected.
 
-### **GET** /url
+#### **GET** /url
 Returns the URL currently being displayed
 
-### **PUT** /url
+#### **PUT** /url
 Sets the URL to be displayed. The URL is set in the request body. Example:
 
-```
+```bash
 curl --data "url=www.balena.io" http://localhost:5011/url
 ```
 
 You can also pre-set the kiosk and GPU settings as part of a URL put request. Example:
 
-```
+```bash
 curl --data "url=www.balena.io&gpu=0&kiosk=1" http://localhost:5011/url
 ```
 
-### **GET** /gpu
+#### **GET** /gpu
 Returns the status of the GPU:
 
 | Return Value | Description |
@@ -177,7 +185,7 @@ Returns the status of the GPU:
 | 0 | disabled |
 | 1 | enabled |
 
-### **PUT** /gpu/{value}
+#### **PUT** /gpu/{value}
 Enables or disables the GPU
 
 | Value | Description |
@@ -185,7 +193,7 @@ Enables or disables the GPU
 | 0 | disable |
 | 1 | enable |
 
-### **GET** /kiosk
+#### **GET** /kiosk
 Returns whether the device is running kiosk mode or not:
 
 | Return Value | Description |
@@ -193,13 +201,15 @@ Returns whether the device is running kiosk mode or not:
 | 0 | disabled |
 | 1 | enabled |
 
-### **PUT** /kiosk/{value}
+#### **PUT** /kiosk/{value}
 Enables or disables kiosk mode
 
 | Value | Description |
 |--------------|-------------|
 | 0 | disable |
 | 1 | enable |
+
+---
 
 ## Supported devices
 The `browser` block has been tested to work on the following devices:
@@ -212,6 +222,7 @@ The `browser` block has been tested to work on the following devices:
 | Raspberry Pi 4 | ✔ |
 | Intel NUC | ✔ |
 | Generic AMD64 | ✔ |
+---
 
 ## Troubleshooting
 This section provides some guidance for common issues encountered:
