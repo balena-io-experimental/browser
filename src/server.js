@@ -28,8 +28,8 @@ async function getUrlToDisplayAsync() {
       return launchUrl;
     }
 
-    console.log("LAUNCH_URL not set.")
-    console.log("Looking for local HTTP services.")
+    console.log("LAUNCH_URL environment variable not set.")
+    console.log("Looking for local HTTP/S services.")
 
     // Check each HTTP/S port
     var ports = [80,443,8080];
@@ -57,7 +57,7 @@ async function getUrlToDisplayAsync() {
         //If OK
         if (200 == response.statusCode)
         {
-          console.log("HTTP services found on URL: " + url)
+          console.log("HTTP/S services found at: " + url)
           return url;
         }
       }
@@ -82,7 +82,7 @@ async function getUrlToDisplayAsync() {
       // Otherwise send the default HTML
       else
       {
-        console.log("Using default HTML page");
+        console.log("Displaying default HTML page");
        returnURL = "file:///home/chromium/index.html";
       }
     });
@@ -105,7 +105,6 @@ let launchChromium = function(url) {
       // User the default flags from chrome-launcher, plus our own.
       flags = DEFAULT_FLAGS;
       var balenaFlags = [
-        '--no-sandbox',
         '--window-size=' + WINDOW_SIZE,
         '--window-position=' + WINDOW_POSITION,
         '--autoplay-policy=no-user-gesture-required',
@@ -120,7 +119,12 @@ let launchChromium = function(url) {
 
     if (enableGpu != '1')
     {
+      console.log("Disabling GPU")
       flags.push('--disable-gpu')
+    }
+    else
+    {
+      console.log("Enabling GPU")
     }
 
     if (PERSISTENT_DATA == '1')
@@ -131,7 +135,12 @@ let launchChromium = function(url) {
     var startingUrl = url;
     if (kioskMode == '1')
     {
+      console.log("Enabling KIOSK mode")
       startingUrl = '--app=' + url
+    }
+    else
+    {
+      console.log("Disabling KIOSK mode")
     }
 
     console.log("Starting Chromium with the following flags: " + flags)
@@ -142,7 +151,7 @@ let launchChromium = function(url) {
       chromeFlags: flags,
       port: REMOTE_DEBUG_PORT
     }).then(chrome => {
-      console.log(`Chromium debugging port running on ${chrome.port}`);
+      console.log(`Chromium debugging port running on port: ${chrome.port}`);
       currentUrl = url;
     });
   });
@@ -156,19 +165,17 @@ async function SetDefaultFlags() {
 async function main(){
   await SetDefaultFlags();
   var url = await getUrlToDisplayAsync();
-  console.log("Scan resulted in " + url)
   launchChromium(url);
 }
 
-main().catch("Main error: " + console.log);
+main().catch("Main method error: " + console.log);
 
 // Start the API
 const app = express();
-console.log("Browser block running.")
 
 const errorHandler = (err, req, res, next) => {
   res.status(500);
-  res.render('error', {
+  res.render('API error: ', {
     error: err
   });
 };
@@ -192,7 +199,7 @@ app.get('/ping', (req, res) => {
 
 app.post('/url', (req, res) => {
   if (!req.body.url) {
-    return res.status(400).send('Bad URL Request');
+    return res.status(400).send('Bad request: missing URL in the body element');
   }
 
   var url = req.body.url;
@@ -203,11 +210,11 @@ app.post('/url', (req, res) => {
   }
 
   if (req.body.kiosk) {
-    kioskMode = req.params.kiosk;
+    kioskMode = req.body.kiosk;
   }
 
   if (req.body.gpu) {
-    enableGpu = req.params.gpu;
+    enableGpu = req.body.gpu;
   }
 
   launchChromium(url);
@@ -267,7 +274,7 @@ app.post('/scan', (req, res) => {
 });
 
 app.listen(API_PORT, () => {
-  console.log('server listening on port ' + API_PORT);
+  console.log('Browser API running on port: ' + API_PORT);
 });
 
 process.on('SIGINT', () => {

@@ -27,9 +27,9 @@ RUN chmod +x ./*.sh
 ENV UDEV=1
 
 # Add chromium user
-RUN useradd chromium -m -s /bin/bash -G root && \
-    groupadd -r -f chromium && id -u chromium \
-    && chown -R chromium:chromium /home/chromium
+RUN useradd chromium -m -s /bin/bash -G root || true && \
+    groupadd -r -f chromium && id -u chromium || true \
+    && chown -R chromium:chromium /home/chromium || true
 
 COPY ./public-html /home/chromium  
 
@@ -37,7 +37,7 @@ COPY ./public-html /home/chromium
 RUN echo 'SUBSYSTEM=="vchiq",GROUP="video",MODE="0660"' > /etc/udev/rules.d/10-vchiq-permissions.rules
 RUN usermod -a -G audio,video,tty chromium
 
-RUN ln -s /usr/bin/chromium /usr/bin/chromium-browser
+RUN ln -s /usr/bin/chromium /usr/bin/chromium-browser || true
 
 # Set up the audio block. This won't have any effect if the audio block is not being used.
 RUN curl -skL https://raw.githubusercontent.com/balenablocks/audio/master/scripts/alsa-bridge/debian-setup.sh| sh

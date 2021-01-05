@@ -33,4 +33,4 @@ if [[ ! -z $SHOW_CURSOR ]] && [[ "$SHOW_CURSOR" -eq "1" ]]
     echo "Disabling cursor"
 fi
 
-export DISPLAY=:0 && startx /usr/src/app/startx.sh $CURSOR
+su -c "export DISPLAY=:0 && startx /usr/src/app/startx.sh $CURSOR" - chromium
