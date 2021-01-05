@@ -3,3 +3,4 @@ Dockerfile.raspberrypi3
 Dockerfile.raspberrypi4-64
 =
 .gitignore
+Dockerfile.raspberrypi3
