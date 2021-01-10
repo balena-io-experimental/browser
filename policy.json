@@ -1,0 +1,7 @@
+{
+    "HomepageLocation": "www.chromium.org",
+    "ExtensionInstallForcelist": [
+    "aleakchihdccplidncghkekgioiakgal;https://clients2.google.com/service/update2/crx",
+    "cfhdojbkjhnklbpkdaibdccddilifddb"
+    ]
+}

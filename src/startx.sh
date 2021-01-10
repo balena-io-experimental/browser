@@ -37,6 +37,9 @@ if [[ ! -z "$ROTATE_DISPLAY" ]]; then
   fi
 fi
 
+# Set chromium version into an EnVar for later
+export VERSION=`chromium --version`
+
 xset s off -dpms
 
 node /usr/src/app/server.js

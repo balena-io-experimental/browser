@@ -16,6 +16,7 @@ var DEFAULT_FLAGS = [];
 var enableGpu = process.env.ENABLE_GPU || '0';
 var currentUrl = '';
 var kioskMode = process.env.KIOSK || '0';
+var flags = [];
 
 // Returns the URL to display, adhering to the hieracrchy:
 // 1) the configured LAUNCH_URL
@@ -94,7 +95,7 @@ async function getUrlToDisplayAsync() {
 let launchChromium = function(url) {
   chromeLauncher.killAll().then(() => { 
 
-    var flags = [];
+    flags = [];
     // If the user has set the flags, use them
     if (null != FLAGS)
     {
@@ -249,7 +250,7 @@ app.post('/gpu/:gpu', (req, res) => {
 
 app.get('/gpu', (req, res) => {
     
-  return res.status(200).send(enableGpu);
+  return res.status(200).send(enableGpu.toString());
 });
 
 app.post('/kiosk/:kiosk', (req, res) => {
@@ -262,9 +263,20 @@ app.post('/kiosk/:kiosk', (req, res) => {
   return res.status(200).send('ok');
 });
 
+app.get('/flags', (req, res) => {
+    
+  return res.status(200).send(flags.toString());
+});
+
 app.get('/kiosk', (req, res) => {
     
-  return res.status(200).send(kioskMode);
+  return res.status(200).send(kioskMode.toString());
+});
+
+app.get('/version', (req, res) => {
+  
+  var version = process.env.VERSION || "Version not set";
+  return res.status(200).send(version.toString());
 });
 
 app.post('/scan', (req, res) => {

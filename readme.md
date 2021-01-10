@@ -209,6 +209,11 @@ Enables or disables kiosk mode
 | 0 | disable |
 | 1 | enable |
 
+#### **GET** /flags
+Returns the flags Chromium was started with
+
+#### **GET** /version
+Returns the version of Chromium that `browser` is running
 ---
 
 ## Supported devices
