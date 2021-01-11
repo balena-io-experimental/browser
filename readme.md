@@ -159,7 +159,7 @@ Refreshes the currently displayed page
 #### **POST** /scan
 Re-scans the device to find local HTTP or HTTPS services to display. This can be used by the HTTP/S service to notify the `browser` block that it is ready to be displayed, should there be a startup race.
 
-*note*: the `LAUNCH_URL` must not be set for local services to be detected.
+<small><b><i>note:</i></b> *the* `LAUNCH_URL` *must not be set for local services to be detected.*</small>
 
 #### **GET** /url
 Returns the URL currently being displayed
