@@ -9,9 +9,6 @@ sed -i -e 's/console/anybody/g' /etc/X11/Xwrapper.config
 echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
 dpkg-reconfigure xserver-xorg-legacy
 
-PULSE_SERVER=${PULSE_SERVER:-tcp:audio:4317}
-export PULSE_SERVER=$PULSE_SERVER
-
 # if the PERSISTENT enVar is set, add the appropriate flag
 if [[ ! -z $PERSISTENT ]] && [[ "$PERSISTENT" -eq "1" ]]
   then
@@ -19,6 +16,8 @@ if [[ ! -z $PERSISTENT ]] && [[ "$PERSISTENT" -eq "1" ]]
     chown -R chromium:chromium /data
     rm -f /data/SingletonLock
 fi
+
+chown -R chromium /tmp/balena/
 
 echo "Setting CPU Scaling Governor to 'performance'"
 echo 'performance' > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 
@@ -33,4 +32,4 @@ if [[ ! -z $SHOW_CURSOR ]] && [[ "$SHOW_CURSOR" -eq "1" ]]
     echo "Disabling cursor"
 fi
 
-su -c "export DISPLAY=:0 && startx /usr/src/app/startx.sh $CURSOR" - chromium
+su -w "LAUNCH_URL,PERSISTENT,KIOSK,LOCAL_HTTP_DELAY,FLAGS,ROTATE_DISPLAY,ENABLE_GPU,WINDOW_SIZE,WINDOW_POSITION" -c "export DISPLAY=:0 && startx /usr/src/app/startx.sh $CURSOR" - chromium

@@ -96,6 +96,8 @@ The following environment variables allow configuration of the `browser` block:
 |`ENABLE_GPU`|`0`, `1`|0|Enables the GPU rendering. Necessary for Pi3B+ to display YouTube videos. <br/> `0` = off, `1` = on|
 |`WINDOW_SIZE`|`x,y`|Detected screen resolution|Sets the browser window size, such as `800,600`|
 |`WINDOW_POSITION`|`x,y`|`0,0`|Specifies the browser window position on the screen|
+|`API_PORT`|port number|5011|Specifies the port number the API runs on|
+|`REMOTE_DEBUG_PORT`|port number|35173|Specifies the port number the chrome remote debugger runs on|
 
 ---
 
@@ -214,6 +216,7 @@ Returns the flags Chromium was started with
 
 #### **GET** /version
 Returns the version of Chromium that `browser` is running
+
 ---
 
 ## Supported devices
@@ -227,6 +230,7 @@ The `browser` block has been tested to work on the following devices:
 | Raspberry Pi 4 | ✔ |
 | Intel NUC | ✔ |
 | Generic AMD64 | ✔ |
+
 ---
 
 ## Troubleshooting
@@ -245,3 +249,4 @@ Occasionally users report that only a portion of the browser screen appears on t
 
 * Setting the WINDOW_SIZE manually to your display's resolution (e.g. `1980,1080`) - the display may be mis-reporting it's resolution to the device
 * Increase the memory being allocated to the GPU with the [configuration variable](https://www.balena.io/docs/learn/manage/configuration/) - for large displays the device may need to allocate more memory to displaying the output
+
