@@ -11,7 +11,12 @@ function reverse_window_coordinates () {
   fi 
 }
 
+PULSE_SERVER=${PULSE_SERVER:-tcp:audio:4317}
+export PULSE_SERVER=$PULSE_SERVER
+
 export WINDOW_SIZE=$( cat /sys/class/graphics/fb0/virtual_size )
+
+export DISABLE_V8_COMPILE_CACHE=1
 
 # rotate screen if env variable is set [normal, inverted, left or right]
 if [[ ! -z "$ROTATE_DISPLAY" ]]; then
@@ -38,7 +43,7 @@ if [[ ! -z "$ROTATE_DISPLAY" ]]; then
 fi
 
 # Set chromium version into an EnVar for later
-export VERSION=`chromium --version`
+export VERSION=`chromium-browser --version`
 
 xset s off -dpms
 

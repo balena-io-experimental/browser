@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const chromeLauncher = require('chrome-launcher');
 const bent = require('bent')
 
+// Bring in the static environment variables
 const API_PORT = parseInt(process.env.API_PORT) || 5011;
 const WINDOW_SIZE = process.env.WINDOW_SIZE || "800,600";
 const WINDOW_POSITION = process.env.WINDOW_POSITION || "0,0";
@@ -12,10 +13,12 @@ const PERSISTENT_DATA = process.env.PERSISTENT || '0';
 const REMOTE_DEBUG_PORT = process.env.REMOTE_DEBUG_PORT || 35173;
 const FLAGS = process.env.FLAGS || null;
 
-var DEFAULT_FLAGS = [];
-var enableGpu = process.env.ENABLE_GPU || '0';
-var currentUrl = '';
+// Environment variables which can be overriden from the API
 var kioskMode = process.env.KIOSK || '0';
+var enableGpu = process.env.ENABLE_GPU || '0';
+
+var DEFAULT_FLAGS = [];
+var currentUrl = '';
 var flags = [];
 
 // Returns the URL to display, adhering to the hieracrchy:
@@ -26,6 +29,14 @@ async function getUrlToDisplayAsync() {
     var launchUrl = process.env.LAUNCH_URL || null;
     if (null != launchUrl)
     {
+      console.log("Using LAUNCH_URL: " + launchUrl)
+
+      // Prepend http:// if the LAUNCH_URL doesn't have it.
+      // This is needed for the --app flag to be used for kiosk mode
+      if (!/^https?:\/\//i.test(launchUrl)) {
+        launchUrl = 'http://' + launchUrl;
+      }
+
       return launchUrl;
     }
 
@@ -38,6 +49,7 @@ async function getUrlToDisplayAsync() {
     await Promise.all(ports.map(async (port) => 
     {
       var url = '';
+      //prepend the correct prefix
       if(port == 443)
       {
         url = 'https://'
@@ -112,9 +124,10 @@ let launchChromium = function(url) {
         '--noerrdialogs',
         '--disable-session-crashed-bubble',
         '--check-for-update-interval=31536000',
-        '--disable-dev-shm-usage'
+        '--disable-dev-shm-usage' // TODO: work out if we can enable this for devices with >1Gb of memory
       ];
 
+      // Merge the chromium default and balena default flags
       flags = flags.concat(balenaFlags);
     }
 
@@ -145,12 +158,14 @@ let launchChromium = function(url) {
     }
 
     console.log("Starting Chromium with the following flags: " + flags)
+    console.log("Displaying URL " + startingUrl)
 
     chromeLauncher.launch({
       startingUrl: startingUrl,
       ignoreDefaultFlags: true,
       chromeFlags: flags,
-      port: REMOTE_DEBUG_PORT
+      port: REMOTE_DEBUG_PORT,
+      userDataDir: '/tmp/balena'
     }).then(chrome => {
       console.log(`Chromium debugging port running on port: ${chrome.port}`);
       currentUrl = url;
@@ -158,7 +173,7 @@ let launchChromium = function(url) {
   });
 }
 
-// Get's the chrome-launcher default flags, minus the extensions and audio muting ones.
+// Get's the chrome-launcher default flags, minus the extensions and audio muting flags.
 async function SetDefaultFlags() {
   DEFAULT_FLAGS =  await chromeLauncher.Launcher.defaultFlags().filter(flag => flag !== '--disable-extensions' && flag !== '--mute-audio');
 }
@@ -193,11 +208,13 @@ app.use(function(req, res, next) {
 });
 app.use(errorHandler);
 
+// ping endpoint
 app.get('/ping', (req, res) => {
     
     return res.status(200).send('ok');
 });
 
+// url set endpoint
 app.post('/url', (req, res) => {
   if (!req.body.url) {
     return res.status(400).send('Bad request: missing URL in the body element');
@@ -205,9 +222,9 @@ app.post('/url', (req, res) => {
 
   var url = req.body.url;
 
-  if ((!url.toLowerCase().startsWith("http://")) && (!url.toLowerCase().startsWith("https://")))
-  {
-    url = "http://" + url;
+  // prepend http prefix if necessary for kiosk mode to work
+  if (!/^https?:\/\//i.test(url)) {
+    url = 'http://' + url;
   }
 
   if (req.body.kiosk) {
@@ -222,17 +239,20 @@ app.post('/url', (req, res) => {
   return res.status(200).send('ok');
 });
 
+// url get endpoint
 app.get('/url', (req, res) => {
     
   return res.status(200).send(currentUrl);
 });
 
+// refresh endpoint
 app.post('/refresh', (req, res) => {
  
   launchChromium(currentUrl);
   return res.status(200).send('ok');
 });
 
+// gpu set endpoint
 app.post('/gpu/:gpu', (req, res) => {
   if (!req.params.gpu) {
     return res.status(400).send('Bad Request');
@@ -247,12 +267,13 @@ app.post('/gpu/:gpu', (req, res) => {
   launchChromium(currentUrl);
   return res.status(200).send('ok');
 });
-
+// gpu get endpoint
 app.get('/gpu', (req, res) => {
     
   return res.status(200).send(enableGpu.toString());
 });
 
+// kiosk set endpoint
 app.post('/kiosk/:kiosk', (req, res) => {
   if (!req.params.kiosk) {
     return res.status(400).send('Bad Request');
@@ -263,22 +284,26 @@ app.post('/kiosk/:kiosk', (req, res) => {
   return res.status(200).send('ok');
 });
 
+// flags endpoint
 app.get('/flags', (req, res) => {
     
   return res.status(200).send(flags.toString());
 });
 
+// kiosk get endpoint
 app.get('/kiosk', (req, res) => {
     
   return res.status(200).send(kioskMode.toString());
 });
 
+// version get endpoint
 app.get('/version', (req, res) => {
   
   var version = process.env.VERSION || "Version not set";
   return res.status(200).send(version.toString());
 });
 
+// scan endpoint - causes the device to rescan for local HTTP services
 app.post('/scan', (req, res) => {
  
   main().catch("Main error: " + console.log);

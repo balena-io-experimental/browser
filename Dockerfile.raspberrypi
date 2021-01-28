@@ -1,7 +1,6 @@
 ARG NODEJS_VERSION="13"
 
-## buildstep base image
-FROM balenalib/%%BALENA_MACHINE_NAME%%-node:${NODEJS_VERSION}-build
+FROM balenalib/%%BALENA_MACHINE_NAME%%-node:${NODEJS_VERSION}-run
 # install required packages
 RUN install_packages \
     chromium-browser \
@@ -18,6 +17,8 @@ RUN install_packages \
     xterm 
 
 WORKDIR /usr/src/app
+
+# install node dependencies
 COPY ./package.json /usr/src/app/package.json
 RUN JOBS=MAX npm install --unsafe-perm --production && npm cache clean --force
 
@@ -42,7 +43,7 @@ COPY ./public-html /home/chromium
 RUN echo 'SUBSYSTEM=="vchiq",GROUP="video",MODE="0660"' > /etc/udev/rules.d/10-vchiq-permissions.rules
 RUN usermod -a -G audio,video,tty chromium
 
-# Set up the audio block. This won't have any effect if the audio block is not being used.
+# # Set up the audio block. This won't have any effect if the audio block is not being used.
 RUN curl -skL https://raw.githubusercontent.com/balenablocks/audio/master/scripts/alsa-bridge/debian-setup.sh| sh
 ENV PULSE_SERVER=tcp:audio:4317
 
