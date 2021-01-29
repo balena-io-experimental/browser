@@ -1,0 +1,13 @@
+version: '2'
+
+volumes:
+  settings:                          # Only required if using PERSISTENT flag (see below)
+
+services:
+
+  browser:
+    image: balenablocks/browser:raspberrypi3
+    privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
+    network_mode: host
+    volumes:
+      - 'settings:/data' # Only required if using PERSISTENT flag (see below)
