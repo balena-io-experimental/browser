@@ -1,0 +1,20 @@
+version: "2"
+slug: "browser"
+name: "browser"
+type: "sw.application"
+assets:
+  - url: "https://github.com/balenablocks/browser"
+    name: "repository"
+  - url: "https://raw.githubusercontent.com/balenablocks/browser/master/logo.png"
+    name: "logo"
+data:
+  description: "a hardware accelerated web browser to present internal and external URLs on a connected display"
+  defaultDeviceType: "raspberrypi3"
+  supportedDeviceTypes:
+    - "raspberrypi4-64"
+    - "fincm3"
+    - "raspberrypi3"
+    - "raspberrypi3-64"
+    - "raspberrypi400-64"
+    - "intel-nuc"
+    - "genericx86-64-ext"
