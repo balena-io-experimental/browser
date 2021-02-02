@@ -12,29 +12,30 @@ const WINDOW_POSITION = process.env.WINDOW_POSITION || "0,0";
 const PERSISTENT_DATA = process.env.PERSISTENT || '0';
 const REMOTE_DEBUG_PORT = process.env.REMOTE_DEBUG_PORT || 35173;
 const FLAGS = process.env.FLAGS || null;
+const HTTPS_REGEX = /^https?:\/\//i //regex for HTTP/S prefix
 
 // Environment variables which can be overriden from the API
-var kioskMode = process.env.KIOSK || '0';
-var enableGpu = process.env.ENABLE_GPU || '0';
+let kioskMode = process.env.KIOSK || '0';
+let enableGpu = process.env.ENABLE_GPU || '0';
 
-var DEFAULT_FLAGS = [];
-var currentUrl = '';
-var flags = [];
+let DEFAULT_FLAGS = [];
+let currentUrl = '';
+let flags = [];
 
 // Returns the URL to display, adhering to the hieracrchy:
 // 1) the configured LAUNCH_URL
 // 2) a discovered HTTP service on the device
 // 3) the default static HTML
 async function getUrlToDisplayAsync() {
-    var launchUrl = process.env.LAUNCH_URL || null;
-    if (null != launchUrl)
+  let launchUrl = process.env.LAUNCH_URL || null;
+    if (null !== launchUrl)
     {
-      console.log("Using LAUNCH_URL: " + launchUrl)
+      console.log(`Using LAUNCH_URL: ${launchUrl}`)
 
       // Prepend http:// if the LAUNCH_URL doesn't have it.
       // This is needed for the --app flag to be used for kiosk mode
-      if (!/^https?:\/\//i.test(launchUrl)) {
-        launchUrl = 'http://' + launchUrl;
+      if (!HTTPS_REGEX.test(launchUrl)) {
+        launchUrl = `http://${launchUrl}`;
       }
 
       return launchUrl;
@@ -43,73 +44,53 @@ async function getUrlToDisplayAsync() {
     console.log("LAUNCH_URL environment variable not set.")
     console.log("Looking for local HTTP/S services.")
 
-    // Check each HTTP/S port
-    var ports = [80,443,8080];
-    var returnURL = null;
-    await Promise.all(ports.map(async (port) => 
-    {
-      var url = '';
-      //prepend the correct prefix
-      if(port == 443)
-      {
-        url = 'https://'
-      }
-      else
-      {
-        url = 'http://'
-      }
-      url = url + 'localhost:' + port;
-      
-      console.log("Trying " + url);
-
-      try 
-      {
-        //request the URL
+    // make a HTTP/S request for each supported port to the localhost
+    // add the URL to the array if HTTP200 is returned
+    let ports = [80,443,8080];
+    let returnURL = null;
+    let urls = []
+    for await (const port of ports) {
+      const protocol = 443 === port ? `https` : `http`;
+      const url = `${protocol}://localhost:${port}`;
+      try {
         const request = bent(url);
         const response = await request();
-        //If OK
+        console.log(`Trying port ${port}`)
         if (200 == response.statusCode)
         {
-          console.log("HTTP/S services found at: " + url)
-          return url;
+          console.log("HTTP/S service found at: " + url)
+          urls.push(url)
         }
       }
-      catch(error)
+      catch(e)
       {
-        //TODO: Handle expected connection errors, but re-throw anything else
+        //Nothing to do here, failure is expected when nothing
+        //is listening on a port
       }
-    })).then((urls) =>
-    {
-      // An array of the promise resolves will be returned. The discovered services
-      // will have their URL in the array. The others will be null.
-      var filteredUrls = urls.filter(function (el) {
-        // Only keep the non-null items
-        return el != null;
-      });
+    }
 
-      // If we found a URL
-      if(filteredUrls.length > 0)
-      {
-        returnURL = filteredUrls[0];
-      }
-      // Otherwise send the default HTML
-      else
-      {
-        console.log("Displaying default HTML page");
-       returnURL = "file:///home/chromium/index.html";
-      }
-    });
+    if(urls.length > 0)
+    {
+      // return the first URL that returned 200
+      returnURL = urls[0];
+    }
+    // Otherwise send the default HTML
+    else
+    {
+      console.log("Displaying default HTML page");
+      returnURL = "file:///home/chromium/index.html";
+    }
 
     return returnURL;
   }
        
 // Launch the browser with the URL specified
-let launchChromium = function(url) {
-  chromeLauncher.killAll().then(() => { 
+let launchChromium = async function(url) {
+    await chromeLauncher.killAll();
 
     flags = [];
     // If the user has set the flags, use them
-    if (null != FLAGS)
+    if (null !== FLAGS)
     {
       flags = FLAGS.split(' ');
     }
@@ -117,7 +98,7 @@ let launchChromium = function(url) {
     {
       // User the default flags from chrome-launcher, plus our own.
       flags = DEFAULT_FLAGS;
-      var balenaFlags = [
+      let balenaFlags = [
         '--window-size=' + WINDOW_SIZE,
         '--window-position=' + WINDOW_POSITION,
         '--autoplay-policy=no-user-gesture-required',
@@ -133,58 +114,61 @@ let launchChromium = function(url) {
 
     if (enableGpu != '1')
     {
-      console.log("Disabling GPU")
-      flags.push('--disable-gpu')
+      console.log("Disabling GPU");
+      flags.push('--disable-gpu');
     }
     else
     {
-      console.log("Enabling GPU")
+      console.log("Enabling GPU");
     }
 
-    if (PERSISTENT_DATA == '1')
+    if ('1' === PERSISTENT_DATA)
     {
-      flags.push('--user-data-dir=/data')
+      flags.push('--user-data-dir=/data');
     }
 
-    var startingUrl = url;
-    if (kioskMode == '1')
+    let startingUrl = url;
+    if ('1' === kioskMode)
     {
-      console.log("Enabling KIOSK mode")
-      startingUrl = '--app=' + url
+      console.log("Enabling KIOSK mode");
+      startingUrl = `--app= ${url}`;
     }
     else
     {
-      console.log("Disabling KIOSK mode")
+      console.log("Disabling KIOSK mode");
     }
 
-    console.log("Starting Chromium with the following flags: " + flags)
-    console.log("Displaying URL " + startingUrl)
+    console.log(`Starting Chromium with the following flags: ${flags}`);
+    console.log(`Displaying URL ${startingUrl}`);
 
-    chromeLauncher.launch({
+    const chrome = await chromeLauncher.launch({
       startingUrl: startingUrl,
       ignoreDefaultFlags: true,
       chromeFlags: flags,
       port: REMOTE_DEBUG_PORT,
       userDataDir: '/tmp/balena'
-    }).then(chrome => {
-      console.log(`Chromium debugging port running on port: ${chrome.port}`);
-      currentUrl = url;
     });
-  });
+      
+    console.log(`Chromium debugging port running on port: ${chrome.port}`);
+    currentUrl = url;
 }
 
 // Get's the chrome-launcher default flags, minus the extensions and audio muting flags.
 async function SetDefaultFlags() {
-  DEFAULT_FLAGS =  await chromeLauncher.Launcher.defaultFlags().filter(flag => flag !== '--disable-extensions' && flag !== '--mute-audio');
+  DEFAULT_FLAGS =  await chromeLauncher.Launcher.defaultFlags().filter(flag => '--disable-extensions' !== flag && '--mute-audio' !== flag);
 }
 
 async function main(){
   await SetDefaultFlags();
-  var url = await getUrlToDisplayAsync();
-  launchChromium(url);
+  let url = await getUrlToDisplayAsync();
+  await launchChromium(url);
 }
 
-main().catch("Main method error: " + console.log);
+try {
+  main()
+} catch (e) {
+  `Main method error: ${console.log}`
+}
 
 // Start the API
 const app = express();
@@ -220,10 +204,10 @@ app.post('/url', (req, res) => {
     return res.status(400).send('Bad request: missing URL in the body element');
   }
 
-  var url = req.body.url;
+  let url = req.body.url;
 
   // prepend http prefix if necessary for kiosk mode to work
-  if (!/^https?:\/\//i.test(url)) {
+  if (!HTTPS_REGEX.test(url)) {
     url = 'http://' + url;
   }
 
@@ -258,7 +242,7 @@ app.post('/gpu/:gpu', (req, res) => {
     return res.status(400).send('Bad Request');
   }
 
-  if(req.params.gpu != '1' && req.params.gpu != '0')
+  if('1' !== req.params.gpu && '0' !== req.params.gpu)
   {
     return res.status(400).send('Bad Request');
   }
@@ -299,7 +283,7 @@ app.get('/kiosk', (req, res) => {
 // version get endpoint
 app.get('/version', (req, res) => {
   
-  var version = process.env.VERSION || "Version not set";
+  let version = process.env.VERSION || "Version not set";
   return res.status(200).send(version.toString());
 });
 
