@@ -55,7 +55,7 @@ async function getUrlToDisplayAsync() {
       try {
         const request = bent(url);
         const response = await request();
-        console.log(`Trying port ${port}`)
+        console.log(`Trying local port ${port}`)
         if (200 == response.statusCode)
         {
           console.log("HTTP/S service found at: " + url)
@@ -66,6 +66,7 @@ async function getUrlToDisplayAsync() {
       {
         //Nothing to do here, failure is expected when nothing
         //is listening on a port
+        console.log(`No service found on port ${port}`);
       }
     }
 
@@ -138,8 +139,8 @@ let launchChromium = async function(url) {
       console.log("Disabling KIOSK mode");
     }
 
-    console.log(`Starting Chromium with the following flags: ${flags}`);
-    console.log(`Displaying URL ${startingUrl}`);
+    console.log(`Starting Chromium with flags: ${flags}`);
+    console.log(`Displaying URL: ${startingUrl}`);
 
     const chrome = await chromeLauncher.launch({
       startingUrl: startingUrl,
@@ -149,7 +150,7 @@ let launchChromium = async function(url) {
       userDataDir: '/tmp/balena'
     });
       
-    console.log(`Chromium debugging port running on port: ${chrome.port}`);
+    console.log(`Chromium remote debugging tools running on port: ${chrome.port}`);
     currentUrl = url;
 }
 
