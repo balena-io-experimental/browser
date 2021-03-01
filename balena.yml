@@ -1,23 +1,25 @@
-name: "browser"
-description: "a hardware accelerated web browser to present internal and external URLs on a connected display"
-version: x.x.x
-type: "sw.application"
+name: browser
+description: >-
+  a hardware accelerated web browser to present internal and external URLs on a
+  connected display
+version: 1.0.1
+type: sw.application
 assets:
   repository:
-    type: "blob.asset"
+    type: blob.asset
     data:
-      url: "https://github.com/balenablocks/browser"
+      url: 'https://github.com/balenablocks/browser'
   logo:
-    type: "blob.asset"
+    type: blob.asset
     data:
-      url: "https://raw.githubusercontent.com/balenablocks/browser/master/logo.png"
+      url: 'https://raw.githubusercontent.com/balenablocks/browser/master/logo.png'
 data:
-  defaultDeviceType: "raspberrypi3"
+  defaultDeviceType: raspberrypi3
   supportedDeviceTypes:
-    - "raspberrypi4-64"
-    - "fincm3"
-    - "raspberrypi3"
-    - "raspberrypi3-64"
-    - "raspberrypi400-64"
-    - "intel-nuc"
-    - "genericx86-64-ext"
+    - raspberrypi4-64
+    - fincm3
+    - raspberrypi3
+    - raspberrypi3-64
+    - raspberrypi400-64
+    - intel-nuc
+    - genericx86-64-ext
