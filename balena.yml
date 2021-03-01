@@ -1,5 +1,6 @@
 name: "browser"
 description: "a hardware accelerated web browser to present internal and external URLs on a connected display"
+version: x.x.x
 type: "sw.application"
 assets:
   repository:
