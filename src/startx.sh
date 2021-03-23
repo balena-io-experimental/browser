@@ -11,12 +11,12 @@ function reverse_window_coordinates () {
   fi 
 }
 
+# Export the location of the pulse server for audio block integration
 PULSE_SERVER=${PULSE_SERVER:-tcp:audio:4317}
 export PULSE_SERVER=$PULSE_SERVER
 
+# detect the window size from the framebuffer file
 export WINDOW_SIZE=$( cat /sys/class/graphics/fb0/virtual_size )
-
-export DISABLE_V8_COMPILE_CACHE=1
 
 # rotate screen if env variable is set [normal, inverted, left or right]
 if [[ ! -z "$ROTATE_DISPLAY" ]]; then
@@ -42,9 +42,15 @@ if [[ ! -z "$ROTATE_DISPLAY" ]]; then
   fi
 fi
 
+# these two lines remote the "restore pages" annoying popup on chromium. 
+sed -i 's/"exited_cleanly":false/"exited_cleanly":true/' /data/chromium/'Local State' || true
+sed -i 's/"exited_cleanly":false/"exited_cleanly":true/; s/"exit_type":"[^"]\+"/"exit_type":"Normal"/' /data/chromium/Default/Preferences || true
+
+
 # Set chromium version into an EnVar for later
 export VERSION=`chromium-browser --version`
 
+# stop the screen blanking
 xset s off -dpms
 
 node /usr/src/app/server.js

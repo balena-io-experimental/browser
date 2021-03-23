@@ -4,6 +4,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const chromeLauncher = require('chrome-launcher');
 const bent = require('bent')
+const {
+  setIntervalAsync,
+  clearIntervalAsync
+} = require('set-interval-async/dynamic')
 
 // Bring in the static environment variables
 const API_PORT = parseInt(process.env.API_PORT) || 5011;
@@ -21,6 +25,9 @@ let enableGpu = process.env.ENABLE_GPU || '0';
 let DEFAULT_FLAGS = [];
 let currentUrl = '';
 let flags = [];
+
+// Refresh timer object
+let timer = {};
 
 // Returns the URL to display, adhering to the hieracrchy:
 // 1) the configured LAUNCH_URL
@@ -106,26 +113,35 @@ let launchChromium = async function(url) {
         '--noerrdialogs',
         '--disable-session-crashed-bubble',
         '--check-for-update-interval=31536000',
-        '--disable-dev-shm-usage' // TODO: work out if we can enable this for devices with >1Gb of memory
+        '--disable-dev-shm-usage', // TODO: work out if we can enable this for devices with >1Gb of memory
       ];
 
       // Merge the chromium default and balena default flags
       flags = flags.concat(balenaFlags);
-    }
 
-    if (enableGpu != '1')
-    {
-      console.log("Disabling GPU");
-      flags.push('--disable-gpu');
-    }
-    else
-    {
-      console.log("Enabling GPU");
+      // either disable the gpu or set some flags to enable it
+      if (enableGpu != '1')
+      {
+        console.log("Disabling GPU");
+        flags.push('--disable-gpu');
+      }
+      else
+      {
+        console.log("Enabling GPU");
+        let gpuFlags = [
+          '--enable-zero-copy',
+          '--num-raster-threads=4',
+          '--ignore-gpu-blacklist',
+          '--enable-gpu-rasterization',
+        ];
+
+        flags = flags.concat(gpuFlags);
+      }
     }
 
     if ('1' === PERSISTENT_DATA)
     {
-      flags.push('--user-data-dir=/data');
+      flags.push('--user-data-dir=/data/chromium');
     }
 
     let startingUrl = url;
@@ -147,7 +163,6 @@ let launchChromium = async function(url) {
       ignoreDefaultFlags: true,
       chromeFlags: flags,
       port: REMOTE_DEBUG_PORT,
-      userDataDir: '/tmp/balena'
     });
       
     console.log(`Chromium remote debugging tools running on port: ${chrome.port}`);
@@ -157,6 +172,20 @@ let launchChromium = async function(url) {
 // Get's the chrome-launcher default flags, minus the extensions and audio muting flags.
 async function SetDefaultFlags() {
   DEFAULT_FLAGS =  await chromeLauncher.Launcher.defaultFlags().filter(flag => '--disable-extensions' !== flag && '--mute-audio' !== flag);
+}
+
+async function setTimer(interval) {
+  timer = setIntervalAsync(
+    async () => {
+      await launchChromium(currentUrl);
+    },
+    interval
+  )
+  
+}
+
+async function clearTimer(){
+  await clearIntervalAsync(timer);
 }
 
 async function main(){
@@ -269,8 +298,25 @@ app.post('/kiosk/:kiosk', (req, res) => {
   return res.status(200).send('ok');
 });
 
+app.post('/autorefresh/:interval', async(req, res) => {
+  if (!req.params.interval) {
+    return res.status(400).send('Bad Request');
+  }
+
+  if(req.params.interval < 1)
+  {
+    await clearTimer();
+  }
+  else
+  {
+    await setTimer((req.params.interval * 1000))
+  }
+  
+  return res.status(200).send('ok');
+});
+
 // flags endpoint
-app.get('/flags', (req, res) => {
+app.get('/flags', (req, res) => { 
     
   return res.status(200).send(flags.toString());
 });
