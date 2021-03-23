@@ -29,7 +29,7 @@ volumes:
 services:
 
   browser:
-    image: balenablocks/browser:raspberrypi4-64
+    image: balenablocks/browser
     privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
     network_mode: host
     ports:
@@ -37,33 +37,6 @@ services:
         - '35173' # Chromium debugging port (optional)
     volumes:
       - 'settings:/data' # Only required if using PERSISTENT flag (see below)
-```
-
-You can also set your `docker-compose.yml` to build a `dockerfile.template` file, and use the build variable `%%BALENA_MACHINE_NAME%%` so that the correct image is automatically built for your device type (see [supported devices](#Supported-devices)):
-
-*docker-compose.yml:*
-```yaml
-version: '2'
-
-volumes:
-  settings:                          # Only required if using PERSISTENT flag (see below)
-
-services:
-
-  browser:
-    build: ./
-    privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
-    network_mode: host
-    ports:
-        - '5011' # management API (optional)
-        - '35173' # Chromium debugging port (optional)
-    volumes:
-      - 'settings:/data' # Only required if using PERSISTENT flag (see below)
-```
-*dockerfile.template*
-
-```dockerfile
-FROM balenablocks/browser:%%BALENA_MACHINE_NAME%%
 ```
 ---
 
@@ -74,7 +47,7 @@ By default the `browser` block uses the first local display (i.e. `DISPLAY=:0`) 
 
 *dockerfile.template*
 ```Dockerfile
-FROM balenablocks/browser:%%BALENA_MACHINE_NAME%%
+FROM balenablocks/browser
 
 CMD ["export DISPLAY=:1"]
 ```
@@ -90,11 +63,11 @@ The following environment variables allow configuration of the `browser` block:
 |`LOCAL_HTTP_DELAY`|Number (seconds)|0|Number of seconds to wait for a local HTTP service to start before trying to detect it|
 |`KIOSK`|`0`, `1`|`0`|Run in kiosk mode with no menus or status bars. <br/> `0` = off, `1` = on|
 |`SHOW_CURSOR`|`0`, `1`|`0`|Enables/disables the cursor when in kiosk mode<br/> `0` = off, `1` = on|
-|`FLAGS`|[many!](https://peter.sh/experiments/chromium-command-line-switches/)|N/A|Overrides the flags chromium is started with. **Use with caution!**|
+|`FLAGS`|[many!](https://peter.sh/experiments/chromium-command-line-switches/)|N/A|Overrides the flags chromium is started with. Enter a space (\' \') separated list of flags (e.g. `--noerrdialogs --disable-session-crashed-bubble`) <br/> **Use with caution!**|
 |`PERSISTENT`|`0`, `1`|`0`|Enables/disables user profile data being stored on the device. **Note: you'll need to create a settings volume. See example above** <br/> `0` = off, `1` = on|
 |`ROTATE_DISPLAY`|`normal`, `left`, `right`, `inverted`|`normal`|Rotates the display|
 |`ENABLE_GPU`|`0`, `1`|0|Enables the GPU rendering. Necessary for Pi3B+ to display YouTube videos. <br/> `0` = off, `1` = on|
-|`WINDOW_SIZE`|`x,y`|Detected screen resolution|Sets the browser window size, such as `800,600`|
+|`WINDOW_SIZE`|`x,y`|Detected screen resolution|Sets the browser window size, such as `800,600`. <br/> **Note:** Reverse the dimensions if you also rotate the display to `left` or `right` |
 |`WINDOW_POSITION`|`x,y`|`0,0`|Specifies the browser window position on the screen|
 |`API_PORT`|port number|5011|Specifies the port number the API runs on|
 |`REMOTE_DEBUG_PORT`|port number|35173|Specifies the port number the chrome remote debugger runs on|
@@ -112,7 +85,7 @@ volumes:
 services:
   browser:
     restart: always
-    image: balenablocks/browser:raspberrypi4-64
+    image: balenablocks/browser
     network_mode: host
     privileged: true
     volumes:
@@ -134,10 +107,10 @@ In this example we add the `audio` block and route the `browser` audio to the Ra
 ```yaml
 services:
   browser:
-    image: balenablocks/browser:raspberrypi4-64
+    image: balenablocks/browser
     network_mode: host
   audio:
-    image: balenablocks/audio:raspberrypi4-64
+    image: balenablocks/audio
     privileged: true
     ports:
       - 4317:4317
@@ -157,6 +130,14 @@ Returns HTTP 200 if the `browser` block is ready
 
 #### **POST** /refresh
 Refreshes the currently displayed page
+
+#### **POST** /autorefresh/{interval}
+Automatically refreshes the browser window
+
+| Value | Description |
+|--------------|-------------|
+| 0 | disable |
+| 1-60 | refresh every `interval` seconds |
 
 #### **POST** /scan
 Re-scans the device to find local HTTP or HTTPS services to display. This can be used by the HTTP/S service to notify the `browser` block that it is ready to be displayed, should there be a startup race.

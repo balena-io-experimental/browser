@@ -31,7 +31,8 @@
         "dateformat": "^3.0.3",
         "debug": "^4.1.1",
         "express": "^4.17.1",
-        "bent": "7.3.10"
+        "bent": "7.3.10",
+        "set-interval-async": "^1.0.34"
     }
   }
   

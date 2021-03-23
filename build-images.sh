@@ -15,10 +15,10 @@ function build_and_push_image () {
     sed "s/%%BALENA_MACHINE_NAME%%/$BALENA_MACHINE_NAME/g" ./Dockerfile.template > ./Dockerfile.$BALENA_MACHINE_NAME
   fi
   
-  docker buildx build -t $DOCKER_REPO/browser:$BALENA_MACHINE_NAME --platform $DOCKER_ARCH --file Dockerfile.$BALENA_MACHINE_NAME .
+  docker buildx build -t $DOCKER_REPO/browser:$BALENA_MACHINE_NAME --load --platform $DOCKER_ARCH --file Dockerfile.$BALENA_MACHINE_NAME .
 
-  echo "Publishing..."
-  docker push $DOCKER_REPO/browser:$BALENA_MACHINE_NAME
+  # echo "Publishing..."
+  # docker push $DOCKER_REPO/browser:$BALENA_MACHINE_NAME
 
   echo "Cleaning up..."
   rm Dockerfile.$BALENA_MACHINE_NAME
@@ -36,6 +36,13 @@ function retag_and_push_image () {
   docker push $DOCKER_REPO/browser:$NEW_TAG
 }
 
+function create_and_push_manifest() {
+  docker manifest create $DOCKER_REPO/browser:latest --amend $DOCKER_REPO/browser:raspberrypi3 --amend $DOCKER_REPO/browser:raspberrypi4-64 --amend $DOCKER_REPO/browser:genericx86-64-ext
+  docker manifest annotate --arch arm64 $DOCKER_REPO/browser:latest $DOCKER_REPO/browser:raspberrypi4-64
+  docker manifest annotate --variant v8 $DOCKER_REPO/browser:latest $DOCKER_REPO/browser:raspberrypi4-64
+  docker manifest push $DOCKER_REPO/browser:latest
+}
+
 # YOu can pass in a repo (such as a test docker repo) or accept the default
 DOCKER_REPO=${1:-balenablocks}
 
@@ -43,7 +50,7 @@ DOCKER_REPO=${1:-balenablocks}
 build_and_push_image $DOCKER_REPO "raspberrypi3" "linux/arm/v7"
 #RPI4 is built as ARMv7 because there are currently (jan 2021) no 64-bit chromium sources from RPI
 retag_and_push_image $DOCKER_REPO "raspberrypi3" "raspberrypi4-64"
-retag_and_push_image $DOCKER_REPO "raspberrypi3" "raspberrypi3-64"
-retag_and_push_image $DOCKER_REPO "raspberrypi3" "fincm3"
 
 build_and_push_image $DOCKER_REPO "genericx86-64-ext" "linux/amd64"
+
+create_and_push_manifest
