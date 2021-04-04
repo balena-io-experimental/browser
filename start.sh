@@ -83,14 +83,8 @@ echo "#!/bin/bash" > /home/chromium/xstart.sh
 PULSE_SERVER=${PULSE_SERVER:-tcp:audio:4317}
 echo "export PULSE_SERVER=$PULSE_SERVER" >> /home/chromium/xstart.sh
 
-# if no window size has been specified, find the framebuffer size and use that
-if [[ -z ${WINDOW_SIZE+x} ]]
-  then
-    export WINDOW_SIZE=$( cat /sys/class/graphics/fb0/virtual_size )
-    echo "Using fullscreen: $WINDOW_SIZE"
-  else
-    echo "Custom window size set to $WINDOW_SIZE"
-fi
+export WINDOW_SIZE=$( cat /sys/class/graphics/fb0/virtual_size )
+echo "Using fullscreen: $WINDOW_SIZE"
 
 # if no window position has been specified, use the default
 if [[ -z ${WINDOW_POSITION+x} ]]
