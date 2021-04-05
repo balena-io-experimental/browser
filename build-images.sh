@@ -19,9 +19,6 @@ function build_image () {
   
   docker buildx build -t $DOCKER_REPO/$BLOCK_NAME:$BALENA_MACHINE_NAME --push --platform $DOCKER_ARCH --file Dockerfile.$BALENA_MACHINE_NAME .
 
-  # echo "Publishing..."
-  # docker push $DOCKER_REPO/$BLOCK_NAME:$BALENA_MACHINE_NAME
-
   echo "Cleaning up temporary dockerfiles..."
   rm Dockerfile.$BALENA_MACHINE_NAME
 }
@@ -35,7 +32,7 @@ function retag_image () {
   docker tag $DOCKER_REPO/$BLOCK_NAME:$BUILT_TAG $DOCKER_REPO/$BLOCK_NAME:$NEW_TAG
 
   # echo "Publishing..."
-  # docker push $DOCKER_REPO/$BLOCK_NAME:$NEW_TAG
+  docker push $DOCKER_REPO/$BLOCK_NAME:$NEW_TAG
 }
 
 function create_and_push_manifest() {
