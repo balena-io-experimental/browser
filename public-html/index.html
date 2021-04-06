@@ -33,7 +33,7 @@
   <header class="my-auto bg-primary text-white">
     <div class="container text-center ">
       <h1>balenalabs-browser</h1>
-      <p class="lead">A primitive block for browsing HTML</p>
+      <p class="lead">A balena block for browsing HTML</p>
     </div>
     </header>
 
@@ -44,8 +44,9 @@
             <h2>Choosing what to display</h2>
             <p class="lead">You have a few options for choosing what to display here:</p>
             <ul>
-                <li>You can create a service on this device serving HTTP over port 80, and it'll display here automatically! **</li>
+                <li>You can create a service on this device serving HTTP over port 80 or 8080, or HTTPS over 443, and it'll display here automatically! **</li>
                 <li>You can set a Device Variable called <code>LAUNCH_URL</code></li>
+                <li>You can use the API on port 5011 to set the URL (see project readme for details)</li>
             </ul>
             <blockquote>** The balenalabs-browser service will need <code>network_mode: host</code> set.</blockquote>
             </div>
@@ -56,7 +57,7 @@
   <footer class="py-5 bg-dark">
     <div class="container">
       <p class="m-0 text-center text-white">
-        Copyright 2020 Balena |
+        Copyright 2021 Balena |
         All Rights Reserved</p>
     </div>
     <!-- /.container -->
