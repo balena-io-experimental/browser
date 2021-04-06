@@ -2,6 +2,7 @@
 
 Provides a hardware accelerated web browser to present internal and external URLs on a connected display.
 The `browser` block is a docker image that runs a [Chromium](https://www.chromium.org/Home) browser via X11, optimized for balenaOS.
+The block provides an API for dynamic configuration, and also exposes the Chromium Remote Debug port.
 
 ---
 ## Features
