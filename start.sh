@@ -80,8 +80,8 @@ echo "#!/bin/bash" > /home/chromium/xstart.sh
 
 # Configure audio block server
 # This won't have any effect if not using the audio block
-PULSE_SERVER=${PULSE_SERVER:-tcp:audio:4317}
-echo "export PULSE_SERVER=$PULSE_SERVER" >> /home/chromium/xstart.sh
+# PULSE_SERVER=${PULSE_SERVER:-tcp:audio:4317}
+# echo "export PULSE_SERVER=$PULSE_SERVER" >> /home/chromium/xstart.sh
 
 # if no window size has been specified, find the framebuffer size and use that
 if [[ -z ${WINDOW_SIZE+x} ]]
