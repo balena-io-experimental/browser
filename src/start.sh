@@ -39,4 +39,4 @@ mkdir -p /data/chromium
 rm -f /data/chromium/SingletonLock
 
 # launch Chromium and whitelist the enVars so that they pass through to the su session
-su -w "LAUNCH_URL,PERSISTENT,KIOSK,LOCAL_HTTP_DELAY,FLAGS,ROTATE_DISPLAY,ENABLE_GPU,WINDOW_SIZE,WINDOW_POSITION" -c "export DISPLAY=:0 && startx /usr/src/app/startx.sh $CURSOR" - chromium
+su -w "PULSE_SERVER,PULSE_SINK,PULSE_SOURCE,LAUNCH_URL,PERSISTENT,KIOSK,LOCAL_HTTP_DELAY,FLAGS,ROTATE_DISPLAY,ENABLE_GPU,WINDOW_SIZE,WINDOW_POSITION" -c "export DISPLAY=:0 && startx /usr/src/app/startx.sh $CURSOR" - chromium
