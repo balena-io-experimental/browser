@@ -11,10 +11,6 @@ function reverse_window_coordinates () {
   fi 
 }
 
-# Export the location of the pulse server for audio block integration
-PULSE_SERVER=${PULSE_SERVER:-tcp:audio:4317}
-export PULSE_SERVER=$PULSE_SERVER
-
 if [[ -z "$WINDOW_SIZE" ]]; then
   # detect the window size from the framebuffer file
   echo "Detecting window size from framebuffer"
@@ -49,8 +45,8 @@ if [[ ! -z "$ROTATE_DISPLAY" ]]; then
 fi
 
 # these two lines remove the "restore pages" popup on chromium. 
-sed -i 's/"exited_cleanly":false/"exited_cleanly":true/' /data/chromium/'Local State' || true
-sed -i 's/"exited_cleanly":false/"exited_cleanly":true/; s/"exit_type":"[^"]\+"/"exit_type":"Normal"/' /data/chromium/Default/Preferences || true
+sed -i 's/"exited_cleanly":false/"exited_cleanly":true/' /data/chromium/'Local State' > /dev/null 2>&1 || true 
+sed -i 's/"exited_cleanly":false/"exited_cleanly":true/; s/"exit_type":"[^"]\+"/"exit_type":"Normal"/' /data/chromium/Default/Preferences > /dev/null 2>&1 || true 
 
 
 # Set chromium version into an EnVar for later

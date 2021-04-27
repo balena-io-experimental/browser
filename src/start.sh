@@ -38,5 +38,12 @@ chown -R chromium:chromium /data
 mkdir -p /data/chromium
 rm -f /data/chromium/SingletonLock
 
+# we can't maintain the environment with su, because we are logging in to a new session
+# so we need to manually pass in the environment variables to maintain, in a whitelist
+# This gets the current environment, as a comma-separated string
+environment=$(env | grep -v -w '_' | awk -F: '{ st = index($0,"=");print substr($1,0,st) ","}' | tr -d "\n")
+# remove the last comma
+environment="${environment::-1}"
+
 # launch Chromium and whitelist the enVars so that they pass through to the su session
-su -w "LAUNCH_URL,PERSISTENT,KIOSK,LOCAL_HTTP_DELAY,FLAGS,ROTATE_DISPLAY,ENABLE_GPU,WINDOW_SIZE,WINDOW_POSITION" -c "export DISPLAY=:0 && startx /usr/src/app/startx.sh $CURSOR" - chromium
+su -w $environment -c "export DISPLAY=:0 && startx /usr/src/app/startx.sh $CURSOR -logverbose 0" - chromium
