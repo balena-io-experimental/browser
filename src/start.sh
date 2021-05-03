@@ -9,7 +9,7 @@ sed -i -e 's/console/anybody/g' /etc/X11/Xwrapper.config
 echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
 dpkg-reconfigure xserver-xorg-legacy
 
-echo "balenaBlocks browser version $(<VERSION)"
+echo "balenaBlocks browser version: $(<VERSION)"
 
 # this stops the CPU performance scaling down
 echo "Setting CPU Scaling Governor to 'performance'"
@@ -48,4 +48,4 @@ environment=$(env | grep -v -w '_' | awk -F: '{ st = index($0,"=");print substr(
 environment="${environment::-1}"
 
 # launch Chromium and whitelist the enVars so that they pass through to the su session
-su -w $environment -c "export DISPLAY=:0 && startx /usr/src/app/startx.sh $CURSOR -logverbose 0" - chromium
+su -w $environment -c "export DISPLAY=:0 && startx /usr/src/app/startx.sh $CURSOR" - chromium
