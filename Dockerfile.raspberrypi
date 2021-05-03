@@ -47,5 +47,7 @@ RUN usermod -a -G audio,video,tty chromium
 RUN curl -skL https://raw.githubusercontent.com/balenablocks/audio/master/scripts/alsa-bridge/debian-setup.sh| sh
 ENV PULSE_SERVER=tcp:audio:4317
 
+COPY VERSION .
+
 # Start app
 CMD ["bash", "/usr/src/app/start.sh"]
