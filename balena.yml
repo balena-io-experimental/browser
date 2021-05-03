@@ -2,7 +2,7 @@ name: browser
 description: >-
   a hardware accelerated web browser to present internal and external URLs on a
   connected display
-version: 2.0.2
+version: 2.0.3
 type: sw.application
 assets:
   repository:
