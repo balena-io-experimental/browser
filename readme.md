@@ -226,9 +226,13 @@ If, when you plug one of the supported devices into your HDMI screen, you find b
 
 You may also need to turn it off on the screen itself (check your device instructions for details).
 
-#### Partial display output
-Occasionally users report that only a portion of the browser screen appears on their display. The things to try here are:
+#### Partial/strange display output
+Occasionally users report weird things are happening with their display output like:
+* Only a portion of the browser screen appears on their display
+* The screen is displaying skewed or fragmented
+* Colors have changed dramatically
 
+Here are some things to try:
 * Setting the WINDOW_SIZE manually to your display's resolution (e.g. `1980,1080`) - the display may be mis-reporting it's resolution to the device
-* Increase the memory being allocated to the GPU with the [configuration variable](https://www.balena.io/docs/learn/manage/configuration/) - for large displays the device may need to allocate more memory to displaying the output
+* Increase the memory being allocated to the GPU with the Device Configuration tab on the dashboard, or via [configuration variable](https://www.balena.io/docs/learn/manage/configuration/) - for large displays the device may need to allocate more memory to displaying the output
 
