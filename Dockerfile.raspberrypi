@@ -7,14 +7,7 @@ RUN install_packages \
     rpi-chromium-mods \ 
     libgles2-mesa \
     lsb-release \
-    mesa-vdpau-drivers \
-    wget \
-    x11-xserver-utils \
-    xserver-xorg-input-evdev \
-    xserver-xorg-legacy \
-    xserver-xorg-video-fbdev \
-    xserver-xorg xinit \
-    xterm 
+    wget
 
 WORKDIR /usr/src/app
 
@@ -51,3 +44,5 @@ COPY VERSION .
 
 # Start app
 CMD ["bash", "/usr/src/app/start.sh"]
+
+ENV DISPLAY=:0

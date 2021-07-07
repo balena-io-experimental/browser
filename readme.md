@@ -1,7 +1,7 @@
 # balenablocks/browser
 
 Provides a hardware accelerated web browser to present internal and external URLs on a connected display.
-The `browser` block is a docker image that runs a [Chromium](https://www.chromium.org/Home) browser via X11, optimized for balenaOS.
+The `browser` block is a docker image that runs a [Chromium](https://www.chromium.org/Home) browser, optimized for balenaOS, via the [xserver](https://github.com/balenablocks/xserver) block.
 The block provides an API for dynamic configuration, and also exposes the Chromium Remote Debug port.
 
 ---
@@ -26,7 +26,7 @@ version: '2'
 
 volumes:
   settings:                          # Only required if using PERSISTENT flag (see below)
-
+  xserver:
 services:
 
   browser:
@@ -38,6 +38,14 @@ services:
         - '35173' # Chromium debugging port (optional)
     volumes:
       - 'settings:/data' # Only required if using PERSISTENT flag (see below)
+      - 'xserver:/tmp/.X11-unix'
+  xserver:
+    image: balenablocks/xserver
+    restart: always
+    privileged: true
+    volumes:
+      - 'xserver:/tmp/.X11-unix'
+
 ```
 ---
 
@@ -63,13 +71,9 @@ The following environment variables allow configuration of the `browser` block:
 |`LAUNCH_URL`|`http` or `https` URL|N\A|Web page to display|
 |`LOCAL_HTTP_DELAY`|Number (seconds)|0|Number of seconds to wait for a local HTTP service to start before trying to detect it|
 |`KIOSK`|`0`, `1`|`0`|Run in kiosk mode with no menus or status bars. <br/> `0` = off, `1` = on|
-|`SHOW_CURSOR`|`0`, `1`|`0`|Enables/disables the cursor when in kiosk mode<br/> `0` = off, `1` = on|
 |`FLAGS`|[many!](https://peter.sh/experiments/chromium-command-line-switches/)|N/A|Overrides the flags chromium is started with. Enter a space (\' \') separated list of flags (e.g. `--noerrdialogs --disable-session-crashed-bubble`) <br/> **Use with caution!**|
 |`PERSISTENT`|`0`, `1`|`0`|Enables/disables user profile data being stored on the device. **Note: you'll need to create a settings volume. See example above** <br/> `0` = off, `1` = on|
-|`ROTATE_DISPLAY`|`normal`, `left`, `right`, `inverted`|`normal`|Rotates the display|
 |`ENABLE_GPU`|`0`, `1`|0|Enables the GPU rendering. Necessary for Pi3B+ to display YouTube videos. <br/> `0` = off, `1` = on|
-|`WINDOW_SIZE`|`x,y`|Detected screen resolution|Sets the browser window size, such as `800,600`. <br/> **Note:** Reverse the dimensions if you also rotate the display to `left` or `right` |
-|`WINDOW_POSITION`|`x,y`|`0,0`|Specifies the browser window position on the screen|
 |`API_PORT`|port number|5011|Specifies the port number the API runs on|
 |`REMOTE_DEBUG_PORT`|port number|35173|Specifies the port number the chrome remote debugger runs on|
 
@@ -91,6 +95,13 @@ services:
     privileged: true
     volumes:
       - 'settings:/data'
+      - 'xserver:/tmp/.X11-unix'
+  xserver:
+    image: balenablocks/xserver
+    restart: always
+    privileged: true
+    volumes:
+      - 'xserver:/tmp/.X11-unix'
   grafana:
     restart: always
     build: ./grafana
@@ -233,6 +244,5 @@ Occasionally users report weird things are happening with their display output l
 * Colors have changed dramatically
 
 Here are some things to try:
-* Setting the WINDOW_SIZE manually to your display's resolution (e.g. `1980,1080`) - the display may be mis-reporting it's resolution to the device
 * Increase the memory being allocated to the GPU with the Device Configuration tab on the dashboard, or via [configuration variable](https://www.balena.io/docs/learn/manage/configuration/) - for large displays the device may need to allocate more memory to displaying the output
 

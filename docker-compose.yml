@@ -1,13 +1,20 @@
-version: '2'
+version: '2.1'
 
 volumes:
-  settings:                          # Only required if using PERSISTENT flag (see below)
+  settings: # Only required if using PERSISTENT flag (see below)
+  xserver:
 
 services:
-
   browser:
-    image: balenablocks/browser
+    build: ./
     privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
     network_mode: host
     volumes:
       - 'settings:/data' # Only required if using PERSISTENT flag (see below)
+      - 'xserver:/tmp/.X11-unix'
+  xserver:
+    image: nucleardreamer/xserver
+    restart: always
+    privileged: true
+    volumes:
+      - 'xserver:/tmp/.X11-unix'

@@ -1,38 +1,35 @@
 {
-    "name": "browserV2",
-    "version": "0.0.1",
-    "description": "balenaBlock that provides a chromium browser wrapped in some balena genius",
-    "main": "index.js",
-    "scripts": {
-
-    },
-    "repository": {
-      "type": "git",
-      "url": "git+https://github.com/balenablocks/browser.git"
-    },
-    "keywords": [
-      "balena",
-      "browser",
-      "chromium"
-    ],
-    "author": "Phil Wilson <phil@balena.io>",
-    "license": "Apache-2.0",
-    "jshintConfig": {
-      "esversion": 8
-    },
-    "bugs": {
-      "url": "https://github.com/balenablocks/browser/issues"
-    },
-    "homepage": "https://github.com/balenablocks/browser#readme",
-    "dependencies": {
-        "chrome-launcher": "^0.13.4",
-        "body-parser": "^1.19.0",
-        "compression": "^1.7.4",
-        "dateformat": "^3.0.3",
-        "debug": "^4.1.1",
-        "express": "^4.17.1",
-        "bent": "7.3.10",
-        "set-interval-async": "^1.0.34"
-    }
+  "name": "browserV2",
+  "version": "0.0.1",
+  "description": "balenaBlock that provides a chromium browser wrapped in some balena genius",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/balenablocks/browser.git"
+  },
+  "keywords": [
+    "balena",
+    "browser",
+    "chromium"
+  ],
+  "author": "Phil Wilson <phil@balena.io>",
+  "license": "Apache-2.0",
+  "jshintConfig": {
+    "esversion": 8
+  },
+  "bugs": {
+    "url": "https://github.com/balenablocks/browser/issues"
+  },
+  "homepage": "https://github.com/balenablocks/browser#readme",
+  "dependencies": {
+    "chrome-launcher": "^0.13.4",
+    "body-parser": "^1.19.0",
+    "compression": "^1.7.4",
+    "dateformat": "^3.0.3",
+    "debug": "^4.1.1",
+    "express": "^4.17.1",
+    "bent": "7.3.10",
+    "set-interval-async": "^1.0.34"
   }
-  
+}
