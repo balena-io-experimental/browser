@@ -177,7 +177,12 @@ async function SetDefaultFlags() {
 async function setTimer(interval) {
   timer = setIntervalAsync(
     async () => {
-      await launchChromium(currentUrl);
+      try {
+        await launchChromium(currentUrl);
+      } catch (err) {
+        console.log("Timer error: ", err);
+        process.exit(1);
+      }
     },
     interval
   )
@@ -194,11 +199,11 @@ async function main(){
   await launchChromium(url);
 }
 
-try {
-  main()
-} catch (e) {
-  `Main method error: ${console.log}`
-}
+
+main().catch(err => {
+  console.log("Main error: ", err);
+  process.exit(1);
+});
 
 // Start the API
 const app = express();
@@ -337,7 +342,10 @@ app.get('/version', (req, res) => {
 // scan endpoint - causes the device to rescan for local HTTP services
 app.post('/scan', (req, res) => {
  
-  main().catch("Main error: " + console.log);
+  main().catch(err => {
+    console.log("Scan error: ", err);
+    process.exit(1);
+  });
   return res.status(200).send('ok');
 });
 
