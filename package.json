@@ -10,6 +10,7 @@
       "type": "git",
       "url": "git+https://github.com/balenablocks/browser.git"
     },
+  "private": true,
     "keywords": [
       "balena",
       "browser",
