@@ -17,7 +17,8 @@ function build_image () {
     sed "s/%%BALENA_MACHINE_NAME%%/$BALENA_MACHINE_NAME/g" ./Dockerfile.template > ./Dockerfile.$BALENA_MACHINE_NAME
   fi
   
-  docker buildx build -t $DOCKER_REPO/$BLOCK_NAME:$BALENA_MACHINE_NAME --push --platform $DOCKER_ARCH --file Dockerfile.$BALENA_MACHINE_NAME .
+  docker buildx build -t $DOCKER_REPO/$BLOCK_NAME:$BALENA_MACHINE_NAME --load --platform $DOCKER_ARCH --file Dockerfile.$BALENA_MACHINE_NAME .
+  docker push $DOCKER_REPO/$BLOCK_NAME:$BALENA_MACHINE_NAME
 
   echo "Cleaning up temporary dockerfiles..."
   rm Dockerfile.$BALENA_MACHINE_NAME
