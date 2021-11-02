@@ -46,7 +46,7 @@ rm -f /data/chromium/SingletonLock
 # we can't maintain the environment with su, because we are logging in to a new session
 # so we need to manually pass in the environment variables to maintain, in a whitelist
 # This gets the current environment, as a comma-separated string
-environment=$(env | grep -v -w '_' | awk -F: '{ st = index($0,"=");print substr($1,0,st) ","}' | tr -d "\n")
+environment=$(env | grep -v -w '_' | awk -F= '{ st = index($0,"=");print substr($1,0,st) ","}' | tr -d "\n")
 # remove the last comma
 environment="${environment::-1}"
 
