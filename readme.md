@@ -61,6 +61,7 @@ The following environment variables allow configuration of the `browser` block:
 | Environment variable | Options | Default | Description |
 | --- | --- | --- | --- |
 |`LAUNCH_URL`|`http` or `https` URL|N\A|Web page to display|
+|`DISPLAY_NUM`|`n`|0|Display number to use|
 |`LOCAL_HTTP_DELAY`|Number (seconds)|0|Number of seconds to wait for a local HTTP service to start before trying to detect it|
 |`KIOSK`|`0`, `1`|`0`|Run in kiosk mode with no menus or status bars. <br/> `0` = off, `1` = on|
 |`SHOW_CURSOR`|`0`, `1`|`0`|Enables/disables the cursor when in kiosk mode<br/> `0` = off, `1` = on|

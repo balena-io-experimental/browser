@@ -18,7 +18,13 @@ echo "balenaBlocks browser version: $(<VERSION)"
 echo "Setting CPU Scaling Governor to 'performance'"
 echo 'performance' > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 
 
- #Set whether to show a cursor or not
+# check if display number envar was set
+if [[ -z "$DISPLAY_NUM" ]]
+  then
+    export DISPLAY_NUM=0
+fi
+
+# set whether to show a cursor or not
 if [[ ! -z $SHOW_CURSOR ]] && [[ "$SHOW_CURSOR" -eq "1" ]]
   then
     export CURSOR=''
@@ -51,4 +57,4 @@ environment=$(env | grep -v -w '_' | awk -F= '{ st = index($0,"=");print substr(
 environment="${environment::-1}"
 
 # launch Chromium and whitelist the enVars so that they pass through to the su session
-su -w $environment -c "export DISPLAY=:0 && startx /usr/src/app/startx.sh $CURSOR" - chromium
+su -w $environment -c "export DISPLAY=:$DISPLAY_NUM && startx /usr/src/app/startx.sh $CURSOR" - chromium
