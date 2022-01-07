@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+echo "--- List Input Devices ---"
+xinput list
+echo "----- End of List --------"
+
 function reverse_window_coordinates () {
   local INPUT=$1
 
@@ -9,6 +13,18 @@ function reverse_window_coordinates () {
   else
     echo "Screen coordinates not set correctly, so cannot reverse them."
   fi 
+}
+
+function rotate_touch () {
+  echo "Rotating Input ($1): $2"
+  local TRANSFORM='Coordinate Transformation Matrix'
+
+  case "$2" in
+    normal)   xinput set-prop "$1" "$TRANSFORM" 1 0 0 0 1 0 0 0 1;;
+    inverted) xinput set-prop "$1" "$TRANSFORM" -1 0 1 0 -1 1 0 0 1;;
+    left)     xinput set-prop "$1" "$TRANSFORM" 0 -1 1 1 0 0 0 0 1;;
+    right)    xinput set-prop "$1" "$TRANSFORM" 0 1 0 -1 0 1 0 0 1;;
+  esac
 }
 
 if [[ -z "$WINDOW_SIZE" ]]; then
@@ -41,6 +57,16 @@ if [[ ! -z "$ROTATE_DISPLAY" ]]; then
       export WINDOW_POSITION=$REVERSED_POSITION
       echo "Reversed window position: $WINDOW_POSITION"
     fi
+  fi
+
+  echo "Rotate Touch Inputs"
+  if [[ ! -z "$TOUCHSCREEN" ]]; then
+    rotate_touch "$TOUCHSCREEN" "$ROTATE_DISPLAY"
+  else
+    devices=$( xinput --list | fgrep Touch | sed -E 's/^.*id=([0-9]+).*$/\1/' )
+    for device in ${devices} ;do
+        rotate_touch $device $ROTATE_DISPLAY
+    done
   fi
 fi
 

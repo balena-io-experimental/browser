@@ -68,6 +68,7 @@ The following environment variables allow configuration of the `browser` block:
 |`FLAGS`|[many!](https://peter.sh/experiments/chromium-command-line-switches/)|N/A|Overrides the flags chromium is started with. Enter a space (\' \') separated list of flags (e.g. `--noerrdialogs --disable-session-crashed-bubble`) <br/> **Use with caution!**|
 |`PERSISTENT`|`0`, `1`|`0`|Enables/disables user profile data being stored on the device. **Note: you'll need to create a settings volume. See example above** <br/> `0` = off, `1` = on|
 |`ROTATE_DISPLAY`|`normal`, `left`, `right`, `inverted`|`normal`|Rotates the display|
+|`TOUCHSCREEN`|`string`|N\A|Name of Touch Input to rotate|
 |`ENABLE_GPU`|`0`, `1`|0|Enables the GPU rendering. Necessary for Pi3B+ to display YouTube videos. <br/> `0` = off, `1` = on|
 |`WINDOW_SIZE`|`x,y`|Detected screen resolution|Sets the browser window size, such as `800,600`. <br/> **Note:** Reverse the dimensions if you also rotate the display to `left` or `right` |
 |`WINDOW_POSITION`|`x,y`|`0,0`|Specifies the browser window position on the screen|
