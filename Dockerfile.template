@@ -13,6 +13,7 @@ RUN install_packages \
     xserver-xorg-legacy \
     xserver-xorg-video-fbdev \
     xserver-xorg xinit \
+    xinput \
     xterm 
 
 WORKDIR /usr/src/app
