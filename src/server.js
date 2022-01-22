@@ -139,11 +139,6 @@ let launchChromium = async function(url) {
       }
     }
 
-    if ('1' === PERSISTENT_DATA)
-    {
-      flags.push('--user-data-dir=/data/chromium');
-    }
-
     let startingUrl = url;
     if ('1' === kioskMode)
     {
@@ -163,6 +158,7 @@ let launchChromium = async function(url) {
       ignoreDefaultFlags: true,
       chromeFlags: flags,
       port: REMOTE_DEBUG_PORT,
+      userDataDir: '1' === PERSISTENT_DATA ? '/data/chromium' : undefined
     });
       
     console.log(`Chromium remote debugging tools running on port: ${chrome.port}`);
