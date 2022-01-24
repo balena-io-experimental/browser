@@ -58,3 +58,4 @@ environment="${environment::-1}"
 
 # launch Chromium and whitelist the enVars so that they pass through to the su session
 su -w $environment -c "export DISPLAY=:$DISPLAY_NUM && startx /usr/src/app/startx.sh $CURSOR" - chromium
+balena-idle

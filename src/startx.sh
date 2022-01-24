@@ -76,6 +76,7 @@ sed -i 's/"exited_cleanly":false/"exited_cleanly":true/; s/"exit_type":"[^"]\+"/
 
 # Set chromium version into an EnVar for later
 export VERSION=`chromium-browser --version`
+echo "Installed browser version: $VERSION"
 
 # stop the screen blanking
 xset s off -dpms
