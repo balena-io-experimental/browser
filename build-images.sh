@@ -9,13 +9,7 @@ function build_image () {
   local DOCKER_ARCH=$3
 
   echo "Building for machine name $BALENA_MACHINE_NAME, platform $DOCKER_ARCH, pushing to $DOCKER_REPO/$BLOCK_NAME"
-
-  # The RPIs all use the same dockerfile for now
-  if [[ $BALENA_MACHINE_NAME = raspberry* ]]; then
-    sed "s/%%BALENA_MACHINE_NAME%%/$BALENA_MACHINE_NAME/g" ./Dockerfile.raspberrypi > ./Dockerfile.$BALENA_MACHINE_NAME
-  else
-    sed "s/%%BALENA_MACHINE_NAME%%/$BALENA_MACHINE_NAME/g" ./Dockerfile.template > ./Dockerfile.$BALENA_MACHINE_NAME
-  fi
+  sed "s/%%BALENA_MACHINE_NAME%%/$BALENA_MACHINE_NAME/g" ./Dockerfile.template > ./Dockerfile.$BALENA_MACHINE_NAME
   
   docker buildx build -t $DOCKER_REPO/$BLOCK_NAME:$BALENA_MACHINE_NAME --load --platform $DOCKER_ARCH --file Dockerfile.$BALENA_MACHINE_NAME .
   docker push $DOCKER_REPO/$BLOCK_NAME:$BALENA_MACHINE_NAME
