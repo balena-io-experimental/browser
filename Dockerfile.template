@@ -8,6 +8,7 @@ RUN install_packages \
     libgles2-mesa \
     lsb-release \
     mesa-vdpau-drivers \
+    scrot \
     wget \
     x11-xserver-utils \
     xserver-xorg-input-evdev \
