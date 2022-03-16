@@ -1,0 +1,24 @@
+name: balena
+
+on:
+  pull_request:
+    types: [opened, synchronize, closed]
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-20.04
+    strategy:
+      fail-fast: true
+      matrix:
+        fleet: [balenablocks/browser-aarch64, balenablocks/browser-amd64, balenablocks/browser-arm32]
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: balena-io/deploy-to-balena-action@v0.8.4
+        with:
+          balena_token: ${{ secrets.BALENA_API_KEY }}
+          environment: balena-cloud.com
+          fleet: ${{ matrix.fleet }}
+          versionbot: true
