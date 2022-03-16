@@ -30,7 +30,7 @@ volumes:
 services:
 
   browser:
-    image: balenablocks/browser
+    image: bhcr.io/balenablocks/browser-<arch> # where <arch> is one of aarch64, arm32 or amd64
     privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
     network_mode: host
     ports:
