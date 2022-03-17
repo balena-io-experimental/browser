@@ -2,6 +2,19 @@ name: browser
 description: >-
   a hardware accelerated web browser to present internal and external URLs on a
   connected display
+post-provisioning: >-
+  ## Usage instructions
+
+  Include this snippet in your docker-compose.yml file under 'services':
+    
+    ```
+    browser:
+      image: bhcr.io/balenablocks/browser-<arch> # where <arch> is one of aarch64, arm32 or amd64
+      privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
+      network_mode: host
+      volumes:
+        - 'settings:/data' # Only required if using PERSISTENT flag (see below)
+    ```
 version: 2.3.3
 type: sw.application
 assets:
