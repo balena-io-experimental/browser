@@ -39,6 +39,9 @@ services:
     volumes:
       - 'settings:/data' # Only required if using PERSISTENT flag (see below)
 ```
+
+See [here](https://github.com/balena-io/open-balena-registry-proxy#usage) for more details about how to use blocks hosted in balenaCloud.
+
 ---
 
 ## Customization
