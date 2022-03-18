@@ -2,7 +2,10 @@ name: browser
 description: >-
   a hardware accelerated web browser to present internal and external URLs on a
   connected display
+
+  
 post-provisioning: >-
+  [![balena](https://github.com/balenablocks/browser/actions/workflows/balena.yml/badge.svg)](https://github.com/balenablocks/browser/actions/workflows/balena.yml)
   ## Usage instructions
 
   Include this snippet in your docker-compose.yml file under 'services':
