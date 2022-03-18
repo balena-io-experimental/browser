@@ -3,7 +3,6 @@ description: >-
   a hardware accelerated web browser to present internal and external URLs on a
   connected display
 
-  
 post-provisioning: >-
   [![balena](https://github.com/balenablocks/browser/actions/workflows/balena.yml/badge.svg)](https://github.com/balenablocks/browser/actions/workflows/balena.yml)
   ## Usage instructions
@@ -32,7 +31,7 @@ post-provisioning: >-
         volumes:
           - 'settings:/data' # Only required if using PERSISTENT flag (see below)
     ```
-version: 2.3.6
+version: 2.3.7
 type: sw.application
 assets:
   repository:
