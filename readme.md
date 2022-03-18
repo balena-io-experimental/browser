@@ -40,6 +40,21 @@ services:
       - 'settings:/data' # Only required if using PERSISTENT flag (see below)
 ```
 
+To pin to a specific [version](CHANGELOG.md) of this block use:
+
+```yaml
+services:
+  browser:
+    image: bhcr.io/balenablocks/browser-<arch>/<version>
+    privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
+    network_mode: host
+    ports:
+        - '5011' # management API (optional)
+        - '35173' # Chromium debugging port (optional)
+    volumes:
+      - 'settings:/data' # Only required if using PERSISTENT flag (see below)
+```
+
 See [here](https://github.com/balena-io/open-balena-registry-proxy#usage) for more details about how to use blocks hosted in balenaCloud.
 
 ---
