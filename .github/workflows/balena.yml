@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        fleet: [balenablocks/browser-aarch64, balenablocks/browser-amd64, balenablocks/browser-arm32]
+        fleet: [balenablocks/browser-aarch64, balenablocks/browser-amd64, balenablocks/browser-armv7hf]
 
     steps:
       - uses: actions/checkout@v3
