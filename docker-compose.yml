@@ -6,7 +6,7 @@ volumes:
 services:
 
   browser:
-    image: balenablocks/browser
+    build: .
     privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
     network_mode: host
     volumes:
