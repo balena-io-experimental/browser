@@ -8,6 +8,10 @@ const {
   setIntervalAsync,
   clearIntervalAsync
 } = require('set-interval-async/dynamic')
+const { spawn } = require('child_process');
+const { readFile, unlink } = require('fs').promises;
+const path = require('path');
+const os = require('os');
 
 // Bring in the static environment variables
 const API_PORT = parseInt(process.env.API_PORT) || 5011;
@@ -333,6 +337,32 @@ app.get('/version', (req, res) => {
   
   let version = process.env.VERSION || "Version not set";
   return res.status(200).send(version.toString());
+});
+
+app.get('/screenshot', async(req, res) => {
+  const fileName = process.hrtime.bigint() + '.png';
+  const filePath = path.join(os.tmpdir(), fileName);
+  try {
+    const child = spawn('scrot', [filePath]);
+
+    const statusCode = await new Promise( (res, rej) => { child.on('close', res); } );
+    if (statusCode != 0) {
+      return res.status(500).send("Screenshot command exited with non-zero return code.");
+    }
+
+    const fileContents = await readFile(filePath);
+    res.set('Content-Type', 'image/png');
+    return res.status(200).send(fileContents);
+  } catch(e) {
+    console.log(e.toString());
+    return res.status(500).send("Error occurred in screenshot code.");
+  } finally {
+    try {
+      await unlink(filePath);
+    } catch (e) {
+      console.log(e)
+    }
+  }
 });
 
 // scan endpoint - causes the device to rescan for local HTTP services
