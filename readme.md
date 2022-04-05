@@ -220,6 +220,10 @@ Returns the flags Chromium was started with
 #### **GET** /version
 Returns the version of Chromium that `browser` is running
 
+#### **GET** /screenshot
+Uses [scrot](https://opensource.com/article/17/11/taking-screen-captures-linux-command-line-scrot) to take a screenshot of the chromium window. 
+The screenshot will be saved as a temporary file in the container.
+
 ---
 
 ## Supported devices
