@@ -5,7 +5,7 @@ description: >-
 
 post-provisioning: >-
   [![balena](https://github.com/balenablocks/browser/actions/workflows/balena.yml/badge.svg)](https://github.com/balenablocks/browser/actions/workflows/balena.yml)
-  
+
   ## Usage instructions
 
   Include this snippet in your docker-compose.yml file under 'services':
@@ -32,7 +32,7 @@ post-provisioning: >-
         volumes:
           - 'settings:/data' # Only required if using PERSISTENT flag (see below)
     ```
-version: 2.4.1
+version: 2.4.2
 type: sw.application
 assets:
   repository:
