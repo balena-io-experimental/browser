@@ -206,7 +206,7 @@ Returns whether the device is running kiosk mode or not:
 | 0 | disabled |
 | 1 | enabled |
 
-#### **PUT** /kiosk/{value}
+#### **POST** /kiosk/{value}
 Enables or disables kiosk mode
 
 | Value | Description |
