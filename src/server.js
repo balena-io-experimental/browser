@@ -1,6 +1,7 @@
 #!/bin/env node
 
 const express = require('express');
+const http = require('http');
 const bodyParser = require('body-parser');
 const chromeLauncher = require('chrome-launcher');
 const bent = require('bent')
@@ -12,6 +13,7 @@ const { spawn } = require('child_process');
 const { readFile, unlink } = require('fs').promises;
 const path = require('path');
 const os = require('os');
+const httpProxy = require('http-proxy');
 
 // Bring in the static environment variables
 const API_PORT = parseInt(process.env.API_PORT) || 5011;
@@ -161,11 +163,46 @@ let launchChromium = async function(url) {
       startingUrl: startingUrl,
       ignoreDefaultFlags: true,
       chromeFlags: flags,
-      port: REMOTE_DEBUG_PORT,
+      port: 9222,
       userDataDir: '1' === PERSISTENT_DATA ? '/data/chromium' : undefined
     });
+
+    const proxy = httpProxy.createProxyServer({
+      ws: true,
+      changeOrigin: true,
+      secure: false,
+      autoRewrite: true,
+    });
+    
+    await new Promise((resolve, reject) => {
+      proxy.on('error', function (err, _req, res) {
+        if (!res.headersSent) {
+            if (typeof res.writeHead === 'function') {
+                res.writeHead(500, {
+                    'content-type': 'application/json'
+                });
+            }
+        }
       
-    console.log(`Chromium remote debugging tools running on port: ${chrome.port}`);
+        res.end(JSON.stringify(err));
+      });
+      
+      http.createServer(function (req, res) {
+        proxy.web(req, res, {
+          target: `http://localhost:${chrome.port}`,
+        });
+      }).on('upgrade', function (req, socket, head) {
+        proxy.ws(req, socket, head, {
+            target: `ws://localhost:${chrome.port}`,
+        });
+      }).on('error', function (err) {
+        reject(err);
+      }).listen(REMOTE_DEBUG_PORT, '0.0.0.0', function () {
+        resolve();
+      });
+    });
+      
+    console.log(`Chromium remote debugging tools running on port: ${REMOTE_DEBUG_PORT}`);
     currentUrl = url;
 }
 
