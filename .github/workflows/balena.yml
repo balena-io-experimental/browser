@@ -12,11 +12,16 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        fleet: [balenablocks/browser-aarch64, balenablocks/browser-amd64, balenablocks/browser-armv7hf]
+        fleet:
+          [
+            balenablocks/browser-aarch64,
+            balenablocks/browser-amd64,
+            balenablocks/browser-armv7hf,
+          ]
 
     steps:
       - uses: actions/checkout@v3
-      - uses: balena-io/deploy-to-balena-action@v0.9.0
+      - uses: balena-io/deploy-to-balena-action@v0.10.7
         with:
           balena_token: ${{ secrets.BALENA_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
