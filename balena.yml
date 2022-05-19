@@ -33,7 +33,7 @@ post-provisioning: >-
           - 'settings:/data' # Only required if using PERSISTENT flag (see below)
     ```
 version: 2.4.2
-type: sw.application
+type: sw.block
 assets:
   repository:
     type: blob.asset
