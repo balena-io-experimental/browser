@@ -182,6 +182,9 @@ You can also pre-set the kiosk and GPU settings as part of a URL put request. Ex
 curl --data "url=www.balena.io&gpu=0&kiosk=1" http://localhost:5011/url
 ```
 
+#### **POST** /kill
+Kills the chromium browser
+
 #### **GET** /gpu
 Returns the status of the GPU:
 
