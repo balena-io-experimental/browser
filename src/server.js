@@ -271,6 +271,12 @@ app.post('/refresh', (req, res) => {
   return res.status(200).send('ok');
 });
 
+// kill endpoint
+app.post('/kill', (req, res) => {
+  chromeLauncher.killAll();
+  return res.status(200).send('ok');
+});
+
 // gpu set endpoint
 app.post('/gpu/:gpu', (req, res) => {
   if (!req.params.gpu) {
