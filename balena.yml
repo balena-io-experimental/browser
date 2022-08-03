@@ -32,7 +32,7 @@ post-provisioning: >-
         volumes:
           - 'settings:/data' # Only required if using PERSISTENT flag (see below)
     ```
-version: 2.4.3
+version: 2.4.4
 type: sw.block
 assets:
   repository:
