@@ -45,8 +45,8 @@ then
 fi
 
 # set up the user data area
-chown -R chromium:chromium /data
 mkdir -p /data/chromium
+chown -R chromium:chromium /data
 rm -f /data/chromium/SingletonLock
 
 # we can't maintain the environment with su, because we are logging in to a new session
