@@ -2,8 +2,38 @@ name: browser
 description: >-
   a hardware accelerated web browser to present internal and external URLs on a
   connected display
-version: 2.3.2
-type: sw.application
+
+post-provisioning: >-
+  [![balena](https://github.com/balenablocks/browser/actions/workflows/balena.yml/badge.svg)](https://github.com/balenablocks/browser/actions/workflows/balena.yml)
+
+  ## Usage instructions
+
+  Include this snippet in your docker-compose.yml file under 'services':
+    
+    ```
+    browser:
+      image: bhcr.io/balenablocks/browser-<arch> # where <arch> is one of aarch64, arm32 or amd64
+      privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
+      network_mode: host
+      volumes:
+        - 'settings:/data' # Only required if using PERSISTENT flag (see below)
+    ```
+
+    To pin to a specific [version](CHANGELOG.md) of this block use:
+
+    ```
+      browser:
+        image: bhcr.io/balenablocks/browser-<arch>/<version>
+        privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
+        network_mode: host
+        ports:
+            - '5011' # management API (optional)
+            - '35173' # Chromium debugging port (optional)
+        volumes:
+          - 'settings:/data' # Only required if using PERSISTENT flag (see below)
+    ```
+version: 2.4.5
+type: sw.block
 assets:
   repository:
     type: blob.asset

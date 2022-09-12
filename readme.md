@@ -1,4 +1,5 @@
 # balenablocks/browser
+ [![balena](https://github.com/balenablocks/browser/actions/workflows/balena.yml/badge.svg)](https://github.com/balenablocks/browser/actions/workflows/balena.yml)
 
 Provides a hardware accelerated web browser to present internal and external URLs on a connected display.
 The `browser` block is a docker image that runs a [Chromium](https://www.chromium.org/Home) browser via X11, optimized for balenaOS.
@@ -30,7 +31,7 @@ volumes:
 services:
 
   browser:
-    image: balenablocks/browser
+    image: bhcr.io/balenablocks/browser-<arch> # where <arch> is one of aarch64, arm32 or amd64
     privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
     network_mode: host
     ports:
@@ -39,6 +40,24 @@ services:
     volumes:
       - 'settings:/data' # Only required if using PERSISTENT flag (see below)
 ```
+
+To pin to a specific [version](CHANGELOG.md) of this block use:
+
+```yaml
+services:
+  browser:
+    image: bhcr.io/balenablocks/browser-<arch>/<version>
+    privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
+    network_mode: host
+    ports:
+        - '5011' # management API (optional)
+        - '35173' # Chromium debugging port (optional)
+    volumes:
+      - 'settings:/data' # Only required if using PERSISTENT flag (see below)
+```
+
+See [here](https://github.com/balena-io/open-balena-registry-proxy#usage) for more details about how to use blocks hosted in balenaCloud.
+
 ---
 
 ## Customization
@@ -201,6 +220,10 @@ Returns the flags Chromium was started with
 
 #### **GET** /version
 Returns the version of Chromium that `browser` is running
+
+#### **GET** /screenshot
+Uses [scrot](https://opensource.com/article/17/11/taking-screen-captures-linux-command-line-scrot) to take a screenshot of the chromium window. 
+The screenshot will be saved as a temporary file in the container.
 
 ---
 
