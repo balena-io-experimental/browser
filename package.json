@@ -4,7 +4,7 @@
     "description": "balenaBlock that provides a chromium browser wrapped in some balena genius",
     "main": "index.js",
     "scripts": {
-
+      "test": "echo No tests yet"
     },
     "repository": {
       "type": "git",
@@ -36,4 +36,3 @@
         "set-interval-async": "^1.0.34"
     }
   }
-  
