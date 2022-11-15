@@ -4,11 +4,11 @@
     "description": "balenaBlock that provides a chromium browser wrapped in some balena genius",
     "main": "index.js",
     "scripts": {
-
+      "test": "exit 0"
     },
     "repository": {
       "type": "git",
-      "url": "git+https://github.com/balenablocks/browser.git"
+      "url": "git+https://github.com/balena-labs-projects/browser.git"
     },
   "private": true,
     "keywords": [
@@ -22,9 +22,9 @@
       "esversion": 8
     },
     "bugs": {
-      "url": "https://github.com/balenablocks/browser/issues"
+      "url": "https://github.com/balena-labs-projects/browser/issues"
     },
-    "homepage": "https://github.com/balenablocks/browser#readme",
+    "homepage": "https://github.com/balena-labs-projects/browser#readme",
     "dependencies": {
         "chrome-launcher": "^0.13.4",
         "body-parser": "^1.19.0",

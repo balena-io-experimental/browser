@@ -12,7 +12,7 @@ sed -i -e 's/console/anybody/g' /etc/X11/Xwrapper.config
 echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
 dpkg-reconfigure xserver-xorg-legacy
 
-echo "balenaBlocks browser version: $(<VERSION)"
+echo "balenaLabs browser version: $(<VERSION)"
 
 # this stops the CPU performance scaling down
 echo "Setting CPU Scaling Governor to 'performance'"
