@@ -4,8 +4,8 @@ FROM balenalib/%%BALENA_MACHINE_NAME%%-debian-node:${NODEJS_VERSION}-buster-run
 
 # install required packages
 RUN install_packages \
-    chromium-common=89.0.4389.114-1~deb10u1 \
-    chromium=89.0.4389.114-1~deb10u1 \
+    chromium-common \
+    chromium \
     libgles2-mesa \
     lsb-release \
     mesa-vdpau-drivers \
