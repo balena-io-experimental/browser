@@ -1,5 +1,5 @@
-# balenablocks/browser
- [![balena](https://github.com/balenablocks/browser/actions/workflows/balena.yml/badge.svg)](https://github.com/balenablocks/browser/actions/workflows/balena.yml)
+# balena-labs-projects/browser
+ [![balena](https://github.com/balena-labs-projects/browser/actions/workflows/balena.yml/badge.svg)](https://github.com/balena-labs-projects/browser/actions/workflows/balena.yml)
 
 Provides a hardware accelerated web browser to present internal and external URLs on a connected display.
 The `browser` block is a docker image that runs a [Chromium](https://www.chromium.org/Home) browser via X11, optimized for balenaOS.
@@ -31,7 +31,7 @@ volumes:
 services:
 
   browser:
-    image: bhcr.io/balenablocks/browser-<arch> # where <arch> is one of aarch64, arm32 or amd64
+    image: bh.cr/balenalabs/browser-<arch> # where <arch> is one of aarch64, arm32 or amd64
     privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
     network_mode: host
     ports:
@@ -46,7 +46,7 @@ To pin to a specific [version](CHANGELOG.md) of this block use:
 ```yaml
 services:
   browser:
-    image: bhcr.io/balenablocks/browser-<arch>/<version>
+    image: bh.cr/balenalabs/browser-<arch>/<version>
     privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
     network_mode: host
     ports:
@@ -67,7 +67,7 @@ By default the `browser` block uses the first local display (i.e. `DISPLAY=:0`) 
 
 *dockerfile.template*
 ```Dockerfile
-FROM balenablocks/browser
+FROM bh.cr/balenalabs/browser-%%BALENA_ARCH%%
 
 CMD ["export DISPLAY=:1"]
 ```
@@ -107,7 +107,7 @@ volumes:
 services:
   browser:
     restart: always
-    image: balenablocks/browser
+    image: bh.cr/balenalabs/browser-<arch>
     network_mode: host
     privileged: true
     volumes:
@@ -122,17 +122,17 @@ services:
 ---
 
 ## Choosing audio output device
-By default the `browser` block will output audio via HDMI. If you want to route audio through a different interface you can do it with the help of the [`audio` block]((https://github.com/balenablocks/audio)). The `browser` block is pre-configured to use it if present so you only need to add it to your `docker-compose.yml` file and then use `AUDIO_OUTPUT` environment variable to select the desired output. Check out the `audio` block [documentation](https://github.com/balenablocks/audio#environment-variables) to learn more about it.
+By default the `browser` block will output audio via HDMI. If you want to route audio through a different interface you can do it with the help of the [`audio` block]((https://github.com/balena-labs-projects/audio)). The `browser` block is pre-configured to use it if present so you only need to add it to your `docker-compose.yml` file and then use `AUDIO_OUTPUT` environment variable to select the desired output. Check out the `audio` block [documentation](https://github.com/balena-labs-projects/audio#environment-variables) to learn more about it.
 
 In this example we add the `audio` block and route the `browser` audio to the Raspberry Pi headphone jack:
 
 ```yaml
 services:
   browser:
-    image: balenablocks/browser
+    image: bh.cr/balenalabs/browser-<arch>
     network_mode: host
   audio:
-    image: balenablocks/audio
+    image: bh.cr/balenalabs/audio-<arch>
     privileged: true
     ports:
       - 4317:4317

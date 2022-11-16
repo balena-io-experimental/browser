@@ -4,7 +4,7 @@ description: >-
   connected display
 
 post-provisioning: >-
-  [![balena](https://github.com/balenablocks/browser/actions/workflows/balena.yml/badge.svg)](https://github.com/balenablocks/browser/actions/workflows/balena.yml)
+  [![balena](https://github.com/balena-labs-projects/browser/actions/workflows/balena.yml/badge.svg)](https://github.com/balena-labs-projects/browser/actions/workflows/balena.yml)
 
   ## Usage instructions
 
@@ -12,7 +12,7 @@ post-provisioning: >-
     
     ```
     browser:
-      image: bhcr.io/balenablocks/browser-<arch> # where <arch> is one of aarch64, arm32 or amd64
+      image: bh.cr/balenalabs/browser-<arch> # where <arch> is one of aarch64, arm32 or amd64
       privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
       network_mode: host
       volumes:
@@ -23,7 +23,7 @@ post-provisioning: >-
 
     ```
       browser:
-        image: bhcr.io/balenablocks/browser-<arch>/<version>
+        image: bh.cr/balenalabs/browser-<arch>/<version>
         privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
         network_mode: host
         ports:
@@ -38,11 +38,11 @@ assets:
   repository:
     type: blob.asset
     data:
-      url: 'https://github.com/balenablocks/browser'
+      url: 'https://github.com/balena-labs-projects/browser'
   logo:
     type: blob.asset
     data:
-      url: 'https://raw.githubusercontent.com/balenablocks/browser/master/logo.png'
+      url: 'https://raw.githubusercontent.com/balena-labs-projects/browser/master/logo.png'
 data:
   defaultDeviceType: raspberrypi3
   supportedDeviceTypes:
