@@ -1,0 +1,1195 @@
+- commits:
+    - subject: move from balenablocks to balena-labs-projects
+      hash: 4bc658c3728e8f0a68c71fabc2d0fec9061ae00a
+      body: ""
+      footer:
+        Signed-off-by: Flynn Joffray <flynn@balena.io>
+        signed-off-by: Flynn Joffray <flynn@balena.io>
+        Change-type: patch
+        change-type: patch
+      author: Flynn Joffray
+      nested: []
+  version: 2.4.6
+  title: ""
+  date: 2022-11-16T03:55:11.113Z
+- version: 2.4.5
+  date: 2022-08-03T18:49:41Z
+  commits:
+    - hash: bdfed43a3a73275a19018bb18bc26d59b8daa44c
+      author: Chris Crocker-White
+      footers:
+        change-type: patch
+        signed-off-by: Chris Crocker-White <chriscw@balena.io>
+      subject: Update DWB action to use master
+      body: null
+- version: 2.4.4
+- date: 2022-08-03T18:25:57Z
+- commits:
+    - hash: 7f50f4734e6ff0f6232ce40783c29c5bc4ad62a9
+- commits:
+    - author: Chris Crocker-White
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Chris Crocker-White <chriscw@balena.io>
+- commits:
+    - subject: "Fix first startup issue closes #130"
+- commits:
+    - body: null
+- version: 2.4.3
+- date: 2022-05-19T14:27:09Z
+- commits:
+    - hash: fcb6498559c46223d67946fb90b343bee18b4fe6
+- commits:
+    - author: Vipul Gupta
+- commits:
+    - subject: "patch: Update browser block to use sw.block type"
+- commits:
+    - body: null
+- commits:
+    - hash: f9f5f2e33764100b9d174d7a6c0b018143ed51f7
+- commits:
+    - author: Alex
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Alex Bucknall <alex.bucknall@gmail.com>
+- commits:
+    - subject: Bumped GitHub action
+- commits:
+    - body: null
+- version: 2.4.2
+- date: 2022-04-05T08:45:15Z
+- commits:
+    - hash: a31f9278259c30fdd6ec9cf854ccd80fafe4d47f
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Fix the badge in hub
+- commits:
+    - body: null
+- commits:
+    - hash: d81db9f3ca0cd69c247d61342431846eba57518d
+- commits:
+    - author: Phil Wilson
+- commits:
+    - subject: Merge branch 'master' into fix-badge
+- commits:
+    - body: null
+- version: 2.4.1
+- date: 2022-04-05T08:07:44Z
+- commits:
+    - hash: 0ff28c86eb924aef93b970c914fe3d3a3fd8d8cc
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Screenshot instructions
+- commits:
+    - body: null
+- commits:
+    - hash: b2dd1a2067c561003b55a4bb5cd88d09df115a43
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Fixed missing package versions
+- commits:
+    - body: "Change-type: patch"
+- version: 2.4.0
+- date: 2022-03-29T11:46:19Z
+- commits:
+    - hash: 68e75e391b6ad4ef08349d08242ce474614a237f
+- commits:
+    - author: Julian P.M. Ertel
+- commits:
+    - subject: "minor: Added Screenshot endpoint using scrot."
+- commits:
+    - body: null
+- commits:
+    - hash: e93885153c555dcd0754910eeb07e0f66beea4b4
+- commits:
+    - author: Julian P.M. Ertel
+- commits:
+    - subject: Merge branch 'master' into master
+- commits:
+    - body: null
+- commits:
+    - hash: 9ff3f12600aa2300152e5d88908199158d693fbb
+- commits:
+    - author: Phil Wilson
+- commits:
+    - subject: Merge branch 'master' into master
+- commits:
+    - body: null
+- version: 2.3.8
+- date: 2022-03-21T20:34:20Z
+- commits:
+    - hash: 22270935f25b112e1d3850e67297aa705d1ee416
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: change arch
+- commits:
+    - body: null
+- version: 2.3.7
+- date: 2022-03-18T22:36:33Z
+- commits:
+    - hash: 16744e61f3731cbb20a0966e56ec8dfb0186761f
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: build badge!
+- commits:
+    - body: null
+- version: 2.3.6
+- date: 2022-03-18T20:06:53Z
+- commits:
+    - hash: 60f31a2225d23c31f72b3804838e634ba6803eaa
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Supplied pinning instructions on hub card
+- commits:
+    - body: null
+- version: 2.3.5
+- date: 2022-03-18T11:39:17Z
+- commits:
+    - hash: 8aab6860fe02a5a5105cdb5c0b923c906c1abc80
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Instructions about pinning added.
+- commits:
+    - body: Chromium pinned to v90.0.4430.212-1
+- version: 2.3.4
+- date: 2022-03-17T11:25:49Z
+- commits:
+    - hash: 388bc817593fe68f6f802b8c1e6cd4d4be9ad0bc
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Update docker compose to build from here, instead of reference DH
+- commits:
+    - body: null
+- version: 2.3.3
+- date: 2022-03-17T11:12:25Z
+- commits:
+    - hash: 1c0171517ec11ca33631d649cc0a36a559cd47b8
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Usage updates for image reference
+- commits:
+    - body: null
+- commits:
+    - hash: 58956eae8f0ce159502c26e6b64a5656d3b7a825
+- commits:
+    - author: Phil Wilson
+- commits:
+    - subject: Add GH token
+- commits:
+    - body: null
+- commits:
+    - hash: 23b2fb527a07affabf0ddc6aa2b85c6660ed09bf
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Update usage section
+- commits:
+    - body: null
+- commits:
+    - hash: 89c90cfdb9187975e84fd1cfae9487a0225bfd85
+- commits:
+    - author: Phil Wilson
+- commits:
+    - subject: Update branch name
+- commits:
+    - body: null
+- commits:
+    - hash: 68733540271ccba322cc581582f48cd6d2fe1c12
+- commits:
+    - author: Phil Wilson
+- commits:
+    - subject: Create GH action file
+- commits:
+    - body: null
+- version: 2.3.2
+- date: 2022-01-25T14:23:46Z
+- commits:
+    - hash: 296ee62abff847f96d4d4f77ef41d029e40be7ce
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: build script fix
+- commits:
+    - body: null
+- version: 2.3.1
+- date: 2022-01-24T18:46:25Z
+- commits:
+    - hash: 0bc5e8933478a2c16a398a433e093c4fad09ebdf
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: remove raspian specific sources
+- commits:
+    - body: null
+- version: 2.3.0
+- date: 2022-01-24T11:59:22Z
+- commits:
+    - hash: d5dc51f132d1fe1f69035320224b67920003ce20
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: pin the version of chromium
+- commits:
+    - body: null
+- commits:
+    - hash: 6db63ab04bc0a85b56759bfd6d7992a6018f799e
+- commits:
+    - author: Oliver Stollmann
+- commits:
+    - subject: Use chrome-launcher's userDataDir
+- commits:
+    - body: null
+- version: 2.2.0
+- date: 2022-01-07T20:12:30Z
+- commits:
+    - hash: f8404bf7496f952c7dc16b57cc59d4a98c8b6565
+- commits:
+    - author: Christoph Flathmann
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Christoph Flathmann <cf@pixel-kraft.de>
+- commits:
+    - subject: Support touch input rotation
+- commits:
+    - body: null
+- version: 2.1.2
+- date: 2021-12-28T15:39:15Z
+- commits:
+    - hash: 7aad80d41e0a00ed832669d2137cf409cd2de4f1
+- commits:
+    - author: Anuj Deshpande
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - subject: Fix typo in policy.json
+- commits:
+    - body: null
+- version: 2.1.1
+- date: 2021-12-08T12:31:53Z
+- commits:
+    - hash: c8aa45b34b238ff374d3e863d98d6b1657c24105
+- commits:
+    - author: Martin Rauscher
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - subject: "catch unhandled promise rejections\r"
+- commits:
+    - body: "\r
+
+        for now, this doesn't change behavior, as we still exit the
+        process, but it fixes error logging. If we don't want to exit the
+        process we can change this later\r
+
+        \r"
+- version: 2.1.0
+- date: 2021-12-08T08:56:36Z
+- commits:
+    - hash: 78a68fe001421a92509180abf7189f416f4a0005
+- commits:
+    - author: Alex
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Alex Bucknall <alex.bucknall@gmail.com>
+- commits:
+    - subject: Support for different display numbers as envars
+- commits:
+    - body: null
+- version: 2.0.7
+- date: 2021-11-02T09:25:26Z
+- commits:
+    - hash: 66d0264cc44f0212c49101b77a2fdbcd83113d33
+- commits:
+    - author: Ken Bannister
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Ken Bannister <kb2ma@runbox.com>
+- commits:
+    - subject: Fix generation of environment variable list
+- commits:
+    - body: null
+- version: 2.0.6
+- date: 2021-10-18T10:55:26Z
+- commits:
+    - hash: f3fb7f737921bca89470a90200527949fe7db5bc
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Fix image build
+- commits:
+    - body: null
+- version: 2.0.5
+- date: 2021-09-17T07:22:22Z
+- commits:
+    - hash: a8677fb09ba10e20d9e62bf7e39b39c7877ed299
+- commits:
+    - author: Rahul Thakoor
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Rahul Thakoor <rahul@balena.io>
+- commits:
+    - subject: Fix chromium sandbox not starting
+- commits:
+    - body: >-
+        balenaOS v2.83.6 enables user namespacing by default making applications
+        such as chromium unable to run.
+
+        We override the kernel parameter `user.max_user_namespaces` in the application as a workaround.
+- version: 2.0.4
+- date: 2021-06-30T18:54:17Z
+- commits:
+    - hash: 9a381ee69d2b5eb037c3fff246d786a7310a5d6c
+- commits:
+    - author: Flynn Joffray
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Flynn Joffray <flynn@balena.io>
+- commits:
+    - subject: adding more use cases to troubleshoting in the readme
+- commits:
+    - body: null
+- commits:
+    - hash: b2a96c0592e738b600a783c86fbb50caac74cd43
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: minor tidy up
+- commits:
+    - body: null
+- version: 2.0.3
+- date: 2021-05-03T14:37:37Z
+- commits:
+    - hash: 700d00f59d021586391d8edb133b400812f67526
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Added version info to startup logging
+- commits:
+    - body: null
+- version: 2.0.2
+- date: 2021-05-03T12:04:20Z
+- commits:
+    - hash: c4d9373eeb4805268ea9adbd581fabf55eb4573d
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Capture and pass-in environment variables to su session
+- commits:
+    - body: null
+- version: 2.0.1
+- date: 2021-04-06T09:19:11Z
+- commits:
+    - hash: 641d0f2f485a0631f357dfc55b2b1af0194805e6
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: delete erroneous dockerfile
+- commits:
+    - body: null
+- version: 2.0.0
+- date: 2021-04-06T08:48:51Z
+- commits:
+    - hash: 5881467acfedc162d8f15601e8920d30f02ca9e8
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Bump version
+- commits:
+    - body: null
+- commits:
+    - hash: 7f35d2bdb5248e6c942f9b85103c3131152cecd1
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: First push to v2 branch
+- commits:
+    - body: null
+- commits:
+    - hash: e0dd0ef4bf090e8818455a739f39c1dee9843fac
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Many changes
+- commits:
+    - body: null
+- commits:
+    - hash: dcf08f473135d4b5430aa4685de376f016609b73
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: display rotation & cursor control added
+- commits:
+    - body: null
+- commits:
+    - hash: ad34707456680f49492bcdae249fd8f1c17c0c14
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Added FLAGS option
+- commits:
+    - body: null
+- commits:
+    - hash: 717aecdfa546c9bc965d988c4881731c988d54d6
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Implemented service discovery and default flags
+- commits:
+    - body: null
+- commits:
+    - hash: 4fc186e82d196a29272991a30828f372caf40a1f
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: RPI dockerfile + fixes
+- commits:
+    - body: null
+- commits:
+    - hash: 87f3a10f70db61f8dd170d99b6e8018ae086e795
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Readme and API endpoint changes
+- commits:
+    - body: null
+- commits:
+    - hash: 97ddb7ac14d3ba1633093eb993805f6e77d1e3d3
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: readme tweaks
+- commits:
+    - body: null
+- commits:
+    - hash: 59f5113731859bea09a211e33e8b9129b496743c
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Fixed kiosk bug. Removed sandbox warning dialogue
+- commits:
+    - body: null
+- commits:
+    - hash: 97e68c3ebb88c9c5d3c50df2da17775d4d9ee44a
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Fixes and API features
+- commits:
+    - body: null
+- commits:
+    - hash: 9e8b3b17bb358a19c65be9d44d36b940a3bed31c
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: readme fixes
+- commits:
+    - body: null
+- commits:
+    - hash: 1571a092ffe06135808af8f72088fb5000500399
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: minor
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Latest
+- commits:
+    - body: null
+- commits:
+    - hash: d0b414092498849ab369ea987c3a429d209938dc
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: hub meta
+- commits:
+    - body: null
+- commits:
+    - hash: ac32efa6b7a234357e73b89508e3acd39413ecbd
+- commits:
+    - author: Phil Wilson
+- commits:
+    - subject: "Merge pull request #47 from balenablocks/hub"
+- commits:
+    - body: hub meta
+- commits:
+    - hash: feae1c40de713baa6c9840021bb69347685bc43a
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: logo
+- commits:
+    - body: null
+- commits:
+    - hash: 72859d6f782efef30fc262d1f36a6726524097aa
+- commits:
+    - author: Phil Wilson
+- commits:
+    - subject: Update balena.yml
+- commits:
+    - body: null
+- commits:
+    - hash: 7095a7b00cd98ab659fbd1532a4e5614d1c9f6b7
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: post-review changes
+- commits:
+    - body: null
+- commits:
+    - hash: 2a3de83d54cdc1c4fd54d7fd89a605c8abea3ae2
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: gitignore trim
+- commits:
+    - body: null
+- commits:
+    - hash: e15db434f7884b7a861380c28f17192955b2af73
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Move to node 12
+- commits:
+    - body: null
+- commits:
+    - hash: c85eedc698397007318a896268865c9072ceec00
+- commits:
+    - author: Tomás Migone
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Tomás Migone <tomas@balena.io>
+- commits:
+    - subject: "meta: add versionist"
+- commits:
+    - body: null
+- commits:
+    - hash: 91afc91786de75e13cc0f3e295771689db78dd0c
+- commits:
+    - author: Tomás Migone
+- commits:
+    - footers:
+        meta: add versionist
+- commits:
+    - subject: "Merge pull request #49 from balenablocks/add-versionist"
+- commits:
+    - body: null
+- commits:
+    - hash: 8db9048cf092a7a7b9c807c6d4a7b192783afafb
+- commits:
+    - author: Balena CI
+- commits:
+    - subject: v1.0.0
+- commits:
+    - body: null
+- commits:
+    - hash: b7b7455d342c49931ddda51e9ce2b31ab4612f33
+- commits:
+    - author: Tomás Migone
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Tomás Migone <tomas@balena.io>
+- commits:
+    - subject: "meta: run versionist to update balena.yml version"
+- commits:
+    - body: null
+- commits:
+    - hash: 2c3b8199749c220be0116b5769c00d3617676362
+- commits:
+    - author: bulldozer-balena[bot]
+- commits:
+    - footers:
+        meta: run versionist to update balena.yml version
+- commits:
+    - subject: "Merge pull request #50 from balenablocks/balena-yml-version"
+- commits:
+    - body: null
+- commits:
+    - hash: 4676a0230886b68afd613992a2039ee141423dc6
+- commits:
+    - author: Balena CI
+- commits:
+    - subject: v1.0.1
+- commits:
+    - body: null
+- commits:
+    - hash: 36fd6866f79a52365d72e5761abbade8bf8d1c1b
+- commits:
+    - author: Phil Wilson
+- commits:
+    - subject: build changes
+- commits:
+    - body: null
+- commits:
+    - hash: b6dd41784db5ac107dddeef6fef18a72c0ffcd72
+- commits:
+    - author: Phil Wilson
+- commits:
+    - subject: "patch: Window size fix and build script bug"
+- commits:
+    - body: null
+- commits:
+    - hash: 466d84e0b6c80ca9739d9cf28cb34a9df3b2e3b6
+- commits:
+    - author: Phil Wilson
+- commits:
+    - subject: "patch: build script update for manifest"
+- commits:
+    - body: null
+- commits:
+    - hash: a1c82eefaf002bdd8324b3db588e86850ade6fef
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: First push to v2 branch
+- commits:
+    - body: null
+- commits:
+    - hash: 82d2af686d13768b37fff70a43ba5ab45c229e9e
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Many changes
+- commits:
+    - body: null
+- version: 1.0.1
+- date: 2021-03-01T13:58:55Z
+- commits:
+    - hash: b7b7455d342c49931ddda51e9ce2b31ab4612f33
+- commits:
+    - author: Tomás Migone
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Tomás Migone <tomas@balena.io>
+- commits:
+    - subject: "meta: run versionist to update balena.yml version"
+- commits:
+    - body: null
+- version: 1.0.0
+- date: 2021-02-25T12:55:07Z
+- commits:
+    - hash: c85eedc698397007318a896268865c9072ceec00
+- commits:
+    - author: Tomás Migone
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Tomás Migone <tomas@balena.io>
+- commits:
+    - subject: "meta: add versionist"
+- commits:
+    - body: null
+- commits:
+    - hash: d0b414092498849ab369ea987c3a429d209938dc
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: hub meta
+- commits:
+    - body: null
+- commits:
+    - hash: fab11623b3d413b837a77e786b51b0a624018191
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Updated readme to remove DEBUG and add some display troubleshooting items
+- commits:
+    - body: null
+- commits:
+    - hash: c6f0ca6cba82265942108999e585a064a7dfa931
+- commits:
+    - author: Tomás Migone
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Tomás Migone <tomas@balena.io>
+- commits:
+    - subject: "audio: add code to make browser block play nicely with the audio block"
+- commits:
+    - body: null
+- commits:
+    - hash: ccc3d869511e97035aa7304587d2bb1a6ea91492
+- commits:
+    - author: Matthew McGinn
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Matthew McGinn <matthew@balena.io>
+- commits:
+    - subject: "typo: wesite -> website"
+- commits:
+    - body: null
+- commits:
+    - hash: d50c28b2f42be216b93915190076f798d38df0ee
+- commits:
+    - author: Matthew McGinn
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Matthew McGinn <matthew@balena.io>
+- commits:
+    - subject: "readme: some spelling fixups for consistency"
+- commits:
+    - body: null
+- commits:
+    - hash: 59eba95f7fde66a54f1030d391c2e8d60b400ec4
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: A bucket of issues fixed
+- commits:
+    - body: null
+- commits:
+    - hash: 3be0809f54ae5fd4d9982f144aeeeb197bc77aa2
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: minor fix to ROTATE_DISPLAY
+- commits:
+    - body: null
+- commits:
+    - hash: f655dac0fbb5fe1f4ed36d33c751b137fec973db
+- commits:
+    - author: Rahul Thakoor
+- commits:
+    - footers:
+        signed-off-by: Rahul Thakoor <rahul@balena.io>
+- commits:
+    - subject: Remove cursor visibility override when not in kiosk mode
+- commits:
+    - body: null
+- commits:
+    - hash: e7cf9b484d8369debd2347d00a7f794dd803f65e
+- commits:
+    - author: Phil
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Fixes from Chris's testing. Readme. Build script.
+- commits:
+    - body: null
+- commits:
+    - hash: e07a936133747544a2f22af308b3485577833e99
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: major
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Added amd64 support
+- commits:
+    - body: null
+- commits:
+    - hash: 88f95ec2f7ced615c5012d492be4825dddfec480
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: change amd base image
+- commits:
+    - body: null
+- commits:
+    - hash: 0ce9cc5278992b492520398388d05478d100a788
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Removed TV control, changed entrypoint
+- commits:
+    - body: null
+- commits:
+    - hash: c1befb3f90924e7ba10c31412e5be503890d19c6
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: html fixes
+- commits:
+    - body: null
+- commits:
+    - hash: 64398ba6c16bc9d76aa74b719645c22668be2e39
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: If no LAUNCH_URL is set, tries to detect local HTTP service, or
+        displays default HTML page.
+- commits:
+    - body: null
+- commits:
+    - hash: 8bc18ef7be4f027b690ef50801b7282adc9b1853
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Fixed the cursor control
+- commits:
+    - body: null
+- commits:
+    - hash: a4f4a58ffb599d8807c38678671b3338115d17ac
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Added remaining variables and rationalised the flags.
+- commits:
+    - body: null
+- commits:
+    - hash: 9cf57135c4d944b0e3d07a42dca221d65c10c061
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Added value to DISABLE_GPU setting
+- commits:
+    - body: null
+- commits:
+    - hash: e2e1510dd7dc3f7f0fb2e0c7a87583444978beb2
+- commits:
+    - author: Phil Wilson
+- commits:
+    - footers:
+        change-type: patch
+- commits:
+    - footers:
+        signed-off-by: Phil Wilson <phil@balena.io>
+- commits:
+    - subject: Made non-kiosk mode the default
+- commits:
+    - body: null
