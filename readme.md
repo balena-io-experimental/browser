@@ -1,5 +1,4 @@
 # balena-labs-projects/browser
- [![balena](https://github.com/balena-labs-projects/browser/actions/workflows/balena.yml/badge.svg)](https://github.com/balena-labs-projects/browser/actions/workflows/balena.yml)
 
 Provides a hardware accelerated web browser to present internal and external URLs on a connected display.
 The `browser` block is a docker image that runs a [Chromium](https://www.chromium.org/Home) browser via X11, optimized for balenaOS.
