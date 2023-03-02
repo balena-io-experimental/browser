@@ -1,4 +1,18 @@
 - commits:
+    - subject: Update base image to fix incorrect platform error
+      hash: 67b374faf7e8c4c92c2c55c5350c79e16bc1d2f1
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Phil Wilson <phil@balena.io>
+        signed-off-by: Phil Wilson <phil@balena.io>
+      author: Phil Wilson
+      nested: []
+  version: 2.4.7
+  title: ""
+  date: 2023-03-02T09:38:40.698Z
+- commits:
     - subject: move from balenablocks to balena-labs-projects
       hash: 4bc658c3728e8f0a68c71fabc2d0fec9061ae00a
       body: ""
