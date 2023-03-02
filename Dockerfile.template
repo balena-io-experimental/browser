@@ -1,4 +1,4 @@
-ARG NODEJS_VERSION="12"
+ARG NODEJS_VERSION="12.22.12"
 
 FROM balenalib/%%BALENA_MACHINE_NAME%%-debian-node:${NODEJS_VERSION}-buster-run
 
