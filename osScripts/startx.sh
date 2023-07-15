@@ -81,4 +81,4 @@ echo "Installed browser version: $VERSION"
 # stop the screen blanking
 xset s off -dpms
 
-node /usr/src/app/server.js
+node /dist/main.js

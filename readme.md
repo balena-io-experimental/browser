@@ -78,7 +78,6 @@ The following environment variables allow configuration of the `browser` block:
 | --- | --- | --- | --- |
 |`LAUNCH_URL`|`http` or `https` URL|N\A|Web page to display|
 |`DISPLAY_NUM`|`n`|0|Display number to use|
-|`LOCAL_HTTP_DELAY`|Number (seconds)|0|Number of seconds to wait for a local HTTP service to start before trying to detect it|
 |`KIOSK`|`0`, `1`|`0`|Run in kiosk mode with no menus or status bars. <br/> `0` = off, `1` = on|
 |`SHOW_CURSOR`|`0`, `1`|`0`|Enables/disables the cursor when in kiosk mode<br/> `0` = off, `1` = on|
 |`FLAGS`|[many!](https://peter.sh/experiments/chromium-command-line-switches/)|N/A|**Replaces** the flags chromium is started with. Enter a space (\' \') separated list of flags (e.g. `--noerrdialogs --disable-session-crashed-bubble`) <br/> **Use with caution!**|
@@ -164,7 +163,7 @@ Re-scans the device to find local HTTP or HTTPS services to display. This can be
 #### **GET** /url
 Returns the URL currently being displayed
 
-#### **PUT** /url
+#### **POST** /url
 Sets the URL to be displayed. The URL is set in the request body. Example:
 
 ```bash
@@ -185,7 +184,7 @@ Returns the status of the GPU:
 | 0 | disabled |
 | 1 | enabled |
 
-#### **PUT** /gpu/{value}
+#### **POST** /gpu/{value}
 Enables or disables the GPU
 
 | Value | Description |
