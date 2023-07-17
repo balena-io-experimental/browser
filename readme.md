@@ -208,6 +208,14 @@ Enables or disables kiosk mode
 | 0 | disable |
 | 1 | enable |
 
+#### **POST** /kiosk/{value}
+Enables or disables kiosk mode
+
+| Value | Description |
+|--------------|-------------|
+| 0 | disable |
+| 1 | enable |
+
 #### **GET** /flags
 Returns the flags Chromium was started with
 

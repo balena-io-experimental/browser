@@ -4,6 +4,7 @@ import { BrowserLauncherService } from './browser/browser-launcher.service';
 
 @Injectable()
 export class AppService implements OnModuleInit {
+  version = process.env.VERSION || 'Version not set';
   constructor(
     private browserUrlService: BrowserUrlService,
     private browserLauncherService: BrowserLauncherService,
