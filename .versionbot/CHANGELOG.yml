@@ -1,4 +1,18 @@
 - commits:
+    - subject: Allow external contributions to use Flowzone
+      hash: 56497f62eb1155dbb86fe8cd3232c2e9b51d258d
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Kyle Harding <kyle@balena.io>
+        signed-off-by: Kyle Harding <kyle@balena.io>
+      author: Kyle Harding
+      nested: []
+  version: 2.4.8
+  title: ""
+  date: 2023-07-18T17:19:45.398Z
+- commits:
     - subject: Update base image to fix incorrect platform error
       hash: 67b374faf7e8c4c92c2c55c5350c79e16bc1d2f1
       body: ""
