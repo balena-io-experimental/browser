@@ -7,13 +7,15 @@ import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.int
 async function bootstrap() {
   const apiPort = parseInt(process.env.API_PORT, 10) || 5011;
   const app = await NestFactory.create(AppModule);
-  const config = new DocumentBuilder()
-    .setTitle('Balena Browser Controls')
-    .setDescription('OpenAPI specification for Balena Browser')
-    .setVersion('1.0')
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api-docs', app, document);
+  if (process.env.NODE_ENV !== 'production') {
+    const config = new DocumentBuilder()
+      .setTitle('Balena Browser Controls')
+      .setDescription('OpenAPI specification for Balena Browser')
+      .setVersion('1.0')
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api-docs', app, document);
+  }
   app.use(compression());
   const corsOptions: CorsOptions = {
     origin: '*',
