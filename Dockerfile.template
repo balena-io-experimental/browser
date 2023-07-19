@@ -10,7 +10,6 @@ RUN install_packages \
     lsb-release \
     mesa-vdpau-drivers \
     scrot \
-    wget \
     x11-xserver-utils \
     xserver-xorg-input-evdev \
     xserver-xorg-legacy \
