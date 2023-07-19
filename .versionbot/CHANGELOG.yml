@@ -1,4 +1,15 @@
 - commits:
+    - subject: "patch: remove wget from dockerfile"
+      hash: b5bfbd51e2e314bbedbc39d8ba117dc65d890d4a
+      body: ""
+      footer:
+        patch: remove wget from dockerfile
+      author: Nikolaos Grigoropoulos
+      nested: []
+  version: 2.4.9
+  title: ""
+  date: 2023-07-19T18:43:06.162Z
+- commits:
     - subject: Allow external contributions to use Flowzone
       hash: 56497f62eb1155dbb86fe8cd3232c2e9b51d258d
       body: ""
