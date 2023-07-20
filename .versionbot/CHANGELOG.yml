@@ -1,4 +1,26 @@
 - commits:
+    - subject: Update to Debian 11 and Node 16
+      hash: 569be5de6d9296f08b636927694e915b5026c2bd
+      body: |
+        The block is currently based on Debian 10, however its mesa version
+        is too old for RPi kernel 5.15.9 and up which results in X server
+        crashing on startup.
+
+        This patch updates the base to Debian 11 which seems to work fine.
+        It also bumps node from 12 to 16 since 12 is quite old at this moment
+        and not available for all the architectures in combination
+        with Debian 11.
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: Michal Toman <michalt@balena.io>
+        signed-off-by: Michal Toman <michalt@balena.io>
+      author: Michal Toman
+      nested: []
+  version: 2.5.0
+  title: ""
+  date: 2023-07-20T12:47:14.909Z
+- commits:
     - subject: "patch: remove wget from dockerfile"
       hash: b5bfbd51e2e314bbedbc39d8ba117dc65d890d4a
       body: ""
