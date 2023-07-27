@@ -1,4 +1,20 @@
 - commits:
+    - subject: Update chromium flag
+      hash: e4aded2b983d806f966d6e71b915f98478ff049b
+      body: >
+        The flag got renamed to --ignore-gpu-blocklist otherwise Hardware
+        acceleration does not work
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Beda Binder <beda@mademarketing.ch>
+        signed-off-by: Beda Binder <beda@mademarketing.ch>
+      author: Beda Binder
+      nested: []
+  version: 2.5.1
+  title: ""
+  date: 2023-07-27T12:17:45.375Z
+- commits:
     - subject: Update to Debian 11 and Node 16
       hash: 569be5de6d9296f08b636927694e915b5026c2bd
       body: |
