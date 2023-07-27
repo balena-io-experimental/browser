@@ -135,7 +135,7 @@ let launchChromium = async function(url) {
         let gpuFlags = [
           '--enable-zero-copy',
           '--num-raster-threads=4',
-          '--ignore-gpu-blacklist',
+          '--ignore-gpu-blocklist',
           '--enable-gpu-rasterization',
         ];
 
