@@ -32,7 +32,6 @@ services:
   browser:
     image: bh.cr/balenalabs/browser-<arch> # where <arch> is one of aarch64, arm32 or amd64
     privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
-    network_mode: host
     ports:
         - '5011' # management API (optional)
         - '35173' # Chromium debugging port (optional)
@@ -47,7 +46,6 @@ services:
   browser:
     image: bh.cr/balenalabs/browser-<arch>/<version>
     privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
-    network_mode: host
     ports:
         - '5011' # management API (optional)
         - '35173' # Chromium debugging port (optional)
@@ -107,14 +105,12 @@ services:
   browser:
     restart: always
     image: bh.cr/balenalabs/browser-<arch>
-    network_mode: host
     privileged: true
     volumes:
       - 'settings:/data'
   grafana:
     restart: always
     build: ./grafana
-    network_mode: host
     ports:
       - "80"
 ```
@@ -129,7 +125,6 @@ In this example we add the `audio` block and route the `browser` audio to the Ra
 services:
   browser:
     image: bh.cr/balenalabs/browser-<arch>
-    network_mode: host
   audio:
     image: bh.cr/balenalabs/audio-<arch>
     privileged: true
