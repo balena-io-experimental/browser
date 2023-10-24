@@ -20,6 +20,7 @@ const WINDOW_POSITION = process.env.WINDOW_POSITION || "0,0";
 const PERSISTENT_DATA = process.env.PERSISTENT || '0';
 const REMOTE_DEBUG_PORT = process.env.REMOTE_DEBUG_PORT || 35173;
 const FLAGS = process.env.FLAGS || null;
+const EXTRA_FLAGS = process.env.EXTRA_FLAGS || null;
 const HTTPS_REGEX = /^https?:\/\//i //regex for HTTP/S prefix
 
 // Environment variables which can be overriden from the API
@@ -141,6 +142,10 @@ let launchChromium = async function(url) {
 
         flags = flags.concat(gpuFlags);
       }
+    }
+
+    if (EXTRA_FLAGS) {
+      flags = flags.concat(EXTRA_FLAGS.split(' '));
     }
 
     let startingUrl = url;
