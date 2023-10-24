@@ -1,4 +1,16 @@
 - commits:
+    - subject: Add EXTRA_FLAGS for extended flag support
+      hash: 8196ccbbb8d89b7d9c2ce90e2aa5b6f44c16aaa5
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+      author: Brian Bugh
+      nested: []
+  version: 2.6.0
+  title: ""
+  date: 2023-10-24T08:06:30.208Z
+- commits:
     - subject: Remove host networking from readme
       hash: 86ef7636f5d63127e0f1ec3861ce386a86c7f971
       body: ""
