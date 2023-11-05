@@ -18,6 +18,8 @@ export class BrowserFlagsService implements OnModuleInit {
     '--disable-dev-shm-usage', // TODO: work out if we can enable this for devices with >1Gb of memory
   ];
   private userDefinedFlags = process.env.FLAGS || null;
+  private userDefinedExtraFlags = process.env.EXTRA_FLAGS || null;
+
   constructor(private readonly browserGpuService: BrowserGpuService) {}
 
   public setBrowserFlags() {
@@ -42,6 +44,9 @@ export class BrowserFlagsService implements OnModuleInit {
           this.browserGpuService.enableGpuFlags,
         );
       }
+    }
+    if (this.userDefinedExtraFlags !== null) {
+      this.browserFlags = this.browserFlags.concat(this.userDefinedExtraFlags.split(' '));
     }
   }
   async onModuleInit() {
