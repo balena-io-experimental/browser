@@ -6,7 +6,7 @@ export class BrowserGpuService {
   enableGpuFlags = [
     '--enable-zero-copy',
     '--num-raster-threads=4',
-    '--ignore-gpu-blacklist',
+    '--ignore-gpu-blocklist',
     '--enable-gpu-rasterization',
   ];
   disableGpuFlags = ['--disable-gpu'];
