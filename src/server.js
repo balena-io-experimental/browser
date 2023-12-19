@@ -167,6 +167,8 @@ let launchChromium = async function(url) {
       ignoreDefaultFlags: true,
       chromeFlags: flags,
       port: REMOTE_DEBUG_PORT,
+      connectionPollInterval: 1000,
+      maxConnectionRetries: 120,
       userDataDir: '1' === PERSISTENT_DATA ? '/data/chromium' : undefined
     });
       

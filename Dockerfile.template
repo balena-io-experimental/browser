@@ -1,22 +1,10 @@
 ARG NODEJS_VERSION="16.19.1"
 
-FROM balenalib/%%BALENA_MACHINE_NAME%%-debian-node:${NODEJS_VERSION}-bullseye-run
+FROM balenalib/%%BALENA_MACHINE_NAME%%-debian-node:${NODEJS_VERSION}-bookworm-run
 
-# install required packages
-RUN install_packages \
-    chromium-common \
-    chromium \
-    libgles2-mesa \
-    lsb-release \
-    mesa-vdpau-drivers \
-    scrot \
-    x11-xserver-utils \
-    xserver-xorg-input-evdev \
-    xserver-xorg-legacy \
-    xserver-xorg-video-fbdev \
-    xserver-xorg xinit \
-    xinput \
-    xterm 
+# Install the necessary packages
+COPY ./build /usr/src/build
+RUN /usr/src/build/install_chromium "%%BALENA_MACHINE_NAME%%"
 
 WORKDIR /usr/src/app
 
@@ -44,8 +32,6 @@ COPY ./public-html /home/chromium
 # udev rule to set specific permissions 
 RUN echo 'SUBSYSTEM=="vchiq",GROUP="video",MODE="0660"' > /etc/udev/rules.d/10-vchiq-permissions.rules
 RUN usermod -a -G audio,video,tty chromium
-
-RUN ln -s /usr/bin/chromium /usr/bin/chromium-browser || true
 
 # Set up the audio block. This won't have any effect if the audio block is not being used.
 RUN curl -skL https://raw.githubusercontent.com/balena-labs-projects/audio/master/scripts/alsa-bridge/debian-setup.sh| sh
