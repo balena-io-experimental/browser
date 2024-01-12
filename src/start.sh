@@ -44,6 +44,16 @@ then
 	fi
 fi
 
+# Inject X11 config on the RPi 5 as the defaults do not work
+# We do this in the startup script and only for the RPi 5 because
+# we build the images per-architecture and we do not want to break
+# other aarch64-based device types
+if [ "${BALENA_DEVICE_TYPE}" = "raspberrypi5" ]
+then
+    echo "Raspberry Pi 5 detected, injecting X.org config"
+    cp -a "/usr/src/build/rpi/99-vc4.conf" "/etc/X11/xorg.conf.d/"
+fi
+
 # set up the user data area
 mkdir -p /data/chromium
 chown -R chromium:chromium /data

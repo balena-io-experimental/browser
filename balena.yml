@@ -51,5 +51,6 @@ data:
     - raspberrypi3
     - raspberrypi3-64
     - raspberrypi400-64
+    - raspberrypi5
     - intel-nuc
     - genericx86-64-ext

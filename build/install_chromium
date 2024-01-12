@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# This script will install chromium to use with the browser block
+# If the device is a Raspberry Pi (any model), it will use the version
+# from the raspios repo (together with mesa and X), because
+# * Since Debian 12, the upstream chromium provided in Debian repos
+#   does not work on armv7 at all
+# * The upstream chromium will not work on devices with < 1GB memory
+#   namely the Pi3A and the PiZero2 even when using aarch64
+# * The Raspberry Pi 5 needs patched versions of mesa and X to work
+
+BASE_DIR="/usr/src/build"
+CHROMIUM_PACKAGE="chromium"
+
+MACHINE_NAME="$1"
+
+# FORCE_RPI_REPO=0 never includes the repo
+# FORCE_RPI_REPO=1 always includes the repo
+# If the machine name starts with "raspberry", or if the machine
+# is a balenaFin, include the repo
+if [ "${FORCE_RPI_REPO}" != "0" ] && [ "${FORCE_RPI_REPO}" = "1" -o "${MACHINE_NAME:0:9}" = "raspberry" -o "${MACHINE_NAME}" = "fincm3" ]
+then
+    echo "Enabling raspios repository"
+
+    cp -a "${BASE_DIR}/rpi/raspi.list" "/etc/apt/sources.list.d/"
+    cp -a "${BASE_DIR}/rpi/raspberrypi-archive-stable.gpg" "/etc/apt/trusted.gpg.d/"
+
+    # The RPi-patched chromium package is called chromium-browser
+    CHROMIUM_PACKAGE="chromium-browser"
+else
+    # The node library launches /usr/bin/chromium-browser
+    # which is not provided by the upstream package
+    ln -s /usr/bin/chromium /usr/bin/chromium-browser
+fi
+
+install_packages \
+    ${CHROMIUM_PACKAGE} \
+    chromium-common \
+    libgles2-mesa \
+    lsb-release \
+    mesa-vdpau-drivers \
+    scrot \
+    x11-xserver-utils \
+    xserver-xorg-input-evdev \
+    xserver-xorg-legacy \
+    xserver-xorg-video-fbdev \
+    xserver-xorg xinit \
+    xinput \
+    xterm
