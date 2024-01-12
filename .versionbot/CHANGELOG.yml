@@ -1,4 +1,20 @@
 - commits:
+    - subject: Add support for Raspberry Pi 5
+      hash: 92105454eb5b57e21af4439ccd70d95296c9c556
+      body: |
+        The Raspberry Pi 5 does not work with upstream mesa or X server,
+        it needs a bump to Debian 12 and packages from raspios repos.
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: Michal Toman <michalt@balena.io>
+        signed-off-by: Michal Toman <michalt@balena.io>
+      author: Michal Toman
+      nested: []
+  version: 2.7.0
+  title: ""
+  date: 2024-01-12T15:09:18.803Z
+- commits:
     - subject: Add EXTRA_FLAGS for extended flag support
       hash: 8196ccbbb8d89b7d9c2ce90e2aa5b6f44c16aaa5
       body: ""
