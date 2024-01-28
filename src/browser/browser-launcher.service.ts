@@ -34,6 +34,8 @@ export class BrowserLauncherService {
       ignoreDefaultFlags: true,
       chromeFlags: this.browserFlagsService.browserFlags,
       port: this.browserDebugPort,
+      connectionPollInterval: 1000,
+      maxConnectionRetries: 120,
       userDataDir: this.isBrowserDataPersistent ? '/data/chromium' : undefined,
     });
   }
