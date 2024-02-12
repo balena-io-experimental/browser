@@ -78,7 +78,12 @@ sed -i 's/"exited_cleanly":false/"exited_cleanly":true/; s/"exit_type":"[^"]\+"/
 export VERSION=`chromium-browser --version`
 echo "Installed browser version: $VERSION"
 
-# stop the screen blanking
-xset s off -dpms
+if [[ ! -z $XSET_COMMAND ]]
+  then
+    xset $XSET_COMMAND
+  else
+    # stop the screen blanking by default
+    xset s off -dpms
+fi
 
 node /usr/src/app/server.js
