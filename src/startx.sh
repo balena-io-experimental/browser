@@ -38,7 +38,9 @@ fi
 
 # rotate screen if env variable is set [normal, inverted, left or right]
 if [[ ! -z "$ROTATE_DISPLAY" ]]; then
-  sleep 3 && xrandr -o $ROTATE_DISPLAY
+  ROTATE_DELAY="${ROTATE_DELAY:-3}"
+
+  sleep "$ROTATE_DELAY" && xrandr -o $ROTATE_DISPLAY
 
   #If the display is rotated to left or right, we need to reverse the size and position coords
   if [[ "$ROTATE_DISPLAY" == "left" ]] || [[ "$ROTATE_DISPLAY" == "right" ]]; then
