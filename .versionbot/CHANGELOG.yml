@@ -1,4 +1,26 @@
 - commits:
+    - subject: Make rotation delay configurable
+      hash: 2648f76c18c694ccf6e94ba190ffc23048952acd
+      body: |
+        At this point we hardcode a 3 seconds delay before applying display
+        rotation, which on some systems is not enough, while on other systems
+        it is too much.
+
+        This patch exposes a `ROTATE_DELAY` variable that makes the delay
+        configurable.
+
+        Resolves: #171
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Michal Toman <michalt@balena.io>
+        signed-off-by: Michal Toman <michalt@balena.io>
+      author: Michal Toman
+      nested: []
+  version: 2.7.1
+  title: ""
+  date: 2024-08-09T09:16:59.089Z
+- commits:
     - subject: Add support for Raspberry Pi 5
       hash: 92105454eb5b57e21af4439ccd70d95296c9c556
       body: |
@@ -491,9 +513,9 @@
 - commits:
     - body: "\r
 
-        for now, this doesn't change behavior, as we still exit the
-        process, but it fixes error logging. If we don't want to exit the
-        process we can change this later\r
+        for now, this doesn't change behavior, as we still exit the process, but
+        it fixes error logging. If we don't want to exit the process we can
+        change this later\r
 
         \r"
 - version: 2.1.0
@@ -563,7 +585,8 @@
         balenaOS v2.83.6 enables user namespacing by default making applications
         such as chromium unable to run.
 
-        We override the kernel parameter `user.max_user_namespaces` in the application as a workaround.
+        We override the kernel parameter `user.max_user_namespaces` in the
+        application as a workaround.
 - version: 2.0.4
 - date: 2021-06-30T18:54:17Z
 - commits:
