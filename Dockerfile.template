@@ -4,6 +4,7 @@ FROM balenalib/%%BALENA_MACHINE_NAME%%-debian-node:${NODEJS_VERSION}-bookworm-ru
 
 # Install the necessary packages
 COPY ./build /usr/src/build
+RUN chmod a+x /usr/src/build/install_chromium
 RUN /usr/src/build/install_chromium "%%BALENA_MACHINE_NAME%%"
 
 WORKDIR /usr/src/app
