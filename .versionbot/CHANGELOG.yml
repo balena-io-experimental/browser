@@ -1,4 +1,18 @@
 - commits:
+    - subject: Add AUTO_REFRESH environment variable
+      hash: fc99cc51c203563bbba5ae9b9f4cb81a985df90d
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: Phil Wilson <phil@balena.io>
+        signed-off-by: Phil Wilson <phil@balena.io>
+      author: Phil Wilson
+      nested: []
+  version: 2.9.0
+  title: ""
+  date: 2024-09-04T14:51:47.493Z
+- commits:
     - subject: Bump node version to 20
       hash: b6c6e105ae2b94dc22e7539da51c313884dcb9d6
       body: ""
