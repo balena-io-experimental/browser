@@ -22,6 +22,7 @@ const REMOTE_DEBUG_PORT = process.env.REMOTE_DEBUG_PORT || 35173;
 const FLAGS = process.env.FLAGS || null;
 const EXTRA_FLAGS = process.env.EXTRA_FLAGS || null;
 const HTTPS_REGEX = /^https?:\/\//i //regex for HTTP/S prefix
+const AUTO_REFRESH = process.env.AUTO_REFRESH || 0;
 
 // Environment variables which can be overriden from the API
 let kioskMode = process.env.KIOSK || '0';
@@ -182,6 +183,7 @@ async function SetDefaultFlags() {
 }
 
 async function setTimer(interval) {
+  console.log("Auto refresh interval: ", interval);
   timer = setIntervalAsync(
     async () => {
       try {
@@ -204,6 +206,10 @@ async function main(){
   await SetDefaultFlags();
   let url = await getUrlToDisplayAsync();
   await launchChromium(url);
+  if (AUTO_REFRESH > 0)
+  {
+    await setTimer(AUTO_REFRESH * 1000);
+  }
 }
 
 
