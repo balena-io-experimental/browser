@@ -1,4 +1,18 @@
 - commits:
+    - subject: Bump node version to 20
+      hash: b6c6e105ae2b94dc22e7539da51c313884dcb9d6
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: Phil Wilson <phil@balena.io>
+        signed-off-by: Phil Wilson <phil@balena.io>
+      author: Phil Wilson
+      nested: []
+  version: 2.8.0
+  title: ""
+  date: 2024-09-04T10:43:36.039Z
+- commits:
     - subject: Make rotation delay configurable
       hash: 2648f76c18c694ccf6e94ba190ffc23048952acd
       body: |
