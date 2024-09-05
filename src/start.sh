@@ -66,6 +66,15 @@ environment=$(env | grep -v -w '_' | awk -F= '{ st = index($0,"=");print substr(
 # remove the last comma
 environment="${environment::-1}"
 
+# enable hotplugging of input devices
+if which udevadm > /dev/null; then
+  set +e # Disable exit on error
+  udevadm control --reload-rules
+  service udev restart
+  udevadm trigger
+  set -e # Re-enable exit on error
+fi
+
 # launch Chromium and whitelist the enVars so that they pass through to the su session
 su -w $environment -c "export DISPLAY=:$DISPLAY_NUM && startx /usr/src/app/startx.sh $CURSOR" - chromium
 balena-idle
