@@ -166,11 +166,11 @@ Re-scans the device to find local HTTP or HTTPS services to display. This can be
 #### **GET** /url
 Returns the URL currently being displayed
 
-#### **PUT** /url
+#### **POST** /url
 Sets the URL to be displayed. The URL is set in the request body. Example:
 
 ```bash
-curl --data "url=www.balena.io" http://localhost:5011/url
+curl -X POST --data "url=www.balena.io" http://localhost:5011/url
 ```
 
 You can also pre-set the kiosk and GPU settings as part of a URL put request. Example:
