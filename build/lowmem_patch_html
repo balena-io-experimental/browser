@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# install_chromium uses MACHINE_NAME passed in from the Dockerfile
+# to identify the hardware
+# We could use $BALENA_DEVICE_TYPE which is also defined in the
+# script and would not need to be passed in
+# Not sure why install_chromium did it this way, but following
+# that convention until I understand
+MACHINE_NAME="$1"
+
+# The balenalibs source file public-html/index.html loads
+# jquery and bootstrap Javascript libraries as well as some
+# custom Javascript related to navigation.
+# On rpi-zero2w, it looks like the Javascript
+# is just too much for browser to handle given the constrained
+# memory on that device.  The page comes up white and nothing
+# renders.
+# If we edit out the four <script> elements appearing after the
+# <footer> element of the page, the page appears to render fine
+# without them.
+
+# Note that the rpi-zero2w with 0.5Gbyte RAM is not really a
+# suitable device for running Chromium due to the low memory
+# - the /usr/bin/chromium{-browser} wrapper script requires
+# an argument --no-memcheck to allow Chromium to start without
+# the user acknowledging a dialog box notifying that
+# trying to run with less than 1Gbyte RAM is a bad idea.
+
+if [ "$MACHINE_NAME" = "raspberrypi0-2w-64" ]
+then
+  echo Patching index.html to remove Javascript elements
+  sed -e "s^Bootstrap core JavaScript^raspberrypi0-2w-64 can't run jquery^" -i /home/chromium/index.html
+  sed -e 's^<script^<!-- script^' -i /home/chromium/index.html
+  sed -e 's^script>^/script -->^' -i /home/chromium/index.html
+  echo Patch completed
+else
+  echo No need to patch index.html to remove Javascript elements
+fi

@@ -28,9 +28,17 @@ RUN useradd chromium -m -s /bin/bash -G root || true && \
     groupadd -r -f chromium && id -u chromium || true \
     && chown -R chromium:chromium /home/chromium || true
 
-COPY ./public-html /home/chromium  
+COPY ./public-html /home/chromium
 
-# udev rule to set specific permissions 
+# rpi-zero2w can't handle the Javascript libraries loaded
+# in ./public-html/index.html so on this device only we
+# patch /home/chromium/index.html to comment the relevant
+# <script> elements out
+RUN chmod a+x /usr/src/build/lowmem_patch_html
+RUN /usr/src/build/lowmem_patch_html "%%BALENA_MACHINE_NAME%%"
+
+
+# udev rule to set specific permissions
 RUN echo 'SUBSYSTEM=="vchiq",GROUP="video",MODE="0660"' > /etc/udev/rules.d/10-vchiq-permissions.rules
 RUN usermod -a -G audio,video,tty chromium
 
