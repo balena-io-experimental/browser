@@ -77,7 +77,13 @@ sed -i 's/"exited_cleanly":false/"exited_cleanly":true/' /data/chromium/'Local S
 sed -i 's/"exited_cleanly":false/"exited_cleanly":true/; s/"exit_type":"[^"]\+"/"exit_type":"Normal"/' /data/chromium/Default/Preferences > /dev/null 2>&1 || true 
 
 # Set chromium version into an EnVar for later
-export VERSION=`chromium-browser --version`
+# We need to include --no-memcheck in the command line in
+# case we are on a low memory device where the chromium-browser
+# wrapper script would block the command from running until
+# the user acknowledged a low memory dialog on the X screen
+# (in kiosk mode, without an input pointer device it is
+# not possible to dismiss this warning).
+export VERSION=`chromium-browser --no-memcheck --version`
 echo "Installed browser version: $VERSION"
 
 # stop the screen blanking
