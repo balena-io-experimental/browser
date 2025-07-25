@@ -24,4 +24,6 @@ jobs:
       )
     secrets: inherit
     with:
-      balena_slugs: 'balenalabs/browser-aarch64,balenalabs/browser-amd64,balenalabs/browser-armv7hf'
+      # Prevent publishing of releases to balenaCloud after its move to balena-io-experimental org
+      # To update on balenaHub, do a manual push of the browser block from the balenalabs account 
+      balena_slugs: ''

@@ -34,7 +34,8 @@ else
     ln -s /usr/bin/chromium /usr/bin/chromium-browser
 fi
 
-install_packages \
+# mimic previous balenalib "install_packages" behavior:
+apt-get update && apt-get install -y  --no-install-recommends \
     ${CHROMIUM_PACKAGE} \
     chromium-common \
     libgles2-mesa \
@@ -47,4 +48,5 @@ install_packages \
     xserver-xorg-video-fbdev \
     xserver-xorg xinit \
     xinput \
-    xterm
+    xterm && \
+    rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*

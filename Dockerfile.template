@@ -1,6 +1,6 @@
-ARG NODEJS_VERSION="20.12.0"
+FROM node:20.19.2-bookworm
 
-FROM balenalib/%%BALENA_MACHINE_NAME%%-debian-node:${NODEJS_VERSION}-bookworm-run
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install the necessary packages
 COPY ./build /usr/src/build
