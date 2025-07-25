@@ -1,4 +1,34 @@
 - commits:
+    - subject: "patch: Stop flowzone publish step"
+      hash: 01521a0dee448b49a43ac99d365bbd163413ef00
+      body: ""
+      footer: {}
+      author: Vipul Gupta
+      nested: []
+    - subject: Replace install_packages command
+      hash: 1e0d72902d63092592c8e21ac7d0655779df3039
+      body: ""
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Alan Boris <alan@balena.io>
+        signed-off-by: Alan Boris <alan@balena.io>
+      author: Alan Boris
+      nested: []
+    - subject: Replace balenalib base image
+      hash: d6da70dd96c31656e91e48f47a48111f70753487
+      body: ""
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: Alan Boris <alan@balena.io>
+        signed-off-by: Alan Boris <alan@balena.io>
+      author: Alan Boris
+      nested: []
+  version: 2.11.0
+  title: ""
+  date: 2025-07-22T15:26:12.286Z
+- commits:
     - subject: Fix error in API docs for /url write method
       hash: b52908418e3a39e2b6d95bef754bfaa9d2eb4770
       body: >

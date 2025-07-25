@@ -26,13 +26,38 @@ MACHINE_NAME="$1"
 # the user acknowledging a dialog box notifying that
 # trying to run with less than 1Gbyte RAM is a bad idea.
 
-if [ "$MACHINE_NAME" = "raspberrypi0-2w-64" ]
-then
-  echo Patching index.html to remove Javascript elements
-  sed -e "s^Bootstrap core JavaScript^raspberrypi0-2w-64 can't run jquery^" -i /home/chromium/index.html
-  sed -e 's^<script^<!-- script^' -i /home/chromium/index.html
-  sed -e 's^script>^/script -->^' -i /home/chromium/index.html
-  echo Patch completed
-else
-  echo No need to patch index.html to remove Javascript elements
-fi
+cp /home/chromium/index.html /home/chromium/index-lowmem.html
+
+echo Patching index-lowmem.html to remove Javascript elements
+sed -e "s^Bootstrap core JavaScript^raspberrypi0-2w-64 can't run jquery^" -i /home/chromium/index-lowmem.html
+sed -e 's^<script^<!-- script^' -i /home/chromium/index-lowmem.html
+sed -e 's^script>^/script -->^' -i /home/chromium/index-lowmem.html
+echo Patch completed
+
+# Also patch the copied file to add a warning about running on a low memory device
+memory_disclaimer_text="
+    <section id='memory_disclaimer' class='my-auto'>
+        <div class='container-fluid'>
+        <div class='row'>
+            <div class='col-lg-8 mx-auto'>
+            <h2>Low memory Disclaimer</h2>
+            <p class='lead'>
+              The host you are running on has less than 1Gbyte memory.
+              The browser on this host may not be able to display complex
+              content or load JQuery or other large Javascript libraries.
+            </p>
+            </div>
+        </div>
+    </section>
+
+"
+sed -e "s^    <!-- Footer -->^$memory_disclaimer_text
+
+
+    <!-- Footer -->^" -i /home/chromium/index-lowmem.html
+
+# Move the vanilla index.html to one side
+mv /home/chromium/index.html /home/chromium/index-normal.html
+
+# At runtime on the host device, start.sh will create a symlink from index.html
+# to whichever variant is more suitable for the host
