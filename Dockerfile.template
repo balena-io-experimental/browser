@@ -2,6 +2,20 @@ FROM node:20.19.2-bookworm
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Update repository, install apt-utils and its required dependencies
+# so that post-install scripts run cleanly
+RUN apt-get update 
+RUN apt-get install -y  --no-install-recommends apt-utils
+RUN apt-get upgrade -y
+
+# This script relies on curl and udev so install these before 
+# running install_chromium
+RUN apt-get install -y  --no-install-recommends curl udev
+
+# the step where install_chromium runs tends to die while installing
+# libz3-4, so pre-install it here
+RUN apt-get install -y  --no-install-recommends libz3-4
+
 # Install the necessary packages
 COPY ./build /usr/src/build
 RUN chmod a+x /usr/src/build/install_chromium
@@ -43,8 +57,8 @@ RUN echo 'SUBSYSTEM=="vchiq",GROUP="video",MODE="0660"' > /etc/udev/rules.d/10-v
 RUN usermod -a -G audio,video,tty chromium
 
 # Set up the audio block. This won't have any effect if the audio block is not being used.
-RUN curl -skL https://raw.githubusercontent.com/balena-labs-projects/audio/master/scripts/alsa-bridge/debian-setup.sh| sh
-ENV PULSE_SERVER=tcp:audio:4317
+#RUN curl -skL https://raw.githubusercontent.com/balena-labs-projects/audio/master/scripts/alsa-bridge/debian-setup.sh| sh
+#ENV PULSE_SERVER=tcp:audio:4317
 
 COPY VERSION .
 

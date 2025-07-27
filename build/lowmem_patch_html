@@ -31,11 +31,11 @@ cp /home/chromium/index.html /home/chromium/index-lowmem.html
 echo Patching index-lowmem.html to remove Javascript elements
 sed -e "s^Bootstrap core JavaScript^raspberrypi0-2w-64 can't run jquery^" -i /home/chromium/index-lowmem.html
 sed -e 's^<script^<!-- script^' -i /home/chromium/index-lowmem.html
-sed -e 's^script>^/script -->^' -i /home/chromium/index-lowmem.html
+sed -e 's^script>^script -->^' -i /home/chromium/index-lowmem.html
 echo Patch completed
 
 # Also patch the copied file to add a warning about running on a low memory device
-memory_disclaimer_text="
+raw_memory_disclaimer_text="
     <section id='memory_disclaimer' class='my-auto'>
         <div class='container-fluid'>
         <div class='row'>
@@ -51,13 +51,22 @@ memory_disclaimer_text="
     </section>
 
 "
-sed -e "s^    <!-- Footer -->^$memory_disclaimer_text
 
+# bash (not sh) supports the ${str@Q} operation to escape 
+# newlines (and lots of other things) in a shell variable
+# We use this to convert the readable/editable snippet above 
+# into a form which can be consumed by sed
+escaped_memory_disclaimer_text="${raw_memory_disclaimer_text@Q}"
+echo "$escaped_memory_disclaimer_text"
 
-    <!-- Footer -->^" -i /home/chromium/index-lowmem.html
+sed -e "s^    <!-- Footer -->^$escaped_memory_disclaimer_text\n\n    <!-- Footer -->^" -i /home/chromium/index-lowmem.html
 
 # Move the vanilla index.html to one side
 mv /home/chromium/index.html /home/chromium/index-normal.html
 
+diff /home/chromium/index-*.html
+
 # At runtime on the host device, start.sh will create a symlink from index.html
 # to whichever variant is more suitable for the host
+
+exit 0
