@@ -26,22 +26,19 @@ MACHINE_NAME="$1"
 # the user acknowledging a dialog box notifying that
 # trying to run with less than 1Gbyte RAM is a bad idea.
 
-cp /home/chromium/index.html /home/chromium/index-lowmem.html
 
-echo Patching index-lowmem.html to remove Javascript elements
-sed -e "s^Bootstrap core JavaScript^raspberrypi0-2w-64 can't run jquery^" -i /home/chromium/index-lowmem.html
-sed -e 's^<script^<!-- script^' -i /home/chromium/index-lowmem.html
-sed -e 's^script>^script -->^' -i /home/chromium/index-lowmem.html
-echo Patch completed
 
-# Also patch the copied file to add a warning about running on a low memory device
-raw_memory_disclaimer_text="
-    <section id='memory_disclaimer' class='my-auto'>
-        <div class='container-fluid'>
-        <div class='row'>
-            <div class='col-lg-8 mx-auto'>
+
+## Also patch the copied file to add a warning about running on a low memory device
+
+# This is the HTML to be inserted
+memory_disclaimer_text='
+    <section id="memory_disclaimer" class="my-auto">
+        <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
             <h2>Low memory Disclaimer</h2>
-            <p class='lead'>
+            <p class="lead">
               The host you are running on has less than 1Gbyte memory.
               The browser on this host may not be able to display complex
               content or load JQuery or other large Javascript libraries.
@@ -50,7 +47,21 @@ raw_memory_disclaimer_text="
         </div>
     </section>
 
-"
+'
+
+# It will be inserted directly before the <!-- Footer --> comment
+# using 'grep -B' and 'grep -A' to separate the lines before and
+# after that point
+grep -B999 "<!-- Footer -->" /home/chromium/index.html | grep -v "<!-- Footer -->" > /home/chromium/index-lowmem.html
+echo "$memory_disclaimer_text" >> /home/chromium/index-lowmem.html
+grep -A999 "<!-- Footer -->" /home/chromium/index.html >> /home/chromium/index-lowmem.html
+
+echo Patching index-lowmem.html to remove Javascript elements
+sed -e "s^Bootstrap core JavaScript^raspberrypi0-2w-64 can't run jquery^" -i /home/chromium/index-lowmem.html
+sed -e 's^<script^<!-- script^' -i /home/chromium/index-lowmem.html
+sed -e 's^script>^script -->^' -i /home/chromium/index-lowmem.html
+echo Patch completed
+
 
 # bash (not sh) supports the ${str@Q} operation to escape 
 # newlines (and lots of other things) in a shell variable
