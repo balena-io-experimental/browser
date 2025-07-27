@@ -9,13 +9,14 @@
 MACHINE_NAME="$1"
 
 # The balenalibs source file public-html/index.html loads
-# jquery and bootstrap Javascript libraries as well as some
+# JQuery and bootstrap Javascript libraries as well as some
 # custom Javascript related to navigation.
 # On rpi-zero2w, it looks like the Javascript
 # is just too much for browser to handle given the constrained
 # memory on that device.  The page comes up white and nothing
 # renders.
-# If we edit out the four <script> elements appearing after the
+# If we create a low-memory variant of index.html by commenting
+# out the four <script> elements appearing after the
 # <footer> element of the page, the page appears to render fine
 # without them.
 
@@ -24,53 +25,35 @@ MACHINE_NAME="$1"
 # - the /usr/bin/chromium{-browser} wrapper script requires
 # an argument --no-memcheck to allow Chromium to start without
 # the user acknowledging a dialog box notifying that
-# trying to run with less than 1Gbyte RAM is a bad idea.
-
-
-
-
-## Also patch the copied file to add a warning about running on a low memory device
+# trying to run with less than 1Gbyte RAM is a bad idea, so 
+# the low memory variant of index.html will also contain a
+# visible warning that the device is constrained.
 
 # This is the HTML to be inserted
-memory_disclaimer_text='
-    <section id="memory_disclaimer" class="my-auto">
-        <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-8 mx-auto">
-            <h2>Low memory Disclaimer</h2>
-            <p class="lead">
-              The host you are running on has less than 1Gbyte memory.
-              The browser on this host may not be able to display complex
-              content or load JQuery or other large Javascript libraries.
-            </p>
-            </div>
-        </div>
-    </section>
+memory_disclaimer_text="
 
-'
+            <blockquote>
+              ** The Balena device you are running is of type $MACHINE_NAME.
+              Because this device type has less than 1GByte memory, 
+              the browser may not be able to display complex content
+              or load JQuery or other large Javascript libraries.
+            </blockquote>
 
-# It will be inserted directly before the <!-- Footer --> comment
-# using 'grep -B' and 'grep -A' to separate the lines before and
-# after that point
-grep -B999 "<!-- Footer -->" /home/chromium/index.html | grep -v "<!-- Footer -->" > /home/chromium/index-lowmem.html
+"
+
+# The disclaimer will be inserted directly after the line containing the 
+# target string using 'grep -B' and 'grep -A' to separate the 
+# lines before and after that point
+target='<blockquote>'
+grep -B999 "$target" /home/chromium/index.html > /home/chromium/index-lowmem.html
 echo "$memory_disclaimer_text" >> /home/chromium/index-lowmem.html
-grep -A999 "<!-- Footer -->" /home/chromium/index.html >> /home/chromium/index-lowmem.html
+grep -A999 "$target" /home/chromium/index.html | grep -v "$target" >> /home/chromium/index-lowmem.html
 
 echo Patching index-lowmem.html to remove Javascript elements
 sed -e "s^Bootstrap core JavaScript^raspberrypi0-2w-64 can't run jquery^" -i /home/chromium/index-lowmem.html
 sed -e 's^<script^<!-- script^' -i /home/chromium/index-lowmem.html
 sed -e 's^script>^script -->^' -i /home/chromium/index-lowmem.html
 echo Patch completed
-
-
-# bash (not sh) supports the ${str@Q} operation to escape 
-# newlines (and lots of other things) in a shell variable
-# We use this to convert the readable/editable snippet above 
-# into a form which can be consumed by sed
-escaped_memory_disclaimer_text="${raw_memory_disclaimer_text@Q}"
-echo "$escaped_memory_disclaimer_text"
-
-sed -e "s^    <!-- Footer -->^$escaped_memory_disclaimer_text\n\n    <!-- Footer -->^" -i /home/chromium/index-lowmem.html
 
 # Move the vanilla index.html to one side
 mv /home/chromium/index.html /home/chromium/index-normal.html
