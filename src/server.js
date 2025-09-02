@@ -22,6 +22,8 @@ const REMOTE_DEBUG_PORT = process.env.REMOTE_DEBUG_PORT || 35173;
 const FLAGS = process.env.FLAGS || null;
 const EXTRA_FLAGS = process.env.EXTRA_FLAGS || null;
 const HTTPS_REGEX = /^https?:\/\//i //regex for HTTP/S prefix
+const FILE_REGEX = /^file:\/\/\//i //regex for file:/// prefix
+const DATA_REGEX = /^data:/i //regex for data: prefix
 const AUTO_REFRESH = process.env.AUTO_REFRESH || 0;
 
 // Environment variables which can be overriden from the API
@@ -45,9 +47,14 @@ async function getUrlToDisplayAsync() {
     {
       console.log(`Using LAUNCH_URL: ${launchUrl}`)
 
-      // Prepend http:// if the LAUNCH_URL doesn't have it.
+      // Prepend http:// if the LAUNCH_URL doesn't start with
+      // http:, https:, file:, or data:
       // This is needed for the --app flag to be used for kiosk mode
-      if (!HTTPS_REGEX.test(launchUrl)) {
+      if (
+        !HTTPS_REGEX.test(launchUrl) &&
+        !FILE_REGEX.test(launchUrl) &&
+        !DATA_REGEX.test(launchUrl)
+      ) {
         launchUrl = `http://${launchUrl}`;
       }
 
