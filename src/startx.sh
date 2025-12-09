@@ -27,6 +27,22 @@ function rotate_touch () {
   esac
 }
 
+function apply_custom_resolution() {
+  local mode="${WINDOW_SIZE//,/x}"
+  local position="${WINDOW_POSITION:-0,0}"
+  position="${position//,/x}"
+
+  echo "Setting custom display resolution: $DISPLAY_OUTPUT to $mode at position $position"
+
+  if xrandr --output "$DISPLAY_OUTPUT" --mode "$mode" --pos "$position" 2>&1; then
+    echo "Successfully applied custom resolution"
+    return 0
+  else
+    echo "Warning: Failed to apply custom resolution. The mode may not be supported."
+    return 1
+  fi
+}
+
 if [[ -z "$WINDOW_SIZE" ]]; then
   # detect the window size from the framebuffer file
   echo "Detecting window size from framebuffer"
@@ -34,6 +50,11 @@ if [[ -z "$WINDOW_SIZE" ]]; then
   echo "Window size detected as $WINDOW_SIZE"
 else
   echo "Window size set by environment variable to $WINDOW_SIZE"
+fi
+
+# Apply custom resolution if both WINDOW_SIZE and DISPLAY_OUTPUT are set
+if [[ ! -z "$WINDOW_SIZE" ]] && [[ ! -z "$DISPLAY_OUTPUT" ]]; then
+  apply_custom_resolution
 fi
 
 # rotate screen if env variable is set [normal, inverted, left or right]
