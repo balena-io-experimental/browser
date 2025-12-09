@@ -88,8 +88,9 @@ The following environment variables allow configuration of the `browser` block:
 |`ROTATE_DELAY`|`n`|`3`|Add an artificial delay (in seconds) before applying display rotation|
 |`TOUCHSCREEN`|`string`|N\A|Name of Touch Input to rotate|
 |`ENABLE_GPU`|`0`, `1`|0|Enables the GPU rendering. Necessary for Pi3B+ to display YouTube videos. <br/> `0` = off, `1` = on|
-|`WINDOW_SIZE`|`x,y`|Detected screen resolution|Sets the browser window size, such as `800,600`. <br/> **Note:** Reverse the dimensions if you also rotate the display to `left` or `right` |
+|`WINDOW_SIZE`|`x,y`|Detected screen resolution|Sets the browser window size, such as `800,600`. When used with `DISPLAY_OUTPUT`, also forces the display resolution mode on startup. <br/> **Note:** Reverse the dimensions if you also rotate the display to `left` or `right` |
 |`WINDOW_POSITION`|`x,y`|`0,0`|Specifies the browser window position on the screen|
+|`DISPLAY_OUTPUT`|`string`|N\A|Name of the display output (e.g., `HDMI-1`, `DP-1`) to configure for custom resolution mode. Required when using `WINDOW_SIZE` to force a specific display resolution. Use `xrandr` to find available outputs|
 |`API_PORT`|port number|5011|Specifies the port number the API runs on|
 |`REMOTE_DEBUG_PORT`|port number|35173|Specifies the port number the chrome remote debugger runs on|
 |`AUTO_REFRESH`|interval|0 (disabled)|Specifies the number of seconds before the page automatically refreshes|
@@ -153,10 +154,10 @@ Refreshes the currently displayed page
 #### **POST** /autorefresh/{interval}
 Automatically refreshes the browser window
 
-| Value | Description |
-|--------------|-------------|
-| 0 | disable |
-| 1-60 | refresh every `interval` seconds |
+| Value | Description                      |
+|-------|----------------------------------|
+| 0     | disable                          |
+| 1-60  | refresh every `interval` seconds |
 
 #### **POST** /scan
 Re-scans the device to find local HTTP or HTTPS services to display. This can be used by the HTTP/S service to notify the `browser` block that it is ready to be displayed, should there be a startup race.
@@ -184,32 +185,32 @@ Returns the status of the GPU:
 
 | Return Value | Description |
 |--------------|-------------|
-| 0 | disabled |
-| 1 | enabled |
+| 0            | disabled    |
+| 1            | enabled     |
 
 #### **PUT** /gpu/{value}
 Enables or disables the GPU
 
 | Value | Description |
-|--------------|-------------|
-| 0 | disable |
-| 1 | enable |
+|-------|-------------|
+| 0     | disable     |
+| 1     | enable      |
 
 #### **GET** /kiosk
 Returns whether the device is running kiosk mode or not:
 
 | Return Value | Description |
 |--------------|-------------|
-| 0 | disabled |
-| 1 | enabled |
+| 0            | disabled    |
+| 1            | enabled     |
 
 #### **PUT** /kiosk/{value}
 Enables or disables kiosk mode
 
 | Value | Description |
-|--------------|-------------|
-| 0 | disable |
-| 1 | enable |
+|-------|-------------|
+| 0     | disable     |
+| 1     | enable      |
 
 #### **GET** /flags
 Returns the flags Chromium was started with
@@ -226,14 +227,14 @@ The screenshot will be saved as a temporary file in the container.
 ## Supported devices
 The `browser` block has been tested to work on the following devices:
 
-| Device Type  | Status |
-| ------------- | ------------- |
-| Raspberry Pi 3b+ | ✔ |
-| Raspberry Pi 3b+ (64-bit OS) | ✔ |
-| balena Fin | ✔ |
-| Raspberry Pi 4 | ✔ |
-| Intel NUC | ✔ |
-| Generic AMD64 | ✔ |
+| Device Type                  | Status |
+|------------------------------|--------|
+| Raspberry Pi 3b+             | ✔      |
+| Raspberry Pi 3b+ (64-bit OS) | ✔      |
+| balena Fin                   | ✔      |
+| Raspberry Pi 4               | ✔      |
+| Intel NUC                    | ✔      |
+| Generic AMD64                | ✔      |
 
 ---
 
@@ -257,4 +258,21 @@ Occasionally users report weird things are happening with their display output l
 Here are some things to try:
 * Setting the WINDOW_SIZE manually to your display's resolution (e.g. `1980,1080`) - the display may be mis-reporting it's resolution to the device
 * Increase the memory being allocated to the GPU with the Device Configuration tab on the dashboard, or via [configuration variable](https://www.balena.io/docs/learn/manage/configuration/) - for large displays the device may need to allocate more memory to displaying the output
+
+#### Wrong resolution on startup
+Some displays may not correctly negotiate their resolution on startup, resulting in incorrect display modes being selected. If you need to force a specific resolution on certain displays:
+
+1. First, identify the display output and available modes by running inside the container:
+   ```bash
+   su - chromium -c "DISPLAY=:0 xrandr"
+   ```
+
+2. Add the following environment variables to your `docker-compose.yml`:
+   ```yaml
+   environment:
+     DISPLAY_OUTPUT: 'HDMI-1'      # Your display output name (may also be HDMI-A-1, DP-1, etc.)
+     WINDOW_SIZE: '1920,540'       # Your desired resolution (comma-separated)
+   ```
+
+The custom resolution will be applied automatically on startup (the comma-separated format is automatically converted to the xrandr format). This is particularly useful when deploying to multiple devices with different display types, as you can configure this per-device without manual intervention.
 
