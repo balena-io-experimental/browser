@@ -3,7 +3,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const chromeLauncher = require('chrome-launcher');
-const CDP = require('chrome-remote-interface');
+const puppeteer = require('puppeteer-core');
+const { PuppeteerRunnerExtension } = require('@puppeteer/replay');
 const bent = require('bent')
 const {
   setIntervalAsync,
@@ -25,8 +26,8 @@ const EXTRA_FLAGS = process.env.EXTRA_FLAGS || null;
 const HTTPS_REGEX = /^https?:\/\//i //regex for HTTP/S prefix
 const AUTO_REFRESH = process.env.AUTO_REFRESH || 0;
 const FORCE_VULKAN = process.env.FORCE_VULKAN || "-1";
-const CUSTOM_SCRIPT = process.env.CUSTOM_SCRIPT || null;
-const ENABLE_CUSTOM_SCRIPT = process.env.ENABLE_CUSTOM_SCRIPT || '0';
+const RECORDER_SCRIPT_PATH = process.env.RECORDER_SCRIPT_PATH || null;
+const ENABLE_RECORDER_SCRIPT = process.env.ENABLE_RECORDER_SCRIPT || '0';
 
 // Environment variables which can be overriden from the API
 let kioskMode = process.env.KIOSK || '0';
@@ -191,59 +192,60 @@ let launchChromium = async function(url) {
     console.log(`Chromium remote debugging tools running on port: ${chrome.port}`);
     currentUrl = url;
 
-    // Inject custom script if enabled and provided
-    if (ENABLE_CUSTOM_SCRIPT === '1' && CUSTOM_SCRIPT) {
-      await injectCustomScript(chrome.port);
+    // Execute recorder script if enabled and provided
+    if (ENABLE_RECORDER_SCRIPT === '1' && RECORDER_SCRIPT_PATH) {
+      await executeRecorderScript(chrome.port);
     }
 }
 
-// Inject custom JavaScript into the browser page
-async function injectCustomScript(port) {
-  if (!CUSTOM_SCRIPT) {
-    console.log("No custom script provided");
+// Execute Chrome Recorder script (Puppeteer Replay JSON format)
+async function executeRecorderScript(port) {
+  if (!RECORDER_SCRIPT_PATH) {
+    console.log("No recorder script path provided");
     return;
   }
 
   try {
-    console.log("Custom script injection enabled - injecting script into browser...");
+    console.log(`Recorder script enabled - loading script from: ${RECORDER_SCRIPT_PATH}`);
 
-    // Connect to Chrome DevTools Protocol
-    const client = await CDP({ port: port });
-    const { Page, Runtime } = client;
+    // Read the recorder JSON file
+    const recordingJSON = await readFile(RECORDER_SCRIPT_PATH, 'utf-8');
+    const recording = JSON.parse(recordingJSON);
 
-    // Enable necessary domains
-    await Page.enable();
-    await Runtime.enable();
+    console.log(`Loaded recording: ${recording.title || 'Untitled'}`);
 
-    // Wait for page to load
-    await new Promise((resolve) => {
-      Page.loadEventFired(() => {
-        resolve();
-      });
+    // Connect to the already-running Chrome instance
+    const browser = await puppeteer.connect({
+      browserURL: `http://localhost:${port}`,
+      defaultViewport: null
     });
 
-    // Give the page a moment to fully initialize
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    // Wait a moment for the page to be ready
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // Inject the custom script
-    const result = await Runtime.evaluate({
-      expression: CUSTOM_SCRIPT,
-      awaitPromise: true,
-      returnByValue: true
+    // Get the first page (should be our launched URL)
+    const pages = await browser.pages();
+    const page = pages[pages.length - 1]; // Get the most recent page
+
+    console.log("Executing recorded actions...");
+
+    // Create a runner for the recording
+    const runner = await PuppeteerRunnerExtension.createRunner(recording, {
+      page: page
     });
 
-    if (result.exceptionDetails) {
-      console.error("Error executing custom script:", result.exceptionDetails);
-    } else {
-      console.log("Custom script executed successfully");
-      if (result.result && result.result.value !== undefined) {
-        console.log("Script result:", result.result.value);
-      }
-    }
+    // Execute the recording
+    await runner.run();
 
-    await client.close();
+    console.log("Recorder script executed successfully");
+
+    // Disconnect (don't close the browser, just disconnect)
+    await browser.disconnect();
   } catch (err) {
-    console.error("Failed to inject custom script:", err);
+    console.error("Failed to execute recorder script:", err.message);
+    if (err.stack) {
+      console.error("Stack trace:", err.stack);
+    }
   }
 }
 

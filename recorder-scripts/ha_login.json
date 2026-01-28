@@ -1,0 +1,130 @@
+{
+    "title": "Recording 1/27/2026 at 6:07:43 PM",
+    "steps": [
+        {
+            "type": "setViewport",
+            "width": 2005,
+            "height": 928,
+            "deviceScaleFactor": 1,
+            "isMobile": false,
+            "hasTouch": false,
+            "isLandscape": false
+        },
+        {
+            "type": "navigate",
+            "url": "http://10.0.0.78:8123/auth/authorize?response_type=code&redirect_uri=http%3A%2F%2F10.0.0.78%3A8123%2F%3Fauth_callback%3D1&client_id=http%3A%2F%2F10.0.0.78%3A8123%2F&state=eyJoYXNzVXJsIjoiaHR0cDovLzEwLjAuMC43ODo4MTIzIiwiY2xpZW50SWQiOiJodHRwOi8vMTAuMC4wLjc4OjgxMjMvIn0%3D",
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "http://10.0.0.78:8123/auth/authorize?response_type=code&redirect_uri=http%3A%2F%2F10.0.0.78%3A8123%2F%3Fauth_callback%3D1&client_id=http%3A%2F%2F10.0.0.78%3A8123%2F&state=eyJoYXNzVXJsIjoiaHR0cDovLzEwLjAuMC43ODo4MTIzIiwiY2xpZW50SWQiOiJodHRwOi8vMTAuMC4wLjc4OjgxMjMvIn0%3D",
+                    "title": "Home Assistant"
+                }
+            ]
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Username*"
+                ],
+                [
+                    "ha-auth-form-string:nth-of-type(1) input"
+                ],
+                [
+                    "xpath//html/body/div[1]/ha-authorize/div[1]/ha-auth-flow/form/ha-auth-form/div/ha-auth-form-string[1]/ha-auth-textfield/label/input"
+                ],
+                [
+                    "pierce/ha-auth-form-string:nth-of-type(1) input"
+                ]
+            ],
+            "offsetY": 16.75,
+            "offsetX": 141.5
+        },
+        {
+            "type": "change",
+            "value": "guest",
+            "selectors": [
+                [
+                    "aria/Username*"
+                ],
+                [
+                    "ha-auth-form-string:nth-of-type(1) input"
+                ],
+                [
+                    "xpath//html/body/div[1]/ha-authorize/div[1]/ha-auth-flow/form/ha-auth-form/div/ha-auth-form-string[1]/ha-auth-textfield/label/input"
+                ],
+                [
+                    "pierce/ha-auth-form-string:nth-of-type(1) input"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Password*"
+                ],
+                [
+                    "ha-auth-form-string:nth-of-type(2) input"
+                ],
+                [
+                    "xpath//html/body/div[1]/ha-authorize/div[1]/ha-auth-flow/form/ha-auth-form/div/ha-auth-form-string[2]/ha-auth-textfield/label/input"
+                ],
+                [
+                    "pierce/ha-auth-form-string:nth-of-type(2) input"
+                ]
+            ],
+            "offsetY": 20.25,
+            "offsetX": 107.5
+        },
+        {
+            "type": "change",
+            "value": "guest",
+            "selectors": [
+                [
+                    "aria/Password*"
+                ],
+                [
+                    "ha-auth-form-string:nth-of-type(2) input"
+                ],
+                [
+                    "xpath//html/body/div[1]/ha-authorize/div[1]/ha-auth-flow/form/ha-auth-form/div/ha-auth-form-string[2]/ha-auth-textfield/label/input"
+                ],
+                [
+                    "pierce/ha-auth-form-string:nth-of-type(2) input"
+                ]
+            ],
+            "target": "main"
+        },
+        {
+            "type": "click",
+            "target": "main",
+            "selectors": [
+                [
+                    "aria/Log in",
+                    "aria/[role=\"generic\"]"
+                ],
+                [
+                    "div.card-content ha-button",
+                    "slot.label"
+                ],
+                [
+                    "pierce/div.card-content ha-button",
+                    "pierce/slot.label"
+                ]
+            ],
+            "offsetY": 12,
+            "offsetX": 14.671875,
+            "assertedEvents": [
+                {
+                    "type": "navigation",
+                    "url": "http://10.0.0.78:8123/?auth_callback=1&code=26e4323b66494fb386f704036ba1e49d&state=eyJoYXNzVXJsIjoiaHR0cDovLzEwLjAuMC43ODo4MTIzIiwiY2xpZW50SWQiOiJodHRwOi8vMTAuMC4wLjc4OjgxMjMvIn0%3D&storeToken=true",
+                    "title": "Home Assistant"
+                }
+            ]
+        }
+    ]
+}

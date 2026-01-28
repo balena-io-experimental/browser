@@ -36,6 +36,7 @@ RUN JOBS=MAX npm install --unsafe-perm --production \
     && rm -rf /tmp/*
 
 COPY ./src /usr/src/app/
+COPY ./recorder-scripts /usr/src/app/recorder-scripts
 
 RUN chmod +x ./*.sh
 
