@@ -3,6 +3,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const chromeLauncher = require('chrome-launcher');
+const CDP = require('chrome-remote-interface');
 const bent = require('bent')
 const {
   setIntervalAsync,
@@ -24,6 +25,8 @@ const EXTRA_FLAGS = process.env.EXTRA_FLAGS || null;
 const HTTPS_REGEX = /^https?:\/\//i //regex for HTTP/S prefix
 const AUTO_REFRESH = process.env.AUTO_REFRESH || 0;
 const FORCE_VULKAN = process.env.FORCE_VULKAN || "-1";
+const CUSTOM_SCRIPT = process.env.CUSTOM_SCRIPT || null;
+const ENABLE_CUSTOM_SCRIPT = process.env.ENABLE_CUSTOM_SCRIPT || '0';
 
 // Environment variables which can be overriden from the API
 let kioskMode = process.env.KIOSK || '0';
@@ -187,6 +190,61 @@ let launchChromium = async function(url) {
       
     console.log(`Chromium remote debugging tools running on port: ${chrome.port}`);
     currentUrl = url;
+
+    // Inject custom script if enabled and provided
+    if (ENABLE_CUSTOM_SCRIPT === '1' && CUSTOM_SCRIPT) {
+      await injectCustomScript(chrome.port);
+    }
+}
+
+// Inject custom JavaScript into the browser page
+async function injectCustomScript(port) {
+  if (!CUSTOM_SCRIPT) {
+    console.log("No custom script provided");
+    return;
+  }
+
+  try {
+    console.log("Custom script injection enabled - injecting script into browser...");
+
+    // Connect to Chrome DevTools Protocol
+    const client = await CDP({ port: port });
+    const { Page, Runtime } = client;
+
+    // Enable necessary domains
+    await Page.enable();
+    await Runtime.enable();
+
+    // Wait for page to load
+    await new Promise((resolve) => {
+      Page.loadEventFired(() => {
+        resolve();
+      });
+    });
+
+    // Give the page a moment to fully initialize
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // Inject the custom script
+    const result = await Runtime.evaluate({
+      expression: CUSTOM_SCRIPT,
+      awaitPromise: true,
+      returnByValue: true
+    });
+
+    if (result.exceptionDetails) {
+      console.error("Error executing custom script:", result.exceptionDetails);
+    } else {
+      console.log("Custom script executed successfully");
+      if (result.result && result.result.value !== undefined) {
+        console.log("Script result:", result.result.value);
+      }
+    }
+
+    await client.close();
+  } catch (err) {
+    console.error("Failed to inject custom script:", err);
+  }
 }
 
 // Get's the chrome-launcher default flags, minus the extensions and audio muting flags.

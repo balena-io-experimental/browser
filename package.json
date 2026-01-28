@@ -27,6 +27,7 @@
     "homepage": "https://github.com/balena-labs-projects/browser#readme",
     "dependencies": {
         "chrome-launcher": "^0.13.4",
+        "chrome-remote-interface": "^0.33.0",
         "body-parser": "^1.19.0",
         "compression": "^1.7.4",
         "dateformat": "^3.0.3",
