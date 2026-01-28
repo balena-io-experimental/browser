@@ -129,6 +129,8 @@ let launchChromium = async function(url) {
         '--disable-dev-shm-usage', // TODO: work out if we can enable this for devices with >1Gb of memory
         '--disable-features=PasswordManager,Translate',
         '--password-store=basic',
+        '--disable-save-password-bubble',
+        '--disable-password-generation',
       ];
 
       // Merge the chromium default and balena default flags
