@@ -4,7 +4,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const chromeLauncher = require('chrome-launcher');
 const puppeteer = require('puppeteer-core');
-const { PuppeteerRunnerExtension } = require('@puppeteer/replay');
+const { createRunner, PuppeteerRunnerExtension } = require('@puppeteer/replay');
 const bent = require('bent')
 const {
   setIntervalAsync,
@@ -230,9 +230,9 @@ async function executeRecorderScript(port) {
     console.log("Executing recorded actions...");
 
     // Create a runner for the recording
-    const runner = await PuppeteerRunnerExtension.createRunner(recording, {
-      page: page
-    });
+    const runner = await createRunner(recording, new PuppeteerRunnerExtension(browser, page, {
+      timeout: 30000
+    }));
 
     // Execute the recording
     await runner.run();
