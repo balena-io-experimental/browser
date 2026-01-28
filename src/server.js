@@ -206,46 +206,71 @@ async function executeRecorderScript(port) {
   }
 
   try {
-    console.log(`Recorder script enabled - loading script from: ${RECORDER_SCRIPT_PATH}`);
+    console.log("========================================");
+    console.log("RECORDER SCRIPT EXECUTION STARTED");
+    console.log("========================================");
+    console.log(`Loading script from: ${RECORDER_SCRIPT_PATH}`);
 
     // Read the recorder JSON file
     const recordingJSON = await readFile(RECORDER_SCRIPT_PATH, 'utf-8');
-    const recording = JSON.parse(recordingJSON);
+    console.log(`✓ Script file read successfully (${recordingJSON.length} bytes)`);
 
-    console.log(`Loaded recording: ${recording.title || 'Untitled'}`);
+    const recording = JSON.parse(recordingJSON);
+    console.log(`✓ JSON parsed successfully`);
+    console.log(`Recording title: ${recording.title || 'Untitled'}`);
+    console.log(`Number of steps: ${recording.steps ? recording.steps.length : 'unknown'}`);
 
     // Connect to the already-running Chrome instance
+    console.log(`Connecting to Chrome on port ${port}...`);
     const browser = await puppeteer.connect({
       browserURL: `http://localhost:${port}`,
       defaultViewport: null
     });
+    console.log("✓ Connected to Chrome browser");
 
     // Wait a moment for the page to be ready
+    console.log("Waiting 2 seconds for page to be ready...");
     await new Promise(resolve => setTimeout(resolve, 2000));
 
     // Get the first page (should be our launched URL)
     const pages = await browser.pages();
     const page = pages[pages.length - 1]; // Get the most recent page
+    const currentUrl = page.url();
+    console.log(`✓ Got browser page: ${currentUrl}`);
 
-    console.log("Executing recorded actions...");
-
+    console.log("Creating Puppeteer runner...");
     // Create a runner for the recording
     const runner = await createRunner(recording, new PuppeteerRunnerExtension(browser, page, {
       timeout: 30000
     }));
+    console.log("✓ Runner created");
+
+    console.log("========================================");
+    console.log("EXECUTING RECORDED ACTIONS...");
+    console.log("========================================");
 
     // Execute the recording
     await runner.run();
 
-    console.log("Recorder script executed successfully");
+    console.log("========================================");
+    console.log("✓ RECORDER SCRIPT COMPLETED SUCCESSFULLY");
+    console.log("========================================");
 
     // Disconnect (don't close the browser, just disconnect)
     await browser.disconnect();
+    console.log("✓ Disconnected from browser");
   } catch (err) {
-    console.error("Failed to execute recorder script:", err.message);
+    console.error("========================================");
+    console.error("✗ RECORDER SCRIPT FAILED");
+    console.error("========================================");
+    console.error("Error:", err.message);
+    if (err.code) {
+      console.error("Error code:", err.code);
+    }
     if (err.stack) {
       console.error("Stack trace:", err.stack);
     }
+    console.error("========================================");
   }
 }
 
