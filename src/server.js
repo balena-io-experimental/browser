@@ -313,7 +313,7 @@ async function SetDefaultFlags() {
 }
 
 async function setTimer(interval) {
-  console.log("Auto refresh interval: ", interval);
+  console.log("Auto refresh interval seconds: ", interval);
   timer = setIntervalAsync(
     async () => {
       try {
