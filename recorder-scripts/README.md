@@ -24,13 +24,28 @@ ENABLE_RECORDER_SCRIPT=1
 RECORDER_SCRIPT_PATH=/usr/src/app/recorder-scripts/your-script.json
 ```
 
-## Example
+## Credentials (Username/Password)
 
-If you save a recording as `login-flow.json` in this directory:
+The recorder script automatically replaces username and password values at runtime using environment variables. This keeps your credentials secure and out of version control.
+
+Set these environment variables in balenaCloud:
+
+```
+HA_USERNAME=your_username
+HA_PASSWORD=your_password
+```
+
+The script detects fields based on their selectors (looking for "username" or "password" in the field selectors) and replaces the values automatically.
+
+## Example Configuration
+
+If you save a recording as `ha_login.json` in this directory:
 
 ```
 ENABLE_RECORDER_SCRIPT=1
-RECORDER_SCRIPT_PATH=/usr/src/app/recorder-scripts/login-flow.json
+RECORDER_SCRIPT_PATH=/usr/src/app/recorder-scripts/ha_login.json
+HA_USERNAME=your_actual_username
+HA_PASSWORD=your_actual_password
 ```
 
 ## Toggle On/Off

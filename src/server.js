@@ -28,6 +28,8 @@ const AUTO_REFRESH = process.env.AUTO_REFRESH || 0;
 const FORCE_VULKAN = process.env.FORCE_VULKAN || "-1";
 const RECORDER_SCRIPT_PATH = process.env.RECORDER_SCRIPT_PATH || null;
 const ENABLE_RECORDER_SCRIPT = process.env.ENABLE_RECORDER_SCRIPT || '0';
+const HA_USERNAME = process.env.HA_USERNAME || null;
+const HA_PASSWORD = process.env.HA_PASSWORD || null;
 
 // Environment variables which can be overriden from the API
 let kioskMode = process.env.KIOSK || '0';
@@ -219,6 +221,33 @@ async function executeRecorderScript(port) {
     console.log(`✓ JSON parsed successfully`);
     console.log(`Recording title: ${recording.title || 'Untitled'}`);
     console.log(`Number of steps: ${recording.steps ? recording.steps.length : 'unknown'}`);
+
+    // Replace username and password placeholders with environment variables
+    if (HA_USERNAME || HA_PASSWORD) {
+      console.log("Replacing credentials with environment variables...");
+      let replacedCount = 0;
+
+      recording.steps.forEach((step, index) => {
+        if (step.type === 'change' && step.value) {
+          // Check if this is a username or password field based on selectors
+          const selectors = JSON.stringify(step.selectors || []).toLowerCase();
+
+          if (HA_USERNAME && selectors.includes('username')) {
+            console.log(`  ✓ Replacing username in step ${index + 1}`);
+            step.value = HA_USERNAME;
+            replacedCount++;
+          } else if (HA_PASSWORD && selectors.includes('password')) {
+            console.log(`  ✓ Replacing password in step ${index + 1}`);
+            step.value = HA_PASSWORD;
+            replacedCount++;
+          }
+        }
+      });
+
+      console.log(`✓ Replaced ${replacedCount} credential value(s)`);
+    } else {
+      console.log("⚠ No HA_USERNAME or HA_PASSWORD environment variables set - using values from recording file");
+    }
 
     // Connect to the already-running Chrome instance
     console.log(`Connecting to Chrome on port ${port}...`);
