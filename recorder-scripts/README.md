@@ -58,8 +58,33 @@ For credentials that differ per device, use **Device Variables**.
 | Variable Name | Value | Description |
 |--------------|-------|-------------|
 | `AUTO_REFRESH` | `3600` | Auto-refresh interval in seconds (0=disabled) |
-| `PERSISTENT` | `1` | Enable persistent browser profile storage |
+| `PERSISTENT` | `1` | Enable persistent browser profile storage (cookies, cache, sessions) |
 | `ROTATE_DISPLAY` | `left` | Rotate display (normal, left, right, inverted) |
+| `ROTATE_DELAY` | `3` | Delay in seconds before applying display rotation |
+| `TOUCHSCREEN` | `device_name` | Name of specific touch input device to rotate with display |
+| `WINDOW_POSITION` | `100,100` | Browser window position on screen (x,y coordinates) |
+| `DISPLAY_NUM` | `0` | Display number to use (for multi-monitor setups) |
+
+### API & Debugging
+
+| Variable Name | Value | Description |
+|--------------|-------|-------------|
+| `API_PORT` | `5011` | Port for the browser control REST API |
+| `REMOTE_DEBUG_PORT` | `35173` | Port for Chrome DevTools remote debugging |
+
+### Advanced Chromium Flags
+
+| Variable Name | Value | Description |
+|--------------|-------|-------------|
+| `EXTRA_FLAGS` | `--audio-buffer-size=2048` | Adds additional Chromium flags (space-separated) without replacing defaults |
+| `FLAGS` | `--noerrdialogs --disable-gpu` | ⚠️ **Replaces** all Chromium flags (use with caution!) |
+| `FORCE_VULKAN` | `0`, `1`, or undefined | Force Vulkan on/off (undefined=auto-enable on Pi5 only) |
+
+### Startup Control
+
+| Variable Name | Value | Description |
+|--------------|-------|-------------|
+| `LOCAL_HTTP_DELAY` | `5` | Seconds to wait for local HTTP service before auto-detecting URL |
 
 ## Complete Example Configuration
 
@@ -97,3 +122,49 @@ The recorder script automatically replaces username and password values at runti
 - **Disable**: `ENABLE_RECORDER_SCRIPT=0`
 
 After adding/changing variables, the container will automatically restart with the new settings!
+
+## Browser Control REST API
+
+The browser exposes a REST API for runtime control (default port 5011). You can change the URL, refresh the page, take screenshots, and more without restarting the container.
+
+### Available Endpoints
+
+| Endpoint | Method | Description | Example |
+|----------|--------|-------------|---------|
+| `/ping` | GET | Health check | `curl http://localhost:5011/ping` |
+| `/url` | GET | Get current URL | `curl http://localhost:5011/url` |
+| `/url` | POST | Set new URL | `curl -X POST -H "Content-Type: application/json" -d '{"url":"http://example.com"}' http://localhost:5011/url` |
+| `/refresh` | POST | Refresh current page | `curl -X POST http://localhost:5011/refresh` |
+| `/gpu` | GET | Get GPU status | `curl http://localhost:5011/gpu` |
+| `/gpu/:value` | POST | Enable/disable GPU | `curl -X POST http://localhost:5011/gpu/1` |
+| `/kiosk` | GET | Get kiosk mode status | `curl http://localhost:5011/kiosk` |
+| `/kiosk/:value` | POST | Enable/disable kiosk | `curl -X POST http://localhost:5011/kiosk/1` |
+| `/flags` | GET | View current Chromium flags | `curl http://localhost:5011/flags` |
+| `/version` | GET | Get Chromium version | `curl http://localhost:5011/version` |
+| `/screenshot` | GET | Take screenshot (returns PNG) | `curl http://localhost:5011/screenshot > screen.png` |
+| `/autorefresh/:interval` | POST | Set auto-refresh interval | `curl -X POST http://localhost:5011/autorefresh/300` |
+| `/scan` | POST | Rescan for local HTTP services | `curl -X POST http://localhost:5011/scan` |
+
+### Example: Change URL Dynamically
+
+```bash
+# From inside the container or another service
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"url":"http://10.0.0.78:8123/lovelace/dashboard"}' \
+  http://localhost:5011/url
+
+# From your local machine (if device has public URL)
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"url":"http://10.0.0.78:8123"}' \
+  http://my-device.local:5011/url
+```
+
+### Chrome Remote Debugging
+
+Access Chrome DevTools remotely on port 35173 (or your custom `REMOTE_DEBUG_PORT`):
+
+1. Open Chrome on your computer
+2. Navigate to: `chrome://inspect`
+3. Click "Configure" and add: `your-device-ip:35173`
+4. Your browser instance will appear under "Remote Target"
+5. Click "inspect" to debug remotely
