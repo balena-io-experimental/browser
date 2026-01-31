@@ -226,33 +226,6 @@ async function executeRecorderScript(port) {
     console.log(`Recording title: ${recording.title || 'Untitled'}`);
     console.log(`Number of steps: ${recording.steps ? recording.steps.length : 'unknown'}`);
 
-    // Replace username and password placeholders with environment variables
-    if (HA_USERNAME || HA_PASSWORD) {
-      console.log("Replacing credentials with environment variables...");
-      let replacedCount = 0;
-
-      recording.steps.forEach((step, index) => {
-        if (step.type === 'change' && step.value) {
-          // Check if this is a username or password field based on selectors
-          const selectors = JSON.stringify(step.selectors || []).toLowerCase();
-
-          if (HA_USERNAME && selectors.includes('username')) {
-            console.log(`  ✓ Replacing username in step ${index + 1}`);
-            step.value = HA_USERNAME;
-            replacedCount++;
-          } else if (HA_PASSWORD && selectors.includes('password')) {
-            console.log(`  ✓ Replacing password in step ${index + 1}`);
-            step.value = HA_PASSWORD;
-            replacedCount++;
-          }
-        }
-      });
-
-      console.log(`✓ Replaced ${replacedCount} credential value(s)`);
-    } else {
-      console.log("⚠ No HA_USERNAME or HA_PASSWORD environment variables set - using values from recording file");
-    }
-
     // Connect to the already-running Chrome instance
     console.log(`Connecting to Chrome on port ${port}...`);
     const browser = await puppeteer.connect({
@@ -268,22 +241,78 @@ async function executeRecorderScript(port) {
     // Get the first page (should be our launched URL)
     const pages = await browser.pages();
     const page = pages[pages.length - 1]; // Get the most recent page
-    const currentUrl = page.url();
-    console.log(`✓ Got browser page: ${currentUrl}`);
+    const pageUrl = page.url();
+    console.log(`✓ Got browser page: ${pageUrl}`);
 
-    console.log("Creating Puppeteer runner...");
-    // Create a runner for the recording
-    const runner = await createRunner(recording, new PuppeteerRunnerExtension(browser, page, {
-      timeout: 30000
-    }));
-    console.log("✓ Runner created");
+    // Check if we're already logged in (persistent storage session)
+    // If we're on the auth page, we need to login; otherwise skip to final navigation
+    const isOnAuthPage = pageUrl.includes('/auth/') || pageUrl.includes('auth_callback');
+    const needsLogin = isOnAuthPage || pageUrl.includes('authorize');
 
-    console.log("========================================");
-    console.log("EXECUTING RECORDED ACTIONS...");
-    console.log("========================================");
+    console.log(`Checking login status...`);
+    console.log(`  Current URL: ${pageUrl}`);
+    console.log(`  On auth page: ${isOnAuthPage}`);
+    console.log(`  Needs login: ${needsLogin}`);
 
-    // Execute the recording
-    await runner.run();
+    if (needsLogin) {
+      console.log("Login required - executing full recorder script");
+
+      // Replace username and password placeholders with environment variables
+      if (HA_USERNAME || HA_PASSWORD) {
+        console.log("Replacing credentials with environment variables...");
+        let replacedCount = 0;
+
+        recording.steps.forEach((step, index) => {
+          if (step.type === 'change' && step.value) {
+            // Check if this is a username or password field based on selectors
+            const selectors = JSON.stringify(step.selectors || []).toLowerCase();
+
+            if (HA_USERNAME && selectors.includes('username')) {
+              console.log(`  ✓ Replacing username in step ${index + 1}`);
+              step.value = HA_USERNAME;
+              replacedCount++;
+            } else if (HA_PASSWORD && selectors.includes('password')) {
+              console.log(`  ✓ Replacing password in step ${index + 1}`);
+              step.value = HA_PASSWORD;
+              replacedCount++;
+            }
+          }
+        });
+
+        console.log(`✓ Replaced ${replacedCount} credential value(s)`);
+      } else {
+        console.log("⚠ No HA_USERNAME or HA_PASSWORD environment variables set - using values from recording file");
+      }
+
+      console.log("Creating Puppeteer runner...");
+      // Create a runner for the recording
+      const runner = await createRunner(recording, new PuppeteerRunnerExtension(browser, page, {
+        timeout: 30000
+      }));
+      console.log("✓ Runner created");
+
+      console.log("========================================");
+      console.log("EXECUTING RECORDED ACTIONS...");
+      console.log("========================================");
+
+      // Execute the recording
+      await runner.run();
+    } else {
+      console.log("Already logged in (persistent session detected) - skipping login steps");
+
+      // Find the final navigation step (typically to the kiosk/dashboard URL)
+      const finalNavStep = recording.steps
+        .filter(step => step.type === 'navigate')
+        .pop();
+
+      if (finalNavStep && finalNavStep.url) {
+        console.log(`Navigating directly to: ${finalNavStep.url}`);
+        await page.goto(finalNavStep.url, { waitUntil: 'networkidle0', timeout: 30000 });
+        console.log("✓ Navigation complete");
+      } else {
+        console.log("No final navigation step found in recording");
+      }
+    }
 
     console.log("========================================");
     console.log("✓ RECORDER SCRIPT COMPLETED SUCCESSFULLY");
