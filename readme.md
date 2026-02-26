@@ -88,6 +88,7 @@ The following environment variables allow configuration of the `browser` block:
 |`ROTATE_DELAY`|`n`|`3`|Add an artificial delay (in seconds) before applying display rotation|
 |`TOUCHSCREEN`|`string`|N\A|Name of Touch Input to rotate|
 |`ENABLE_GPU`|`0`, `1`|0|Enables the GPU rendering. Necessary for Pi3B+ to display YouTube videos. <br/> `0` = off, `1` = on|
+|`FORCE_VULKAN`|`0`, `1`|undefined|In combination with `ENABLE_GPU`, forces vulkan to either be enabled or disabled in chromium. If undefined or an invalid value, vulkan is only automatically enabled on the Raspberry Pi 5|
 |`WINDOW_SIZE`|`x,y`|Detected screen resolution|Sets the browser window size, such as `800,600`. <br/> **Note:** Reverse the dimensions if you also rotate the display to `left` or `right` |
 |`WINDOW_POSITION`|`x,y`|`0,0`|Specifies the browser window position on the screen|
 |`API_PORT`|port number|5011|Specifies the port number the API runs on|

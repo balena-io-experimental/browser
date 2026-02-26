@@ -1,4 +1,37 @@
 - commits:
+    - subject: Enable vulkan on the Raspberry Pi 5
+      hash: 303749d3175312dfbc9ba52b2615cd50e24bbc38
+      body: |
+        This is necessary for smooth video decoding on the Raspberry Pi 5.
+
+        The patch also adds a FORCE_VULKAN env variable, which can be used
+        to override the default behavior and force vulkan (not) to be loaded.
+        This is useful because enabling vulkan on the Raspberry Pi 5 comes
+        with a 20% performance penalty to OpenGL, which might not be a good
+        tradeoff for all users.
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Michal Toman <michalt@balena.io>
+        signed-off-by: Michal Toman <michalt@balena.io>
+      author: Michal Toman
+      nested: []
+    - subject: Update base image to Debian 13
+      hash: e1211b05166ff0cd021502b28f2937fba4e64808
+      body: |
+        This replaces the node base image by stock Debian and enables renovate
+        for node and npm.
+      footer:
+        Change-type: minor
+        change-type: minor
+        Signed-off-by: Michal Toman <michalt@balena.io>
+        signed-off-by: Michal Toman <michalt@balena.io>
+      author: Michal Toman
+      nested: []
+  version: 2.12.0
+  title: ""
+  date: 2025-12-09T15:29:21.250Z
+- commits:
     - subject: "patch: Stop flowzone publish step"
       hash: 01521a0dee448b49a43ac99d365bbd163413ef00
       body: ""

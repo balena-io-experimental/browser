@@ -10,8 +10,6 @@
 # * The Raspberry Pi 5 needs patched versions of mesa and X to work
 
 BASE_DIR="/usr/src/build"
-CHROMIUM_PACKAGE="chromium"
-
 MACHINE_NAME="$1"
 
 # FORCE_RPI_REPO=0 never includes the repo
@@ -24,23 +22,21 @@ then
 
     cp -a "${BASE_DIR}/rpi/raspi.list" "/etc/apt/sources.list.d/"
     cp -a "${BASE_DIR}/rpi/raspberrypi-archive-stable.gpg" "/etc/apt/trusted.gpg.d/"
-
-    # The RPi-patched chromium package is called chromium-browser
-    CHROMIUM_PACKAGE="chromium-browser"
-else
-    echo "Defaulting to vanilla chromium"
-    # The node library launches /usr/bin/chromium-browser
-    # which is not provided by the upstream package
-    ln -s /usr/bin/chromium /usr/bin/chromium-browser
 fi
+
+# The node library launches /usr/bin/chromium-browser
+# which is not provided by the upstream package
+ln -sf /usr/bin/chromium /usr/bin/chromium-browser
 
 # mimic previous balenalib "install_packages" behavior:
 apt-get update && apt-get install -y  --no-install-recommends \
-    ${CHROMIUM_PACKAGE} \
+    chromium \
     chromium-common \
-    libgles2-mesa \
+    ca-certificates \
+    curl \
     lsb-release \
     mesa-vdpau-drivers \
+    mesa-vulkan-drivers \
     scrot \
     x11-xserver-utils \
     xserver-xorg-input-evdev \

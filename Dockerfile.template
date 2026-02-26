@@ -1,4 +1,4 @@
-FROM node:20.19.2-bookworm
+FROM debian:13
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -7,11 +7,33 @@ COPY ./build /usr/src/build
 RUN chmod a+x /usr/src/build/install_chromium
 RUN /usr/src/build/install_chromium "%%BALENA_MACHINE_NAME%%"
 
+# Install node
+WORKDIR /usr/local
+
+# renovate: datasource=node-version depName=node
+ARG NODE_VERSION=22.21.1
+
+RUN curl "https://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-$(dpkg --print-architecture | sed -e 's/amd/x/' -e 's/armhf/armv7l/').tar.gz" \
+    | tar xz --strip-components=1 \
+    && ./bin/node --version
+
+# renovate: datasource=npm depName=npm
+ARG NPM_VERSION=11.6.3
+
+# install npm
+RUN npm install -g "npm@${NPM_VERSION}" \
+    && rm -rf /root/.npm/_cacache \
+    && npm cache clear --force \
+    && rm -rf /tmp/*
+
 WORKDIR /usr/src/app
 
 # install node dependencies
 COPY ./package.json /usr/src/app/package.json
-RUN JOBS=MAX npm install --unsafe-perm --production && npm cache clean --force
+RUN JOBS=MAX npm install --unsafe-perm --production \
+    && rm -rf /root/.npm/_cacache \
+    && npm cache clear --force \
+    && rm -rf /tmp/*
 
 COPY ./src /usr/src/app/
 

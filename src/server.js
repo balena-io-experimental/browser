@@ -23,6 +23,7 @@ const FLAGS = process.env.FLAGS || null;
 const EXTRA_FLAGS = process.env.EXTRA_FLAGS || null;
 const HTTPS_REGEX = /^https?:\/\//i //regex for HTTP/S prefix
 const AUTO_REFRESH = process.env.AUTO_REFRESH || 0;
+const FORCE_VULKAN = process.env.FORCE_VULKAN || "-1";
 
 // Environment variables which can be overriden from the API
 let kioskMode = process.env.KIOSK || '0';
@@ -140,6 +141,17 @@ let launchChromium = async function(url) {
           '--ignore-gpu-blocklist',
           '--enable-gpu-rasterization',
         ];
+
+        // Enable vulkan
+        // This only seems to make a difference on the Raspberry Pi 5,
+        // it enables HW accelerated video decoding at the cost of some OpenGL performance
+        // * If FORCE_VULKAN is 0, never enable vulkan
+        // * If FORCE_VULKAN is 1, always enable vulkan
+        // * If FORCE_VULKAN is anything else or undefined, enable vulkan if the device is a RPi5
+        if (FORCE_VULKAN === "1" || (process.env.BALENA_DEVICE_TYPE === "raspberrypi5" && FORCE_VULKAN !== "0"))
+        {
+          gpuFlags.push('--enable-features=Vulkan');
+        }
 
         flags = flags.concat(gpuFlags);
       }
