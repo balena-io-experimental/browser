@@ -1,39 +1,39 @@
 {
-    "name": "browserV2",
-    "version": "0.0.1",
-    "description": "balenaBlock that provides a chromium browser wrapped in some balena genius",
-    "main": "index.js",
-    "scripts": {
-      "test": "exit 0"
-    },
-    "repository": {
-      "type": "git",
-      "url": "git+https://github.com/balena-labs-projects/browser.git"
-    },
+  "name": "browserV2",
+  "version": "0.0.1",
+  "description": "balenaBlock that provides a chromium browser wrapped in some balena genius",
+  "main": "index.js",
+  "scripts": {
+    "test": "exit 0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/balena-labs-projects/browser.git"
+  },
   "private": true,
-    "keywords": [
-      "balena",
-      "browser",
-      "chromium"
-    ],
-    "author": "Phil Wilson <phil@balena.io>",
-    "license": "Apache-2.0",
-    "jshintConfig": {
-      "esversion": 8
-    },
-    "bugs": {
-      "url": "https://github.com/balena-labs-projects/browser/issues"
-    },
-    "homepage": "https://github.com/balena-labs-projects/browser#readme",
-    "dependencies": {
-        "chrome-launcher": "^0.13.4",
-        "body-parser": "^1.19.0",
-        "compression": "^1.7.4",
-        "dateformat": "^3.0.3",
-        "debug": "^4.1.1",
-        "express": "^4.17.1",
-        "bent": "7.3.10",
-        "set-interval-async": "^1.0.34"
-    }
+  "keywords": [
+    "balena",
+    "browser",
+    "chromium"
+  ],
+  "author": "Phil Wilson <phil@balena.io>",
+  "license": "Apache-2.0",
+  "jshintConfig": {
+    "esversion": 8
+  },
+  "bugs": {
+    "url": "https://github.com/balena-labs-projects/browser/issues"
+  },
+  "homepage": "https://github.com/balena-labs-projects/browser#readme",
+  "dependencies": {
+    "bent": "7.3.10",
+    "body-parser": "^1.19.0",
+    "chrome-launcher": "^1.2.1",
+    "chrome-remote-interface": "^0.34.0",
+    "compression": "^1.7.4",
+    "dateformat": "^3.0.3",
+    "debug": "^4.1.1",
+    "express": "^4.17.1",
+    "set-interval-async": "^1.0.34"
   }
-  
+}

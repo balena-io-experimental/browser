@@ -12,37 +12,49 @@
 BASE_DIR="/usr/src/build"
 MACHINE_NAME="$1"
 
+
 # FORCE_RPI_REPO=0 never includes the repo
 # FORCE_RPI_REPO=1 always includes the repo
-# If the machine name starts with "raspberry", or if the machine
-# is a balenaFin, include the repo
-if [ "${FORCE_RPI_REPO}" != "0" ] && [ "${FORCE_RPI_REPO}" = "1" -o "${MACHINE_NAME:0:9}" = "raspberry" -o "${MACHINE_NAME}" = "fincm3" ]
+# If the machine name starts with "raspberry"
+if [ "${FORCE_RPI_REPO}" != "0" ] && [ "${FORCE_RPI_REPO}" = "1" -o "${MACHINE_NAME:0:9}" = "raspberry" ]
 then
     echo "Enabling raspios repository"
 
     cp -a "${BASE_DIR}/rpi/raspi.list" "/etc/apt/sources.list.d/"
     cp -a "${BASE_DIR}/rpi/raspberrypi-archive-stable.gpg" "/etc/apt/trusted.gpg.d/"
+    
+    # Workaround for Issue #200: Debian Trixie sqv rejecting SHA1 signatures
+    # This extends the SHA1 validity policy specifically for apt PGP verification
+    # source: https://www.scaleway.com/en/docs/instances/troubleshooting/fix-trixie-error-on-ppa-signature/
+    mkdir -p /etc/crypto-policies/back-ends
+    cat << EOF > /etc/crypto-policies/back-ends/apt-sequoia.config
+[hash_algorithms]
+sha1.second_preimage_resistance = 2028-02-01
+EOF
 fi
 
 # The node library launches /usr/bin/chromium-browser
 # which is not provided by the upstream package
 ln -sf /usr/bin/chromium /usr/bin/chromium-browser
 
-# mimic previous balenalib "install_packages" behavior:
-apt-get update && apt-get install -y  --no-install-recommends \
+# Install hardware acceleration libraries and base system libraries
+# Notice the inclusion of $PLATFORM_SPECIFIC_PACKAGES at the end of the package list
+apt-get update && apt-get install -y --no-install-recommends \
     chromium \
     chromium-common \
     ca-certificates \
     curl \
     lsb-release \
-    mesa-vdpau-drivers \
+    mesa-va-drivers \
     mesa-vulkan-drivers \
-    scrot \
-    x11-xserver-utils \
-    xserver-xorg-input-evdev \
-    xserver-xorg-legacy \
-    xserver-xorg-video-fbdev \
-    xserver-xorg xinit \
-    xinput \
-    xterm && \
-    rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*
+    v4l-utils \
+    libgl1-mesa-dri \
+    libegl-mesa0 \
+    libglx-mesa0 \
+    libgbm1 \
+    libegl1 \
+    libgles2 \
+    libgl1 \
+    fonts-freefont-ttf \
+    fonts-liberation \
+    && rm -rf /var/cache/apt/archives/* /var/lib/apt/lists/*

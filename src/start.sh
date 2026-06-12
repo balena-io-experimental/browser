@@ -1,62 +1,41 @@
 #!/usr/bin/env bash
 
-# this allows chromium sandbox to run, see https://github.com/balena-os/meta-balena/issues/2319
-sysctl -w user.max_user_namespaces=10000
+set -e
 
-# Run balena base image entrypoint script
-/usr/src/app/entry.sh echo "Running balena base image entrypoint..."
+# Enable user namespaces for Chromium's internal sandbox architecture
+sysctl -w user.max_user_namespaces=10000 || true
 
 export DBUS_SYSTEM_BUS_ADDRESS=unix:path=/host/run/dbus/system_bus_socket
 
-sed -i -e 's/console/anybody/g' /etc/X11/Xwrapper.config
-echo "needs_root_rights=yes" >> /etc/X11/Xwrapper.config
-dpkg-reconfigure xserver-xorg-legacy
-
 echo "balenaLabs browser version: $(<VERSION)"
 
-# this stops the CPU performance scaling down
+# Secure performance scaling configuration
 echo "Setting CPU Scaling Governor to 'performance'"
-echo 'performance' > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor 
-
-# check if display number envar was set
-if [[ -z "$DISPLAY_NUM" ]]
-  then
-    export DISPLAY_NUM=0
+if [ -f /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor ]; then
+    echo 'performance' > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor || true
 fi
 
-# set whether to show a cursor or not
-if [[ -n $SHOW_CURSOR ]] && [[ "$SHOW_CURSOR" -eq "1" ]]
-  then
-    export CURSOR=''
-    echo "Enabling cursor"
-  else
-    export CURSOR='-- -nocursor'
-    echo "Disabling cursor"
-fi
+# Map Wayland Socket Parameters
+export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-"/run/user/0"}
+export WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-"wayland-0"}
+WAYLAND_SOCKET="${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}"
 
-# If the vcgencmd is supported (i.e. RPi device) - check enough GPU memory is allocated
-if command -v vcgencmd &> /dev/null
-then
-	echo "Checking GPU memory"
-    if [ "$(vcgencmd get_mem gpu | grep -o '[0-9]\+')" -lt 128 ]
-	then
-	echo -e "\033[91mWARNING: GPU MEMORY TOO LOW"
-	fi
-fi
+echo "Targeting Wayland compositor socket: ${WAYLAND_SOCKET}"
 
-# Inject X11 config on the RPi 5 as the defaults do not work
-# We do this in the startup script and only for the RPi 5 because
-# we build the images per-architecture and we do not want to break
-# other aarch64-based device types
-if [ "${BALENA_DEVICE_TYPE}" = "raspberrypi5" ]
-then
-    echo "Raspberry Pi 5 detected, injecting X.org config"
-    cp -a "/usr/src/build/rpi/99-vc4.conf" "/etc/X11/xorg.conf.d/"
-fi
+# Block until the Display Sidecar container mounts the socket
+echo "Waiting for display server to expose the Wayland socket..."
+until [ -S "${WAYLAND_SOCKET}" ]; do
+  sleep 1
+done
+echo "Wayland socket detected! Establishing connection permissions."
 
-# set up the user data area
+# Apply permissive permissions so the unprivileged 'chromium' user can read/write to the socket
+chmod 777 "${XDG_RUNTIME_DIR}" || true
+chmod 666 "${WAYLAND_SOCKET}" || true
+
+# Initialize user-data storage context
 mkdir -p /data/chromium
-chown -R chromium:chromium /data
+chown -R chromium:chromium /data || true
 rm -f /data/chromium/SingletonLock
 
 # we can't maintain the environment with su, because we are logging in to a new session
@@ -66,7 +45,20 @@ environment=$(env | grep -v -w '_' | awk -F= '{ st = index($0,"=");print substr(
 # remove the last comma
 environment="${environment::-1}"
 
-# launch Chromium and whitelist the enVars so that they pass through to the su session
-su -w "$environment" -c "export DISPLAY=:$DISPLAY_NUM && startx /usr/src/app/startx.sh $CURSOR" - chromium
 
-sleep infinity
+# Dynamically map host DRI/Render GIDs to the container user space
+# if [ -e /dev/dri/renderD128 ]; then
+#     HOST_RENDER_GID=$(stat -c '%g' /dev/dri/renderD128)
+#     echo "Detected host render node GID: ${HOST_RENDER_GID}"
+#     groupadd -g "${HOST_RENDER_GID}" runtime-render || true
+#     usermod -a -G runtime-render chromium
+# elif [ -e /dev/dri/card0 ]; then
+#     HOST_CARD_GID=$(stat -c '%g' /dev/dri/card0)
+#     echo "Detected host graphics card GID: ${HOST_CARD_GID}"
+#     groupadd -g "${HOST_CARD_GID}" runtime-render || true
+#     usermod -a -G runtime-render chromium
+# fi
+
+# Launch the Node Management Service as the non-root 'chromium' user
+echo "Starting Node.js server session..."
+exec su -w "$environment" chromium -c "node /usr/src/app/server.js"
