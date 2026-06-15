@@ -1,8 +1,11 @@
 # balena-labs-projects/browser
 
 Provides a hardware accelerated web browser to present internal and external URLs on a connected display.
-The `browser` block is a docker image that runs a [Chromium](https://www.chromium.org/Home) browser via X11, optimized for balenaOS.
-The block provides an API for dynamic configuration, and also exposes the Chromium Remote Debug port.
+The `browser` block is a docker image that runs a [Chromium](https://www.chromium.org/Home) browser as a [Wayland](https://wayland.freedesktop.org/) client, optimized for balenaOS.
+It renders through a companion **display** (compositor) block, and provides an API for dynamic configuration.
+
+> **Upgrading from v2?** v3 moves from X11 to Wayland and changes the image namespace. See the
+> [v2 → v3 migration guide](docs/migrating-from-v2.md).
 
 ---
 ## Features
@@ -18,59 +21,56 @@ The block provides an API for dynamic configuration, and also exposes the Chromi
 
 ## Usage
 
+The `browser` block renders through a companion **display** (compositor) block. Run both services,
+share a volume mounted at `/run` so the browser can reach the Wayland socket, and reference the
+`browser` image for your **device type** (one of `raspberrypi3-64`, `raspberrypi4-64`,
+`raspberrypi5`, `generic-aarch64`, `generic-amd64`).
+
 #### docker-compose file
-To use this image, create a container in your `docker-compose.yml` file as shown below:
+To use this image, create your `docker-compose.yml` file as shown below:
 
 ```yaml
-version: '2'
+version: '2.4'
 
 volumes:
+  display-socket:                    # Shared Wayland runtime directory
   settings:                          # Only required if using PERSISTENT flag (see below)
 
 services:
 
-  browser:
-    image: bh.cr/balenalabs/browser-<arch> # where <arch> is one of aarch64, arm32 or amd64
-    privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
-    ports:
-        - '5011' # management API (optional)
-        - '35173' # Chromium debugging port (optional)
+  display:
+    image: bh.cr/balenalabs/display-<arch> # companion compositor block; see its README for the image name
+    privileged: true
     volumes:
+      - display-socket:/run
+    labels:
+      io.balena.features.dbus: '1'
+
+  browser:
+    image: bh.cr/balenalabs/browser-<device-type> # e.g. raspberrypi4-64, raspberrypi5, generic-amd64
+    privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
+    depends_on:
+      - display
+    environment:
+      XDG_RUNTIME_DIR: /run/user/0
+      WAYLAND_DISPLAY: wayland-0
+    devices:
+      - /dev/dri:/dev/dri
+    ports:
+      - '5011:5011' # management API
+    volumes:
+      - display-socket:/run
       - 'settings:/data' # Only required if using PERSISTENT flag (see below)
 ```
 
-To pin to a specific [version](CHANGELOG.md) of this block use:
-
-```yaml
-services:
-  browser:
-    image: bh.cr/balenalabs/browser-<arch>/<version>
-    privileged: true # required for UDEV to find plugged in peripherals such as a USB mouse
-    ports:
-        - '5011' # management API (optional)
-        - '35173' # Chromium debugging port (optional)
-    volumes:
-      - 'settings:/data' # Only required if using PERSISTENT flag (see below)
-```
+To pin to a specific [version](CHANGELOG.md) of this block, append the version to the image, e.g.
+`bh.cr/balenalabs/browser-<device-type>/<version>`.
 
 See [here](https://github.com/balena-io/open-balena-registry-proxy#usage) for more details about how to use blocks hosted in balenaCloud.
 
 ---
 
-## Customization
-### Extend image configuration
-
-By default the `browser` block uses the first local display (i.e. `DISPLAY=:0`) which would typically be a connected monitor, TV or a Pi Display. However for custom configurations you can overload the `CMD` directive, as such:
-
-*dockerfile.template*
-```Dockerfile
-FROM bh.cr/balenalabs/browser-%%BALENA_ARCH%%
-
-CMD ["export DISPLAY=:1"]
-```
----
-
-### Environment variables
+## Environment variables
 
 The following environment variables allow configuration of the `browser` block:
 
@@ -95,6 +95,7 @@ The following environment variables allow configuration of the `browser` block:
 |`API_PORT`|port number|5011|Specifies the port number the API runs on|
 |`REMOTE_DEBUG_PORT`|port number|35173|Specifies the port number the chrome remote debugger runs on|
 |`AUTO_REFRESH`|interval|0 (disabled)|Specifies the number of seconds before the page automatically refreshes|
+|`ENABLE_DIAGNOSTICS`|`0`, `1`|`0`|Enables the `/diagnostics/*` API endpoints, which expose Chromium version, GPU and media-decoder state. Off by default. <br/> `0` = off, `1` = on|
 
 ---
 
@@ -109,7 +110,7 @@ volumes:
 services:
   browser:
     restart: always
-    image: bh.cr/balenalabs/browser-<arch>
+    image: bh.cr/balenalabs/browser-<device-type>
     privileged: true
     volumes:
       - 'settings:/data'
@@ -129,7 +130,7 @@ In this example we add the `audio` block and route the `browser` audio to the Ra
 ```yaml
 services:
   browser:
-    image: bh.cr/balenalabs/browser-<arch>
+    image: bh.cr/balenalabs/browser-<device-type>
   audio:
     image: bh.cr/balenalabs/audio-<arch>
     privileged: true
@@ -223,21 +224,48 @@ Returns the version of Chromium that `browser` is running
 Uses [scrot](https://opensource.com/article/17/11/taking-screen-captures-linux-command-line-scrot) to take a screenshot of the chromium window. 
 The screenshot will be saved as a temporary file in the container.
 
+### Diagnostics
+
+The following endpoints expose internal Chromium state for troubleshooting hardware acceleration.
+They are **disabled by default**; set `ENABLE_DIAGNOSTICS=1` to enable them. When disabled they
+return `404`.
+
+#### **GET** /diagnostics/version
+Returns the running Chromium build/version (and the block version) as JSON.
+
+#### **GET** /diagnostics/gpu
+Returns Chromium's GPU feature status, drivers and active backend as JSON (the same data as
+`chrome://gpu`).
+
+#### **GET** /diagnostics/media
+Returns the decoder used by any active media player, including whether it is hardware-accelerated —
+useful for confirming hardware video decode (e.g. `V4L2VideoDecoder`).
+
 ---
 
 ## Supported devices
-The `browser` block has been tested to work on the following devices:
 
-| Device Type  | Status |
-| ------------- | ------------- |
-| Raspberry Pi 3b+ (64-bit OS) | ✔ |
-| Raspberry Pi 4 | ✔ |
-| Raspberry Pi 5 | ✔ |
-| Intel NUC | ✔ |
-| Generic AMD64 | ✔ |
-| Generic AARCH64 | ✔ (software video decode) |
+The block builds for two architectures (`aarch64`, `amd64`) and bundles the Mesa
+GPU/VA-API drivers, so it will *run* on a wide range of hardware. We distinguish two levels of
+support:
 
-> **Note:** 32-bit Raspberry Pi OS and the balena Fin (`fincm3`) are no longer targeted. Use the 64-bit (`aarch64`) OS on Raspberry Pi.
+**Tested** — exercised on real hardware, including hardware video decode where applicable:
+
+| Device Type | Notes |
+| --- | --- |
+| Raspberry Pi 3 (64-bit OS) | H.264 hardware decode |
+| Raspberry Pi 4 / Pi 400 | H.264 hardware decode |
+| Raspberry Pi 5 | GPU rendering; H.264 falls back to software decode |
+| Intel NUC | VA-API hardware decode (Mesa) |
+| Generic AMD64 | VA-API hardware decode (Mesa) |
+| Generic AARCH64 | GPU rendering; software video decode |
+
+**Technically supported** — other devices of the same architecture should boot and render, but we
+haven't validated them and hardware video decode is not guaranteed (it depends on the device's
+kernel drivers). Use the generic `aarch64`/`amd64` images.
+
+> **Note:** 32-bit Raspberry Pi OS and the balena Fin (`fincm3`) are no longer targeted. Use the
+> 64-bit (`aarch64`) OS on Raspberry Pi.
 
 ---
 
@@ -256,8 +284,8 @@ it.
 > **Upgrade note:** `ENABLE_GPU=1` continues to give you hardware video decode, as it always has —
 > nothing to change for existing video kiosks.
 >
-> Hardware **video encode** (e.g. for WebRTC capture) is not currently exposed; it's a candidate for a
-> future enhancement.
+> Hardware **video encode** is currently **not supported** (e.g. WebRTC capture/streaming may not
+> work — see [#168](https://github.com/balena-io-experimental/browser/issues/168)).
 
 What to expect per target (with `ENABLE_GPU=1`):
 
@@ -268,27 +296,6 @@ What to expect per target (with `ENABLE_GPU=1`):
   codecs, so H.264 falls back to **software decode**. GPU rendering still works.
 - **Generic x86_64 (Intel/AMD)** — VA-API decode via `mesa-va-drivers` (already bundled).
 - **Generic AARCH64** — software video decode (no guaranteed kernel decoder).
-
-### Extending the block (advanced VA-API drivers)
-
-The block bundles `mesa-va-drivers`, which covers AMD and Mesa-based Intel decode. Some stacks need
-extra, often non-free, drivers that we deliberately do **not** bundle:
-
-- **Intel (iHD):** `intel-media-va-driver` (Debian `non-free`).
-- **NVIDIA:** `nvidia-vaapi-driver` plus the `VaapiOnNvidiaGPUs` Chromium feature (experimental,
-  unsupported upstream).
-
-Add these in a derived image, e.g.:
-
-```dockerfile
-FROM bh.cr/<your-org>/browser-block
-# Requires the non-free component enabled in apt sources
-RUN apt-get update && apt-get install -y --no-install-recommends intel-media-va-driver vainfo \
-    && rm -rf /var/lib/apt/lists/*
-```
-
-Then verify the driver loads with `vainfo` inside the container, and check
-`GET /diagnostics/media` / `chrome://gpu` for a hardware decoder.
 
 ## Troubleshooting
 This section provides some guidance for common issues encountered:
