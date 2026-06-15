@@ -31,12 +31,84 @@ const FORCE_VULKAN = process.env.FORCE_VULKAN || "-1";
 
 // Dynamic configuration variables that can be altered live via the HTTP API
 let kioskMode = process.env.KIOSK || '0';
+// Hardware acceleration switches. ENABLE_GPU is the master switch for GPU rendering
+// (rasterization/compositing/WebGL); when it is on, best-effort hardware video decode
+// rides along automatically (this preserves the historical ENABLE_GPU=1 contract).
+// DISABLE_VIDEO_DECODE opts OUT of decode while keeping GPU rendering on.
+// (Hardware video encode is a possible future enhancement; not currently exposed.)
 let enableGpu = process.env.ENABLE_GPU || '0';
+let disableVideoDecode = process.env.DISABLE_VIDEO_DECODE || '0';
 
 let DEFAULT_FLAGS = [];
 let currentUrl = '';
 let flags = [];
 let timer = {};
+
+// Universal Wayland and kiosk-oriented behavior flags applied on every platform,
+// regardless of acceleration toggles.
+const BALENA_BASE_FLAGS = [
+  '--autoplay-policy=no-user-gesture-required', // Allow autonomous media playback
+  '--noerrdialogs',                             // Suppress error dialogs in production
+  '--disable-session-crashed-bubble',           // Prevent crash recovery UI from breaking kiosk immersion
+  '--check-for-update-interval=31536000',       // Disable update checks
+  '--disable-dev-shm-usage',                    // Prevent shared memory exhaustion in Docker
+  '--touch-events=enabled',                     // Force capacitive touch layer recognition for DSI displays
+  '--ozone-platform=wayland'                    // Render through the Wayland compositor (display block), never X11/XWayland
+];
+
+/**
+ * Per-platform GPU overrides. Each descriptor only carries the pieces that differ
+ * between hardware targets; the common base and the workload toggles in
+ * composeGpuFlags() decide what actually gets emitted.
+ *
+ * - glBackend:      ANGLE/GL backend selection for the platform's driver stack.
+ * - decodeFeatures: Chromium feature tokens to add when hardware video decode is
+ *                   requested. Empty where decode is owned by the platform's patched
+ *                   Chromium (Raspberry Pi) or unavailable (generic aarch64).
+ */
+const PLATFORM_PROFILES = {
+  // Generic x86_64 (Intel / AMD). Hardware decode via Mesa VA-API; the LinuxGL
+  // features expect the ANGLE-on-GL path.
+  x86: {
+    glBackend: ['--use-gl=angle', '--use-angle=gl'],
+    decodeFeatures: ['AcceleratedVideoDecodeLinuxGL', 'AcceleratedVideoDecodeLinuxZeroCopyGL']
+  },
+  // Raspberry Pi 5 (VideoCore VII, v3dv). HW video decode is HEVC-only and unavailable
+  // in the distro Chromium, so H.264 falls back to software regardless of flags.
+  rpi5: {
+    glBackend: ['--use-angle=gles'],
+    decodeFeatures: []
+  },
+  // Raspberry Pi 3-64 / 4 / 400 (bcm2835-codec). Decode is handled by the Raspberry Pi
+  // patched Chromium (success shows as MojoVideoDecoder), so we add no decode features
+  // and must NOT force the upstream --use-v4l2-codec path.
+  rpiCodec: {
+    glBackend: ['--use-angle=gles'],
+    decodeFeatures: []
+  },
+  // Generic AARCH64 boards lacking guaranteed decoder support. Software video decode.
+  genericArm64: {
+    glBackend: ['--use-gl=egl'],
+    decodeFeatures: []
+  }
+};
+
+/**
+ * Maps a balena device type/arch onto a PLATFORM_PROFILES key.
+ */
+function resolvePlatform(deviceType, deviceArch) {
+  if (deviceType === 'raspberrypi5') {
+    return 'rpi5';
+  }
+  if (deviceType.startsWith('raspberry')) {
+    return 'rpiCodec';
+  }
+  if (deviceArch === 'amd64') {
+    return 'x86';
+  }
+  // aarch64 and any other unrecognized board
+  return 'genericArm64';
+}
 
 /**
  * Resolves the target URL for Chromium to display based on a strict hierarchy:
@@ -90,6 +162,71 @@ async function getUrlToDisplayAsync() {
 }
 
 /**
+ * Builds the full Chromium argument list from the common base, the resolved platform
+ * profile, and the hardware-acceleration switches. ENABLE_GPU is the master switch:
+ * when on, GPU rendering plus best-effort hardware video decode are applied. Decode can
+ * be opted out with DISABLE_VIDEO_DECODE.
+ */
+function composeGpuFlags() {
+  let composed = DEFAULT_FLAGS.concat(BALENA_BASE_FLAGS);
+  let enabledFeatures = [];
+
+  if (process.env.ENABLE_VIRTUAL_KEYBOARD === '1') {
+    enabledFeatures.push('VirtualKeyboard');
+  }
+
+  // Decode rides along with GPU rendering by default (see below), so "I want decode" is
+  // simply ENABLE_GPU=1.
+  const gpuEnabled = enableGpu === '1';
+
+  if (!gpuEnabled) {
+    console.log("GPU rendering disabled. Engaging software rasterization.");
+    // CPU-driven software rasterization pipeline compatible with Wayland/Weston allocation
+    composed.push('--use-gl=swiftshader');
+  } else {
+    console.log("GPU rendering enabled.");
+    // Baseline Wayland GPU rendering parameters
+    composed.push(
+      '--ignore-gpu-blocklist',     // Override default driver blocklists for embedded Mesa drivers
+      '--enable-gpu-rasterization'  // Offload UI and canvas rendering to the GPU
+    );
+
+    const deviceType = process.env.BALENA_DEVICE_TYPE || '';
+    const deviceArch = process.env.BALENA_DEVICE_ARCH || '';
+    const profile = PLATFORM_PROFILES[resolvePlatform(deviceType, deviceArch)];
+
+    composed = composed.concat(profile.glBackend);
+
+    // Best-effort hardware video decode is enabled by default whenever the GPU is on.
+    // Operators can opt out with DISABLE_VIDEO_DECODE=1 on devices where the decode
+    // path misbehaves (rendering stays hardware-accelerated).
+    if (disableVideoDecode === '1') {
+      console.log("Hardware video decode disabled by DISABLE_VIDEO_DECODE.");
+    } else {
+      // On Raspberry Pi this list is empty: decode is owned by the patched Chromium
+      // (verify via V4L2VideoDecoder), so we deliberately do not force a decoder path.
+      enabledFeatures = enabledFeatures.concat(profile.decodeFeatures);
+    }
+
+    // Vulkan is only auto-enabled on the Raspberry Pi 5; FORCE_VULKAN can override.
+    // NOTE: '--ozone-platform=wayland' has been observed to be incompatible with Vulkan
+    // on Pi 4 — validate on Pi 5 hardware.
+    if (deviceType === 'raspberrypi5'
+        ? (FORCE_VULKAN === '1' || FORCE_VULKAN !== '0')
+        : (FORCE_VULKAN === '1')) {
+      enabledFeatures.push('Vulkan');
+    }
+  }
+
+  // Only emit --enable-features when we actually have features to enable
+  if (enabledFeatures.length > 0) {
+    composed.push(`--enable-features=${enabledFeatures.join(',')}`);
+  }
+
+  return composed;
+}
+
+/**
  * Composes hardware-specific flags and spawns Chromium using wayland.
  * Manages the destruction of previous instances before launching a new session.
  */
@@ -101,80 +238,7 @@ let launchChromium = async function(url) {
     // Override completely if the user provides an explicit global FLAGS variable
     flags = FLAGS.split(' ');
   } else {
-    flags = DEFAULT_FLAGS;
-    
-    // Universal Wayland and kiosk-oriented behavior flags
-    let balenaFlags = [
-      '--autoplay-policy=no-user-gesture-required', // Allow autonomous media playback
-      '--noerrdialogs',                             // Suppress error dialogs in production
-      '--disable-session-crashed-bubble',           // Prevent crash recovery UI from breaking kiosk immersion
-      '--check-for-update-interval=31536000',       // Disable update checks
-      '--disable-dev-shm-usage',                    // Prevent shared memory exhaustion in Docker
-      '--touch-events=enabled'                      // Force capacitive touch layer recognition for DSI displays
-    ];
-
-    flags = flags.concat(balenaFlags);
-
-    // Feature toggles combined into a single comma-separated string to prevent CLI argument collisions
-    let enabledFeatures = [];
-    let gpuFlags = [];
-
-    if (process.env.ENABLE_VIRTUAL_KEYBOARD === '1') {
-      enabledFeatures.push('VirtualKeyboard');
-    }
-
-    if (enableGpu != '1') {
-      console.log("GPU Acceleration Disabled. Engaging clean software rasterization.");
-      // Forces a CPU-driven software rasterization pipeline compatible with Wayland/Weston allocation
-      gpuFlags = [
-        '--ozone-platform=wayland',
-        '--use-gl=swiftshader'
-      ];
-    } else {
-      console.log("Enabling Hardware GPU Acceleration Pipeline");
-      
-      // Baseline Wayland GPU acceleration parameters
-      gpuFlags = [
-        '--ozone-platform=wayland',    // Instruct Chromium to bypass X11/XWayland
-        '--ignore-gpu-blocklist',      // Override default driver blacklists for embedded Mesa drivers
-        '--enable-gpu-rasterization',  // Offload UI and canvas rendering to the GPU
-        // '--enable-zero-copy'           // Prevent expensive CPU memory copies by directly mapping GPU textures
-      ];
-      
-      const deviceType = process.env.BALENA_DEVICE_TYPE || '';
-      const deviceArch = process.env.BALENA_DEVICE_ARCH || '';
-
-      // Handle configuration routing based on targeted system architectures
-      
-      // Raspberry Pi Architecture (Broadcom VideoCore)
-      if (deviceType.startsWith('raspberry')) {
-        // Map ANGLE to OpenGL ES native to the Broadcom VideoCore GPU
-        gpuFlags.push('--use-angle=gles');
-        // Engage hardware video engine parameters
-        enabledFeatures.push('V4l2VideoDecoder', 'AcceleratedVideoEncoder');
-
-        // Pi 5 specific Vulkan enablement using the v3dv Mesa driver
-        if (FORCE_VULKAN === "1" || (deviceType === "raspberrypi5" && FORCE_VULKAN !== "0")) {
-          enabledFeatures.push('Vulkan');
-        }
-      } 
-      // Generic x86_64 Architecture (Intel / AMD Radeon)
-      else if (deviceArch === 'amd64') {
-        // Map directly to standard EGL on standard x86 graphics stacks
-        gpuFlags.push('--use-gl=egl');
-        // Engage VA-API hardware decoders specifically optimized for Linux Wayland environments
-        enabledFeatures.push('AcceleratedVideoDecodeLinuxGL', 'AcceleratedVideoDecodeLinuxZeroCopyGL');
-      } 
-      // Generic AARCH64 Architecture
-      else if (deviceArch === 'aarch64') {
-        // Safe fallback for disparate ARM64 boards lacking guaranteed V4L2 decoder compatibility
-        gpuFlags.push('--use-gl=egl');
-      }
-    }
-
-    // Register all collected features into the unified argument flag
-    flags = flags.concat(gpuFlags);
-    flags.push(`--enable-features=${enabledFeatures.join(',')}`);
+    flags = composeGpuFlags();
   }
 
   // Append any additive custom flags provided by the operator
@@ -468,6 +532,115 @@ app.post('/scan', (req, res) => {
 app.listen(API_PORT, () => {
   console.log('Browser API running on port: ' + API_PORT);
 });
+
+// ============================================================================
+// Diagnostic Endpoints
+// Extracts internal Chromium state directly via Chrome DevTools Protocol
+// ============================================================================
+
+// Extracts full GPU diagnostic data silently without creating window surfaces
+app.get('/diagnostics/gpu', async (req, res) => {
+  let client;
+  try {
+    // 1. Interrogate the debugging metadata endpoint to retrieve the root browser socket
+    const browserVersion = await CDP.Version({ port: REMOTE_DEBUG_PORT });
+    
+    // 2. Connect directly to the master browser session WebSocket URL
+    client = await CDP({ target: browserVersion.webSocketDebuggerUrl });
+    
+    // 3. Execute the native SystemInfo protocol command
+    if (client.SystemInfo && typeof client.SystemInfo.getInfo === 'function') {
+      const infoPayload = await client.SystemInfo.getInfo();
+      
+      // infoPayload.gpu contains standard devices, featureStatus, and driverBugWorkarounds
+      return res.status(200).json(infoPayload.gpu);
+    } else {
+      return res.status(500).send("SystemInfo protocol domain not exposed by this Chromium binary.");
+    }
+  } catch (err) {
+    console.log("Error during silent SystemInfo extraction: ", err.toString());
+    return res.status(500).send("Failed to extract GPU diagnostic payload silently.");
+  } finally {
+    // 4. Ensure the control socket is gracefully detached
+    if (client) {
+      await client.close();
+    }
+  }
+});
+
+// Extracts active media player states subtly using the CDP Media domain
+app.get('/diagnostics/media', async (req, res) => {
+  let client;
+  try {
+    // 1. Fetch the target registry to isolate the primary user-visible page
+    const targets = await CDP.List({ port: REMOTE_DEBUG_PORT });
+    const pageTarget = targets.find(t => t.type === 'page');
+
+    if (!pageTarget) {
+      return res.status(404).send("No active kiosk or page target found to inspect.");
+    }
+
+    // 2. Intercept the existing tab socket (zero compositor/window disruption)
+    client = await CDP({ target: pageTarget });
+    const { Media } = client;
+
+    const activePlayers = {};
+
+    // 3. Trap properties as Chromium flushes them down the WebSocket connection
+    Media.playerPropertiesChanged((params) => {
+      const { playerId, properties } = params;
+      if (!activePlayers[playerId]) {
+        activePlayers[playerId] = {};
+      }
+      
+      properties.forEach(prop => {
+        activePlayers[playerId][prop.name] = prop.value;
+      });
+    });
+
+    // 4. Force state synchronization from Chromium's internal media logger
+    await Media.enable();
+
+    // 5. Provide a brief period for the socket events to settle
+    await new Promise(resolve => setTimeout(resolve, 400));
+
+    // 6. Map and normalize the player parameters to verify acceleration status
+    const diagnosticReport = Object.keys(activePlayers).map(id => {
+      const playerData = activePlayers[id];
+      const decoderName = playerData.video_decoder || playerData.kVideoDecoderName || "Unknown";
+      
+      // Determine if hardware-accelerated based on runtime driver name or metadata
+      const isHardware = playerData.is_platform_video_decoder === "true" || 
+                         playerData.is_platform_video_decoder === true ||
+                         /v4l2|vaapi|mojo|d3d11/i.test(decoderName);
+
+      return {
+        playerId: id,
+        videoCodec: playerData.video_codec_name || "Unknown",
+        decoderName: decoderName,
+        isHardwareAccelerated: isHardware,
+        resolution: `${playerData.video_width || 0}x${playerData.video_height || 0}`,
+        rawProperties: playerData
+      };
+    });
+
+    return res.status(200).json({
+      activePlaybackCount: diagnosticReport.length,
+      players: diagnosticReport
+    });
+
+  } catch (err) {
+    console.log("Error executing silent media diagnostics: ", err.toString());
+    return res.status(500).send("Failed to extract active media decoder states subtly.");
+  } finally {
+    // 7. Ensure control socket detachment
+    if (client) {
+      await client.close();
+    }
+  }
+});
+
+
 
 // Graceful cleanup handling on termination signal catch blocks
 process.on('SIGINT', () => {

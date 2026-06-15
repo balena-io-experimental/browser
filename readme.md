@@ -87,7 +87,8 @@ The following environment variables allow configuration of the `browser` block:
 |`ROTATE_DISPLAY`|`normal`, `left`, `right`, `inverted`|`normal`|Rotates the display|
 |`ROTATE_DELAY`|`n`|`3`|Add an artificial delay (in seconds) before applying display rotation|
 |`TOUCHSCREEN`|`string`|N\A|Name of Touch Input to rotate|
-|`ENABLE_GPU`|`0`, `1`|0|Enables the GPU rendering. Necessary for Pi3B+ to display YouTube videos. <br/> `0` = off, `1` = on|
+|`ENABLE_GPU`|`0`, `1`|0|Master hardware-acceleration switch. Enables GPU **rendering** (rasterization, compositing, WebGL/canvas) and, by default, best-effort hardware **video decode**. On Raspberry Pi, decode is handled by the Pi-patched Chromium (verify via `MojoVideoDecoder`/`V4L2VideoDecoder` in `chrome://media-internals`); on x86 it enables the Mesa VA-API path. <br/> `0` = off, `1` = on|
+|`DISABLE_VIDEO_DECODE`|`0`, `1`|0|Opt **out** of hardware video decode while keeping GPU rendering on. Use on devices where the decode path misbehaves. No effect unless `ENABLE_GPU=1`. <br/> `0` = decode stays on, `1` = decode off|
 |`FORCE_VULKAN`|`0`, `1`|undefined|In combination with `ENABLE_GPU`, forces vulkan to either be enabled or disabled in chromium. If undefined or an invalid value, vulkan is only automatically enabled on the Raspberry Pi 5|
 |`WINDOW_SIZE`|`x,y`|Detected screen resolution|Sets the browser window size, such as `800,600`. <br/> **Note:** Reverse the dimensions if you also rotate the display to `left` or `right` |
 |`WINDOW_POSITION`|`x,y`|`0,0`|Specifies the browser window position on the screen|
@@ -229,14 +230,65 @@ The `browser` block has been tested to work on the following devices:
 
 | Device Type  | Status |
 | ------------- | ------------- |
-| Raspberry Pi 3b+ | ✔ |
 | Raspberry Pi 3b+ (64-bit OS) | ✔ |
-| balena Fin | ✔ |
 | Raspberry Pi 4 | ✔ |
+| Raspberry Pi 5 | ✔ |
 | Intel NUC | ✔ |
 | Generic AMD64 | ✔ |
+| Generic AARCH64 | ✔ (software video decode) |
+
+> **Note:** 32-bit Raspberry Pi OS and the balena Fin (`fincm3`) are no longer targeted. Use the 64-bit (`aarch64`) OS on Raspberry Pi.
 
 ---
+
+## Hardware acceleration
+
+Hardware acceleration is controlled by a single master switch with one optional override:
+
+- **`ENABLE_GPU=1`** turns on GPU rendering **and** best-effort hardware video decode. For most
+  kiosks (including video playback) this is the only variable you need.
+- **`DISABLE_VIDEO_DECODE=1`** opts out of decode while keeping GPU rendering — for devices where the
+  decode path misbehaves.
+
+The prefix tells you the default: `ENABLE_*` is off until you set it; `DISABLE_*` is on until you set
+it.
+
+> **Upgrade note:** `ENABLE_GPU=1` continues to give you hardware video decode, as it always has —
+> nothing to change for existing video kiosks.
+>
+> Hardware **video encode** (e.g. for WebRTC capture) is not currently exposed; it's a candidate for a
+> future enhancement.
+
+What to expect per target (with `ENABLE_GPU=1`):
+
+- **Raspberry Pi 4 / Pi 400 / Pi 3 (64-bit)** — H.264 hardware decode via the Pi-patched Chromium
+  (`bcm2835-codec`). Verify in `chrome://media-internals`: the decoder shows as `V4L2VideoDecoder`
+  with `isHardwareAccelerated: true`.
+- **Raspberry Pi 5** — the video block is HEVC-only and the distro Chromium ships without proprietary
+  codecs, so H.264 falls back to **software decode**. GPU rendering still works.
+- **Generic x86_64 (Intel/AMD)** — VA-API decode via `mesa-va-drivers` (already bundled).
+- **Generic AARCH64** — software video decode (no guaranteed kernel decoder).
+
+### Extending the block (advanced VA-API drivers)
+
+The block bundles `mesa-va-drivers`, which covers AMD and Mesa-based Intel decode. Some stacks need
+extra, often non-free, drivers that we deliberately do **not** bundle:
+
+- **Intel (iHD):** `intel-media-va-driver` (Debian `non-free`).
+- **NVIDIA:** `nvidia-vaapi-driver` plus the `VaapiOnNvidiaGPUs` Chromium feature (experimental,
+  unsupported upstream).
+
+Add these in a derived image, e.g.:
+
+```dockerfile
+FROM bh.cr/<your-org>/browser-block
+# Requires the non-free component enabled in apt sources
+RUN apt-get update && apt-get install -y --no-install-recommends intel-media-va-driver vainfo \
+    && rm -rf /var/lib/apt/lists/*
+```
+
+Then verify the driver loads with `vainfo` inside the container, and check
+`GET /diagnostics/media` / `chrome://gpu` for a hardware decoder.
 
 ## Troubleshooting
 This section provides some guidance for common issues encountered:

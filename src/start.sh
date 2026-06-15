@@ -46,18 +46,24 @@ environment=$(env | grep -v -w '_' | awk -F= '{ st = index($0,"=");print substr(
 environment="${environment::-1}"
 
 
-# Dynamically map host DRI/Render GIDs to the container user space
-# if [ -e /dev/dri/renderD128 ]; then
-#     HOST_RENDER_GID=$(stat -c '%g' /dev/dri/renderD128)
-#     echo "Detected host render node GID: ${HOST_RENDER_GID}"
-#     groupadd -g "${HOST_RENDER_GID}" runtime-render || true
-#     usermod -a -G runtime-render chromium
-# elif [ -e /dev/dri/card0 ]; then
-#     HOST_CARD_GID=$(stat -c '%g' /dev/dri/card0)
-#     echo "Detected host graphics card GID: ${HOST_CARD_GID}"
-#     groupadd -g "${HOST_CARD_GID}" runtime-render || true
-#     usermod -a -G runtime-render chromium
-# fi
+# Grant the unprivileged 'chromium' user access to the GPU and video-decode
+# device nodes. These nodes (/dev/dri/card*, /dev/dri/render*, /dev/video*) are
+# group-owned by the host's 'video'/'render' GIDs with mode 0660, so uid 1000
+# cannot open them by default. Without this, hardware GL falls back to the one
+# world-readable render node and V4L2 hardware video decode fails silently
+# (Chromium drops to the software FFmpegVideoDecoder). We map each node's owning
+# GID into the container and add 'chromium' to the matching group before su.
+for dev in /dev/dri/card* /dev/dri/render* /dev/video*; do
+    [ -e "$dev" ] || continue
+    node_gid=$(stat -c '%g' "$dev")
+    node_grp=$(getent group "$node_gid" | cut -d: -f1)
+    if [ -z "$node_grp" ]; then
+        node_grp="hwaccel_${node_gid}"
+        groupadd -g "$node_gid" "$node_grp" || true
+    fi
+    usermod -aG "$node_grp" chromium || true
+    echo "Granted chromium access to ${dev} (gid ${node_gid}, group ${node_grp})"
+done
 
 # Launch the Node Management Service as the non-root 'chromium' user
 echo "Starting Node.js server session..."
