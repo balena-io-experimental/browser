@@ -44,13 +44,12 @@ assets:
     data:
       url: 'https://raw.githubusercontent.com/balena-labs-projects/browser/master/logo.png'
 data:
-  defaultDeviceType: raspberrypi3
+  defaultDeviceType: raspberrypi4-64
   supportedDeviceTypes:
     - raspberrypi4-64
-    - fincm3
-    - raspberrypi3
     - raspberrypi3-64
     - raspberrypi400-64
     - raspberrypi5
     - intel-nuc
-    - genericx86-64-ext
+    - generic-amd64
+    - generic-aarch64
