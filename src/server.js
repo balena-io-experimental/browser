@@ -28,6 +28,8 @@ const EXTRA_FLAGS = process.env.EXTRA_FLAGS || null;
 const HTTPS_REGEX = /^https?:\/\//i;
 const AUTO_REFRESH = process.env.AUTO_REFRESH || 0;
 const FORCE_VULKAN = process.env.FORCE_VULKAN || "-1";
+// Diagnostics endpoints expose internal Chromium/GPU state; off by default.
+const ENABLE_DIAGNOSTICS = process.env.ENABLE_DIAGNOSTICS || '0';
 
 // Dynamic configuration variables that can be altered live via the HTTP API
 let kioskMode = process.env.KIOSK || '0';
@@ -535,11 +537,38 @@ app.listen(API_PORT, () => {
 
 // ============================================================================
 // Diagnostic Endpoints
-// Extracts internal Chromium state directly via Chrome DevTools Protocol
+// Extracts internal Chromium state directly via Chrome DevTools Protocol.
+// Gated behind ENABLE_DIAGNOSTICS (default off) since they expose system info.
 // ============================================================================
 
+// Refuse diagnostics requests unless explicitly enabled.
+function diagnosticsGuard(req, res, next) {
+  if (ENABLE_DIAGNOSTICS !== '1') {
+    return res.status(404).send('Diagnostics are disabled. Set ENABLE_DIAGNOSTICS=1 to enable them.');
+  }
+  next();
+}
+
+// Reports the running Chromium build/version and the block version
+app.get('/diagnostics/version', diagnosticsGuard, async (req, res) => {
+  try {
+    const info = await CDP.Version({ port: REMOTE_DEBUG_PORT });
+    return res.status(200).json({
+      browser: info['Browser'],                 // e.g. "Chrome/148.0.7778.167"
+      protocolVersion: info['Protocol-Version'],
+      v8Version: info['V8-Version'],
+      webkitVersion: info['WebKit-Version'],
+      userAgent: info['User-Agent'],
+      blockVersion: process.env.VERSION || null
+    });
+  } catch (err) {
+    console.log("Error retrieving Chromium version: ", err.toString());
+    return res.status(500).send("Failed to retrieve Chromium version.");
+  }
+});
+
 // Extracts full GPU diagnostic data silently without creating window surfaces
-app.get('/diagnostics/gpu', async (req, res) => {
+app.get('/diagnostics/gpu', diagnosticsGuard, async (req, res) => {
   let client;
   try {
     // 1. Interrogate the debugging metadata endpoint to retrieve the root browser socket
@@ -569,7 +598,7 @@ app.get('/diagnostics/gpu', async (req, res) => {
 });
 
 // Extracts active media player states subtly using the CDP Media domain
-app.get('/diagnostics/media', async (req, res) => {
+app.get('/diagnostics/media', diagnosticsGuard, async (req, res) => {
   let client;
   try {
     // 1. Fetch the target registry to isolate the primary user-visible page
