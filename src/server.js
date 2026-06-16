@@ -206,7 +206,9 @@ function composeGpuFlags() {
     // Operators can opt out with DISABLE_VIDEO_DECODE=1 on devices where the decode
     // path misbehaves (rendering stays hardware-accelerated).
     if (disableVideoDecode === '1') {
+      // Force software video decode while keeping GPU rendering on
       console.log("Hardware video decode disabled by DISABLE_VIDEO_DECODE.");
+      composed.push('--disable-accelerated-video-decode');
     } else {
       // On Raspberry Pi this list is empty: decode is owned by the patched Chromium
       // (verify via V4L2VideoDecoder), so we deliberately do not force a decoder path.
