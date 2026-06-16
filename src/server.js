@@ -35,7 +35,6 @@ const FLAGS = process.env.FLAGS || null;
 const EXTRA_FLAGS = process.env.EXTRA_FLAGS || null;
 const HTTPS_REGEX = /^https?:\/\//i;
 const AUTO_REFRESH = process.env.AUTO_REFRESH || 0;
-const FORCE_VULKAN = process.env.FORCE_VULKAN || "-1";
 // Diagnostics endpoints expose internal Chromium/GPU state; off by default.
 const ENABLE_DIAGNOSTICS = process.env.ENABLE_DIAGNOSTICS || '0';
 
@@ -213,15 +212,6 @@ function composeGpuFlags() {
       // On Raspberry Pi this list is empty: decode is owned by the patched Chromium
       // (verify via V4L2VideoDecoder), so we deliberately do not force a decoder path.
       enabledFeatures = enabledFeatures.concat(profile.decodeFeatures);
-    }
-
-    // Vulkan is only auto-enabled on the Raspberry Pi 5; FORCE_VULKAN can override.
-    // NOTE: '--ozone-platform=wayland' has been observed to be incompatible with Vulkan
-    // on Pi 4 — validate on Pi 5 hardware.
-    if (deviceType === 'raspberrypi5'
-        ? (FORCE_VULKAN === '1' || FORCE_VULKAN !== '0')
-        : (FORCE_VULKAN === '1')) {
-      enabledFeatures.push('Vulkan');
     }
   }
 

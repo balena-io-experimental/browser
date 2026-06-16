@@ -89,7 +89,6 @@ The following environment variables allow configuration of the `browser` block:
 |`TOUCHSCREEN`|`string`|N\A|Name of Touch Input to rotate|
 |`ENABLE_GPU`|`0`, `1`|0|Master hardware-acceleration switch. Enables GPU **rendering** (rasterization, compositing, WebGL/canvas) and, by default, best-effort hardware **video decode**. On Raspberry Pi, decode is handled by the Pi-patched Chromium (verify via `MojoVideoDecoder`/`V4L2VideoDecoder` in `chrome://media-internals`); on x86 it enables the Mesa VA-API path. <br/> `0` = off, `1` = on|
 |`DISABLE_VIDEO_DECODE`|`0`, `1`|0|Opt **out** of hardware video decode while keeping GPU rendering on. Use on devices where the decode path misbehaves. No effect unless `ENABLE_GPU=1`. <br/> `0` = decode stays on, `1` = decode off|
-|`FORCE_VULKAN`|`0`, `1`|undefined|In combination with `ENABLE_GPU`, forces vulkan to either be enabled or disabled in chromium. If undefined or an invalid value, vulkan is only automatically enabled on the Raspberry Pi 5|
 |`WINDOW_SIZE`|`x,y`|Detected screen resolution|Sets the browser window size, such as `800,600`. <br/> **Note:** Reverse the dimensions if you also rotate the display to `left` or `right` |
 |`WINDOW_POSITION`|`x,y`|`0,0`|Specifies the browser window position on the screen|
 |`API_PORT`|port number|5011|Specifies the port number the API runs on|
