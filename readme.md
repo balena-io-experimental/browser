@@ -16,7 +16,7 @@ It renders through a companion **display** (compositor) block, and provides an A
 - Remotely configurable launch URL
 - Automatically displays local HTTP (port 80 or 8080) or HTTPS (443) service endpoints.
 - API for remote configuration and management
-- Chromium remote debugging port
+- Optional remote debugging from another host
 ---
 
 ## Usage
@@ -93,7 +93,8 @@ The following environment variables allow configuration of the `browser` block:
 |`WINDOW_SIZE`|`x,y`|Detected screen resolution|Sets the browser window size, such as `800,600`. <br/> **Note:** Reverse the dimensions if you also rotate the display to `left` or `right` |
 |`WINDOW_POSITION`|`x,y`|`0,0`|Specifies the browser window position on the screen|
 |`API_PORT`|port number|5011|Specifies the port number the API runs on|
-|`REMOTE_DEBUG_PORT`|port number|35173|Specifies the port number the chrome remote debugger runs on|
+|`ENABLE_REMOTE_DEBUG`|`0`, `1`|`0`|Exposes Chromium's remote debugging interface on `REMOTE_DEBUG_PORT` so it can be reached from another host (see [Remote debugging](#remote-debugging)). **No authentication or encryption.** <br/> `0` = off, `1` = on|
+|`REMOTE_DEBUG_PORT`|port number|35173|Port the remote debugging relay listens on when `ENABLE_REMOTE_DEBUG=1`. Has no effect otherwise|
 |`AUTO_REFRESH`|interval|0 (disabled)|Specifies the number of seconds before the page automatically refreshes|
 |`ENABLE_DIAGNOSTICS`|`0`, `1`|`0`|Enables the `/diagnostics/*` API endpoints, which expose Chromium version, GPU and media-decoder state. Off by default. <br/> `0` = off, `1` = on|
 
@@ -240,6 +241,28 @@ Returns Chromium's GPU feature status, drivers and active backend as JSON (the s
 #### **GET** /diagnostics/media
 Returns the decoder used by any active media player, including whether it is hardware-accelerated —
 useful for confirming hardware video decode (e.g. `V4L2VideoDecoder`).
+
+---
+
+## Remote debugging
+
+Chromium's DevTools endpoint binds to localhost only and ignores `--remote-debugging-address`
+outside headless mode, so mapping the port alone does not make it reachable from another machine.
+Set `ENABLE_REMOTE_DEBUG=1` to run a small TCP relay that forwards `REMOTE_DEBUG_PORT` (default
+`35173`) to Chromium, and map that port in your compose file:
+
+```yaml
+    ports:
+      - '5011:5011'
+      - '35173:35173'
+```
+
+Then add the device as a target in `chrome://inspect/#devices` on another machine, connecting by IP
+address (`<device-ip>:35173`).
+
+> ⚠️ The remote debugging interface has **no authentication or encryption** — anyone who can reach
+> the port gets full control of the browser. Only enable it on a trusted/private network, or leave
+> the port unmapped and reach it through an SSH tunnel instead.
 
 ---
 

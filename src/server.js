@@ -18,10 +18,18 @@ const {
 } = require('set-interval-async/dynamic');
 const path = require('path');
 const os = require('os');
+const net = require('net');
 
 // Static environment variable fallback configurations
 const API_PORT = parseInt(process.env.API_PORT) || 5011;
 const PERSISTENT_DATA = process.env.PERSISTENT || '0';
+// Chromium's DevTools endpoint always binds to localhost only (Chromium ignores
+// --remote-debugging-address outside headless mode), so the block talks to it on this internal port.
+const CHROMIUM_DEBUG_PORT = 9222;
+// When ENABLE_REMOTE_DEBUG=1 a built-in TCP relay exposes the DevTools port on REMOTE_DEBUG_PORT so
+// it can be reached from another host. This interface has NO authentication or encryption — only use
+// it on a trusted/private network or behind an SSH tunnel.
+const ENABLE_REMOTE_DEBUG = process.env.ENABLE_REMOTE_DEBUG || '0';
 const REMOTE_DEBUG_PORT = process.env.REMOTE_DEBUG_PORT || 35173;
 const FLAGS = process.env.FLAGS || null;
 const EXTRA_FLAGS = process.env.EXTRA_FLAGS || null;
@@ -54,7 +62,6 @@ const BALENA_BASE_FLAGS = [
   '--disable-session-crashed-bubble',           // Prevent crash recovery UI from breaking kiosk immersion
   '--check-for-update-interval=31536000',       // Disable update checks
   '--disable-dev-shm-usage',                    // Prevent shared memory exhaustion in Docker
-  '--touch-events=enabled',                     // Force capacitive touch layer recognition for DSI displays
   '--ozone-platform=wayland'                    // Render through the Wayland compositor (display block), never X11/XWayland
 ];
 
@@ -82,7 +89,7 @@ const PLATFORM_PROFILES = {
     decodeFeatures: []
   },
   // Raspberry Pi 3-64 / 4 / 400 (bcm2835-codec). Decode is handled by the Raspberry Pi
-  // patched Chromium (success shows as MojoVideoDecoder), so we add no decode features
+  // patched Chromium so we add no decode features
   // and must NOT force the upstream --use-v4l2-codec path.
   rpiCodec: {
     glBackend: ['--use-angle=gles'],
@@ -173,10 +180,6 @@ function composeGpuFlags() {
   let composed = DEFAULT_FLAGS.concat(BALENA_BASE_FLAGS);
   let enabledFeatures = [];
 
-  if (process.env.ENABLE_VIRTUAL_KEYBOARD === '1') {
-    enabledFeatures.push('VirtualKeyboard');
-  }
-
   // Decode rides along with GPU rendering by default (see below), so "I want decode" is
   // simply ENABLE_GPU=1.
   const gpuEnabled = enableGpu === '1';
@@ -265,7 +268,7 @@ let launchChromium = async function(url) {
     startingUrl: startingUrl,
     ignoreDefaultFlags: true,
     chromeFlags: flags,
-    port: REMOTE_DEBUG_PORT,
+    port: CHROMIUM_DEBUG_PORT,
     connectionPollInterval: 1000,
     maxConnectionRetries: 120,
     userDataDir: '1' === PERSISTENT_DATA ? '/data/chromium' : undefined
@@ -282,7 +285,7 @@ let launchChromium = async function(url) {
 async function refreshPageCDP() {
   let client;
   try {
-    client = await CDP({ port: REMOTE_DEBUG_PORT });
+    client = await CDP({ port: CHROMIUM_DEBUG_PORT });
     const { Page } = client;
     await Page.enable();
     await Page.reload();
@@ -304,7 +307,7 @@ async function refreshPageCDP() {
 async function navigatePageCDP(url) {
   let client;
   try {
-    client = await CDP({ port: REMOTE_DEBUG_PORT });
+    client = await CDP({ port: CHROMIUM_DEBUG_PORT });
     const { Page } = client;
     await Page.enable();
     await Page.navigate({ url: url });
@@ -502,7 +505,7 @@ app.get('/version', (req, res) => {
 app.get('/screenshot', async (req, res) => {
   let client;
   try {
-    client = await CDP({ port: REMOTE_DEBUG_PORT });
+    client = await CDP({ port: CHROMIUM_DEBUG_PORT });
     const { Page } = client;
 
     await Page.enable();
@@ -535,6 +538,45 @@ app.listen(API_PORT, () => {
   console.log('Browser API running on port: ' + API_PORT);
 });
 
+// Holds the TCP relay server when remote debugging is exposed.
+let remoteDebugRelay = null;
+
+/**
+ * Optionally exposes Chromium's localhost-only DevTools port to other hosts.
+ * Disabled unless ENABLE_REMOTE_DEBUG=1. A raw TCP relay forwards 0.0.0.0:REMOTE_DEBUG_PORT to
+ * Chromium on 127.0.0.1:CHROMIUM_DEBUG_PORT. Piping bytes transparently carries both the DevTools
+ * HTTP endpoints and the WebSocket session. It does NOT add authentication or encryption.
+ */
+function startRemoteDebugRelay() {
+  if (ENABLE_REMOTE_DEBUG !== '1' || remoteDebugRelay) {
+    return;
+  }
+
+  remoteDebugRelay = net.createServer((client) => {
+    const upstream = net.connect(CHROMIUM_DEBUG_PORT, '127.0.0.1');
+    client.pipe(upstream);
+    upstream.pipe(client);
+    const close = () => { client.destroy(); upstream.destroy(); };
+    client.on('error', close);
+    upstream.on('error', close);
+  });
+
+  remoteDebugRelay.on('error', (err) => {
+    console.log(`Remote debug relay failed: ${err.message}`);
+    remoteDebugRelay = null;
+  });
+
+  remoteDebugRelay.listen(REMOTE_DEBUG_PORT, '0.0.0.0', () => {
+    console.log(
+      `Exposing Chromium remote debugging on port ${REMOTE_DEBUG_PORT}. ` +
+      `This interface has no authentication or encryption — only use it on a trusted ` +
+      `network or via an SSH tunnel.`
+    );
+  });
+}
+
+startRemoteDebugRelay();
+
 // ============================================================================
 // Diagnostic Endpoints
 // Extracts internal Chromium state directly via Chrome DevTools Protocol.
@@ -552,7 +594,7 @@ function diagnosticsGuard(req, res, next) {
 // Reports the running Chromium build/version and the block version
 app.get('/diagnostics/version', diagnosticsGuard, async (req, res) => {
   try {
-    const info = await CDP.Version({ port: REMOTE_DEBUG_PORT });
+    const info = await CDP.Version({ port: CHROMIUM_DEBUG_PORT });
     return res.status(200).json({
       browser: info['Browser'],                 // e.g. "Chrome/148.0.7778.167"
       protocolVersion: info['Protocol-Version'],
@@ -572,7 +614,7 @@ app.get('/diagnostics/gpu', diagnosticsGuard, async (req, res) => {
   let client;
   try {
     // 1. Interrogate the debugging metadata endpoint to retrieve the root browser socket
-    const browserVersion = await CDP.Version({ port: REMOTE_DEBUG_PORT });
+    const browserVersion = await CDP.Version({ port: CHROMIUM_DEBUG_PORT });
     
     // 2. Connect directly to the master browser session WebSocket URL
     client = await CDP({ target: browserVersion.webSocketDebuggerUrl });
@@ -602,7 +644,7 @@ app.get('/diagnostics/media', diagnosticsGuard, async (req, res) => {
   let client;
   try {
     // 1. Fetch the target registry to isolate the primary user-visible page
-    const targets = await CDP.List({ port: REMOTE_DEBUG_PORT });
+    const targets = await CDP.List({ port: CHROMIUM_DEBUG_PORT });
     const pageTarget = targets.find(t => t.type === 'page');
 
     if (!pageTarget) {

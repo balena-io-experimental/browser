@@ -89,3 +89,10 @@ hand-rolled flags where possible.
 The `/diagnostics/*` endpoints (Chromium version, GPU state, media-decoder state) are new in v3 and
 are **off by default**. Set `ENABLE_DIAGNOSTICS=1` to enable them. See
 [Diagnostics](../readme.md#diagnostics).
+
+## 6. Remote debugging
+
+In v2, mapping the remote debugging port did not actually make it reachable from another host —
+Chromium binds that interface to localhost only. In v3 it is an explicit opt-in: set
+`ENABLE_REMOTE_DEBUG=1` and map `REMOTE_DEBUG_PORT`. See
+[Remote debugging](../readme.md#remote-debugging) for the security caveats.
