@@ -19,6 +19,9 @@ const {
 const path = require('path');
 const os = require('os');
 const net = require('net');
+// Diagnostics live in their own module; requiring it here installs the log
+// capture (only when ENABLE_DIAGNOSTICS=1) before main() produces any output.
+const diagnostics = require('./diagnostics');
 
 // Static environment variable fallback configurations
 const API_PORT = parseInt(process.env.API_PORT) || 5011;
@@ -35,8 +38,6 @@ const FLAGS = process.env.FLAGS || null;
 const EXTRA_FLAGS = process.env.EXTRA_FLAGS || null;
 const HTTPS_REGEX = /^https?:\/\//i;
 const AUTO_REFRESH = process.env.AUTO_REFRESH || 0;
-// Diagnostics endpoints expose internal Chromium/GPU state; off by default.
-const ENABLE_DIAGNOSTICS = process.env.ENABLE_DIAGNOSTICS || '0';
 
 // Dynamic configuration variables that can be altered live via the HTTP API
 let kioskMode = process.env.KIOSK || '0';
@@ -242,6 +243,10 @@ let launchChromium = async function(url) {
   if (EXTRA_FLAGS) {
     flags = flags.concat(EXTRA_FLAGS.split(' '));
   }
+
+  // When diagnostics are enabled, tell Chromium to write its own log so the
+  // report can include GPU/decoder/audio errors. No-op otherwise.
+  flags = flags.concat(diagnostics.chromiumLogFlags());
 
   let startingUrl = url;
   if ('1' === kioskMode) {
@@ -569,138 +574,19 @@ function startRemoteDebugRelay() {
 
 startRemoteDebugRelay();
 
-// ============================================================================
-// Diagnostic Endpoints
-// Extracts internal Chromium state directly via Chrome DevTools Protocol.
-// Gated behind ENABLE_DIAGNOSTICS (default off) since they expose system info.
-// ============================================================================
-
-// Refuse diagnostics requests unless explicitly enabled.
-function diagnosticsGuard(req, res, next) {
-  if (ENABLE_DIAGNOSTICS !== '1') {
-    return res.status(404).send('Diagnostics are disabled. Set ENABLE_DIAGNOSTICS=1 to enable them.');
-  }
-  next();
-}
-
-// Reports the running Chromium build/version and the block version
-app.get('/diagnostics/version', diagnosticsGuard, async (req, res) => {
-  try {
-    const info = await CDP.Version({ port: CHROMIUM_DEBUG_PORT });
-    return res.status(200).json({
-      browser: info['Browser'],                 // e.g. "Chrome/148.0.7778.167"
-      protocolVersion: info['Protocol-Version'],
-      v8Version: info['V8-Version'],
-      webkitVersion: info['WebKit-Version'],
-      userAgent: info['User-Agent'],
-      blockVersion: process.env.VERSION || null
-    });
-  } catch (err) {
-    console.log("Error retrieving Chromium version: ", err.toString());
-    return res.status(500).send("Failed to retrieve Chromium version.");
-  }
-});
-
-// Extracts full GPU diagnostic data silently without creating window surfaces
-app.get('/diagnostics/gpu', diagnosticsGuard, async (req, res) => {
-  let client;
-  try {
-    // 1. Interrogate the debugging metadata endpoint to retrieve the root browser socket
-    const browserVersion = await CDP.Version({ port: CHROMIUM_DEBUG_PORT });
-    
-    // 2. Connect directly to the master browser session WebSocket URL
-    client = await CDP({ target: browserVersion.webSocketDebuggerUrl });
-    
-    // 3. Execute the native SystemInfo protocol command
-    if (client.SystemInfo && typeof client.SystemInfo.getInfo === 'function') {
-      const infoPayload = await client.SystemInfo.getInfo();
-      
-      // infoPayload.gpu contains standard devices, featureStatus, and driverBugWorkarounds
-      return res.status(200).json(infoPayload.gpu);
-    } else {
-      return res.status(500).send("SystemInfo protocol domain not exposed by this Chromium binary.");
-    }
-  } catch (err) {
-    console.log("Error during silent SystemInfo extraction: ", err.toString());
-    return res.status(500).send("Failed to extract GPU diagnostic payload silently.");
-  } finally {
-    // 4. Ensure the control socket is gracefully detached
-    if (client) {
-      await client.close();
-    }
-  }
-});
-
-// Extracts active media player states subtly using the CDP Media domain
-app.get('/diagnostics/media', diagnosticsGuard, async (req, res) => {
-  let client;
-  try {
-    // 1. Fetch the target registry to isolate the primary user-visible page
-    const targets = await CDP.List({ port: CHROMIUM_DEBUG_PORT });
-    const pageTarget = targets.find(t => t.type === 'page');
-
-    if (!pageTarget) {
-      return res.status(404).send("No active kiosk or page target found to inspect.");
-    }
-
-    // 2. Intercept the existing tab socket (zero compositor/window disruption)
-    client = await CDP({ target: pageTarget });
-    const { Media } = client;
-
-    const activePlayers = {};
-
-    // 3. Trap properties as Chromium flushes them down the WebSocket connection
-    Media.playerPropertiesChanged((params) => {
-      const { playerId, properties } = params;
-      if (!activePlayers[playerId]) {
-        activePlayers[playerId] = {};
-      }
-      
-      properties.forEach(prop => {
-        activePlayers[playerId][prop.name] = prop.value;
-      });
-    });
-
-    // 4. Force state synchronization from Chromium's internal media logger
-    await Media.enable();
-
-    // 5. Provide a brief period for the socket events to settle
-    await new Promise(resolve => setTimeout(resolve, 400));
-
-    // 6. Map and normalize the player parameters to verify acceleration status
-    const diagnosticReport = Object.keys(activePlayers).map(id => {
-      const playerData = activePlayers[id];
-      const decoderName = playerData.video_decoder || playerData.kVideoDecoderName || "Unknown";
-      
-      // Determine if hardware-accelerated based on runtime driver name or metadata
-      const isHardware = playerData.is_platform_video_decoder === "true" || 
-                         playerData.is_platform_video_decoder === true ||
-                         /v4l2|vaapi|mojo|d3d11/i.test(decoderName);
-
-      return {
-        playerId: id,
-        videoCodec: playerData.video_codec_name || "Unknown",
-        decoderName: decoderName,
-        isHardwareAccelerated: isHardware,
-        resolution: `${playerData.video_width || 0}x${playerData.video_height || 0}`,
-        rawProperties: playerData
-      };
-    });
-
-    return res.status(200).json({
-      activePlaybackCount: diagnosticReport.length,
-      players: diagnosticReport
-    });
-
-  } catch (err) {
-    console.log("Error executing silent media diagnostics: ", err.toString());
-    return res.status(500).send("Failed to extract active media decoder states subtly.");
-  } finally {
-    // 7. Ensure control socket detachment
-    if (client) {
-      await client.close();
-    }
-  }
+// Diagnostics endpoints (/diagnostics/version, /gpu, /media, /report) live in
+// ./diagnostics and are gated behind ENABLE_DIAGNOSTICS. getRuntimeConfig is
+// read at request time so the report reflects the live state.
+diagnostics.register(app, {
+  debugPort: CHROMIUM_DEBUG_PORT,
+  getRuntimeConfig: () => ({
+    enableGpu,
+    disableVideoDecode,
+    kioskMode,
+    currentUrl,
+    flags,
+    blockVersion: process.env.VERSION || null
+  })
 });
 
 

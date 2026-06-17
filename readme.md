@@ -228,7 +228,17 @@ The screenshot will be saved as a temporary file in the container.
 
 The following endpoints expose internal Chromium state for troubleshooting hardware acceleration.
 They are **disabled by default**; set `ENABLE_DIAGNOSTICS=1` to enable them. When disabled they
-return `404`.
+return `404`. While enabled, Chromium also logs to `/tmp/chrome_debug.log` in the container so its
+GPU/decoder/audio errors can be included in the report below.
+
+#### **GET** /diagnostics/report
+Returns a single, human-readable `.txt` bundling device/host info, runtime config and flags, Chromium
+/ GPU / media state, and recent block + Chromium logs. This is the easiest thing to attach to a bug
+report. Save it with:
+
+```bash
+curl -OJ http://<device-ip>:5011/diagnostics/report
+```
 
 #### **GET** /diagnostics/version
 Returns the running Chromium build/version (and the block version) as JSON.
