@@ -96,3 +96,62 @@ In v2, mapping the remote debugging port did not actually make it reachable from
 Chromium binds that interface to localhost only. In v3 it is an explicit opt-in: set
 `ENABLE_REMOTE_DEBUG=1` and map `REMOTE_DEBUG_PORT`. See
 [Remote debugging](../readme.md#remote-debugging) for the security caveats.
+
+## 7. Screen rotation & display geometry moved to the display block
+
+In v2 the browser owned the screen — it ran its own X server and rotated the display with `xrandr`,
+rotated touch input with `xinput`, and sized its own window. In v3 the **compositor (the display
+block) owns the output**, so these settings move there. The following `browser` variables **no longer
+exist**:
+
+`ROTATE_DISPLAY`, `ROTATE_DELAY`, `TOUCHSCREEN`, `WINDOW_SIZE`, `WINDOW_POSITION`, `SHOW_CURSOR`,
+`DISPLAY_NUM`.
+
+Configure the equivalents on the **`display`** service instead:
+
+| v2 (browser) | v3 (display block) |
+| --- | --- |
+| `ROTATE_DISPLAY=left` | `DISPLAY_ROTATION=270` (degrees **clockwise**: `left`→`270`, `right`→`90`, `inverted`→`180`) |
+| `ROTATE_DELAY` | no longer needed — the compositor applies the transform at startup |
+| `WINDOW_SIZE=1920,1080` | `DISPLAY_RESOLUTION=1920x1080` (in kiosk mode the client always fills the output) |
+| `WINDOW_POSITION` | not applicable — the kiosk client is full-screen |
+| `TOUCHSCREEN` | not needed — touch input follows the output transform automatically |
+| `SHOW_CURSOR` | controlled by the compositor |
+
+See the display block's README for the full list (`DISPLAY_ROTATION`, `DISPLAY_RESOLUTION`,
+`DISPLAY_SCALE`). Note that `DISPLAY_ROTATION` uses **degrees clockwise** (`0`/`90`/`180`/`270`)
+rather than v2's `left`/`right`/`inverted`.
+
+Before (v2 — rotation on the browser):
+
+```yaml
+services:
+  browser:
+    image: bh.cr/balenalabs/browser-aarch64
+    environment:
+      ROTATE_DISPLAY: left
+      WINDOW_SIZE: '1920,1080'
+```
+
+After (v3 — rotation on the display block):
+
+```yaml
+services:
+  display:
+    image: bh.cr/balenalabs/display-<arch>
+    privileged: true
+    volumes:
+      - display-socket:/run
+    labels:
+      io.balena.features.dbus: '1'
+    environment:
+      DISPLAY_ROTATION: 270      # v2 "left" == 270 degrees clockwise
+      DISPLAY_RESOLUTION: 1920x1080
+
+  browser:
+    image: bh.cr/balenalabs/browser-<device-type>
+    # ... no rotation/geometry variables here anymore
+```
+
+> Multi-display setups are not yet supported by the display block; these variables apply to the
+> first connected display.

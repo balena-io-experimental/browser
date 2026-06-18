@@ -77,25 +77,25 @@ The following environment variables allow configuration of the `browser` block:
 | Environment variable | Options | Default | Description |
 | --- | --- | --- | --- |
 |`LAUNCH_URL`|`http` or `https` URL|N\A|Web page to display|
-|`DISPLAY_NUM`|`n`|0|Display number to use|
 |`LOCAL_HTTP_DELAY`|Number (seconds)|0|Number of seconds to wait for a local HTTP service to start before trying to detect it|
 |`KIOSK`|`0`, `1`|`0`|Run in kiosk mode with no menus or status bars. <br/> `0` = off, `1` = on|
-|`SHOW_CURSOR`|`0`, `1`|`0`|Enables/disables the cursor when in kiosk mode<br/> `0` = off, `1` = on|
 |`FLAGS`|[many!](https://peter.sh/experiments/chromium-command-line-switches/)|N/A|**Replaces** the flags chromium is started with. Enter a space (\' \') separated list of flags (e.g. `--noerrdialogs --disable-session-crashed-bubble`) <br/> **Use with caution!**|
 |`EXTRA_FLAGS`|[many!](https://peter.sh/experiments/chromium-command-line-switches/)|N/A|Adds **additional** flags chromium is started with. Enter a space (\' \') separated list of flags (e.g. `--audio-buffer-size=2048 --audio-output-channels=8`)|
 |`PERSISTENT`|`0`, `1`|`0`|Enables/disables user profile data being stored on the device. **Note: you'll need to create a settings volume. See example above** <br/> `0` = off, `1` = on|
-|`ROTATE_DISPLAY`|`normal`, `left`, `right`, `inverted`|`normal`|Rotates the display|
-|`ROTATE_DELAY`|`n`|`3`|Add an artificial delay (in seconds) before applying display rotation|
-|`TOUCHSCREEN`|`string`|N\A|Name of Touch Input to rotate|
 |`ENABLE_GPU`|`0`, `1`|0|Master hardware-acceleration switch. Enables GPU **rendering** (rasterization, compositing, WebGL/canvas) and, by default, best-effort hardware **video decode**. On Raspberry Pi, decode is handled by the Pi-patched Chromium (verify via `MojoVideoDecoder`/`V4L2VideoDecoder` in `chrome://media-internals`); on x86 it enables the Mesa VA-API path. <br/> `0` = off, `1` = on|
 |`DISABLE_VIDEO_DECODE`|`0`, `1`|0|Opt **out** of hardware video decode while keeping GPU rendering on. Use on devices where the decode path misbehaves. No effect unless `ENABLE_GPU=1`. <br/> `0` = decode stays on, `1` = decode off|
-|`WINDOW_SIZE`|`x,y`|Detected screen resolution|Sets the browser window size, such as `800,600`. <br/> **Note:** Reverse the dimensions if you also rotate the display to `left` or `right` |
-|`WINDOW_POSITION`|`x,y`|`0,0`|Specifies the browser window position on the screen|
 |`API_PORT`|port number|5011|Specifies the port number the API runs on|
 |`ENABLE_REMOTE_DEBUG`|`0`, `1`|`0`|Exposes Chromium's remote debugging interface on `REMOTE_DEBUG_PORT` so it can be reached from another host (see [Remote debugging](#remote-debugging)). **No authentication or encryption.** <br/> `0` = off, `1` = on|
 |`REMOTE_DEBUG_PORT`|port number|35173|Port the remote debugging relay listens on when `ENABLE_REMOTE_DEBUG=1`. Has no effect otherwise|
 |`AUTO_REFRESH`|interval|0 (disabled)|Specifies the number of seconds before the page automatically refreshes|
 |`ENABLE_DIAGNOSTICS`|`0`, `1`|`0`|Enables the `/diagnostics/*` API endpoints, which expose Chromium version, GPU and media-decoder state. Off by default. <br/> `0` = off, `1` = on|
+
+> **Display geometry (rotation, resolution, scale) is configured on the `display` block,
+> not here.** In v3 the browser is a Wayland client and the compositor owns the screen, so the v2
+> `ROTATE_DISPLAY`, `ROTATE_DELAY`, `TOUCHSCREEN`, `WINDOW_SIZE`, `WINDOW_POSITION`, `SHOW_CURSOR` and
+> `DISPLAY_NUM` variables no longer apply. Set `DISPLAY_ROTATION` / `DISPLAY_RESOLUTION` /
+> `DISPLAY_SCALE` on the `display` service instead — see its README and
+> [Migrating from v2](docs/migrating-from-v2.md#7-screen-rotation--display-geometry-moved-to-the-display-block).
 
 ---
 
