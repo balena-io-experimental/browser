@@ -122,25 +122,40 @@ services:
 ```
 ---
 
-## Choosing audio output device
-By default the `browser` block will output audio via HDMI. If you want to route audio through a different interface you can do it with the help of the [`audio` block]((https://github.com/balena-labs-projects/audio)). The `browser` block is pre-configured to use it if present so you only need to add it to your `docker-compose.yml` file and then use `AUDIO_OUTPUT` environment variable to select the desired output. Check out the `audio` block [documentation](https://github.com/balena-labs-projects/audio#environment-variables) to learn more about it.
+## Audio
 
-In this example we add the `audio` block and route the `browser` audio to the Raspberry Pi headphone jack:
+The `browser` block plays audio **directly via ALSA** to the device's sound
+hardware — no extra container or configuration is required. The block
+automatically grants its unprivileged `chromium` user access to the kernel sound
+devices (`/dev/snd/*`); see [`src/start.sh`](src/start.sh). `privileged: true`
+(already set in the example `docker-compose.yml`) is required so those devices are
+visible to the container.
 
-```yaml
-services:
-  browser:
-    image: bh.cr/balenalabs/browser-<device-type>
-  audio:
-    image: bh.cr/balenalabs/audio-<arch>
-    privileged: true
-    ports:
-      - 4317:4317
-    environment:
-      AUDIO_OUTPUT: RPI_HEADPHONES
+In practice audio is emitted on the device's active output. For example, with an
+HDMI screen connected the sound travels over HDMI, and the 3.5mm headphone jack
+works when used (verified on a Raspberry Pi 4). The kernel/ALSA default decides
+which output is used; the browser block does not currently expose a knob to
+select a specific output.
+
+To force a specific output without any additional container, you can bake an
+[`/etc/asound.conf`](https://www.alsa-project.org/wiki/Asoundrc) into a derived
+image that pins ALSA's default device to the card you want — for example the
+Raspberry Pi 4 headphone jack:
+
+```Dockerfile
+FROM bh.cr/balenalabs/browser-<device-type>
+RUN printf 'pcm.!default {\n  type plug\n  slave.pcm "hw:Headphones"\n}\nctl.!default {\n  type hw\n  card Headphones\n}\n' > /etc/asound.conf
 ```
 
-**Note**: The `browser` block expects the `audio` block to be named as such. If you change it's service name you'll need to override the `PULSE_SERVER` environment variable value to match it in the `browser` dockerfile. For example add `ENV PULSE_SERVER=tcp:not-audio:4317`.
+Use the card name as reported by `aplay -l` (e.g. `Headphones`, `vc4hdmi0`,
+`vc4hdmi1`); names are more stable across reboots than numeric indices.
+
+For richer routing — selecting a specific sink at runtime, Bluetooth output, or
+sharing audio across multiple containers — run a dedicated sound server such as
+the [`audio` block](https://github.com/balena-labs-projects/audio), PipeWire, or
+similar, and point the browser at it. This is no longer wired in by default; if
+you are migrating from v2 and want to retain the audio block, see
+[Migrating from v2 → Audio](docs/migrating-from-v2.md#8-audio-no-longer-pre-wired-to-the-audio-block).
 
 ---
 

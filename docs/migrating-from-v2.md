@@ -155,3 +155,52 @@ services:
 
 > Multi-display setups are not yet supported by the display block; these variables apply to the
 > first connected display.
+
+## 8. Audio no longer pre-wired to the audio block
+
+In v2 the browser image baked in the [`audio` block](https://github.com/balena-labs-projects/audio)
+integration: the Dockerfile installed the PulseAudio ALSA bridge and set
+`PULSE_SERVER=tcp:audio:4317`, so dropping the audio block into your compose file "just worked".
+
+In v3 this is **removed**. The browser now plays audio **directly via ALSA** to the device's sound
+hardware, with no extra container required — for most setups (HDMI sound, the 3.5mm jack) audio works
+out of the box with no configuration.
+
+### Retaining the audio block
+
+If you relied on the audio block, you can opt back in, but you must now wire it up yourself by
+extending the browser image. Add the ALSA→PulseAudio bridge and point it at the audio server (this is
+exactly what the v2 image baked in):
+
+```Dockerfile
+FROM bh.cr/balenalabs/browser-<device-type>
+# Route ALSA output to the audio block's PulseAudio server
+RUN curl -skL https://raw.githubusercontent.com/balena-labs-projects/audio/master/scripts/alsa-bridge/debian-setup.sh | sh
+ENV PULSE_SERVER=tcp:audio:4317
+```
+
+Then add the `audio` service alongside the (now locally built) browser service. In this example audio
+is routed to the Raspberry Pi headphone jack via the audio block's `AUDIO_OUTPUT` variable:
+
+```yaml
+services:
+  browser:
+    build: .            # builds the extended Dockerfile above
+    privileged: true
+  audio:
+    image: bh.cr/balenalabs/audio-<arch>
+    privileged: true
+    ports:
+      - 4317:4317
+    environment:
+      AUDIO_OUTPUT: RPI_HEADPHONES
+```
+
+The `PULSE_SERVER` host must match the audio service name. It defaults to `audio`; if you rename the
+service, update the env var accordingly (e.g. `ENV PULSE_SERVER=tcp:not-audio:4317`). See the audio
+block's [environment variables](https://github.com/balena-labs-projects/audio#environment-variables)
+for the full `AUDIO_OUTPUT` vocabulary (`RPI_HDMI0`, `RPI_HDMI1`, `DAC`, `USB`, `AUTO`, …).
+
+> The `audio` block is **unmaintained** (no updates or testing in ~4 years). The supported, tested
+> path is the default ALSA-direct one; use the audio block at your own risk. It is also the only way
+> to get Bluetooth audio output, which the default ALSA-direct path does not support.

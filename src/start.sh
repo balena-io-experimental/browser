@@ -5,8 +5,6 @@ set -e
 # Enable user namespaces for Chromium's internal sandbox architecture
 sysctl -w user.max_user_namespaces=10000 || true
 
-export DBUS_SYSTEM_BUS_ADDRESS=unix:path=/host/run/dbus/system_bus_socket
-
 echo "balenaLabs browser version: $(<VERSION)"
 
 # Secure performance scaling configuration
