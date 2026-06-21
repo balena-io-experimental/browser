@@ -20,17 +20,6 @@ WAYLAND_SOCKET="${XDG_RUNTIME_DIR}/${WAYLAND_DISPLAY}"
 
 echo "Targeting Wayland compositor socket: ${WAYLAND_SOCKET}"
 
-# Block until the Display Sidecar container mounts the socket
-echo "Waiting for display server to expose the Wayland socket..."
-until [ -S "${WAYLAND_SOCKET}" ]; do
-  sleep 1
-done
-echo "Wayland socket detected! Establishing connection permissions."
-
-# Apply permissive permissions so the unprivileged 'chromium' user can read/write to the socket
-chmod 777 "${XDG_RUNTIME_DIR}" || true
-chmod 666 "${WAYLAND_SOCKET}" || true
-
 # Initialize user-data storage context
 mkdir -p /data/chromium
 chown -R chromium:chromium /data || true
@@ -64,6 +53,35 @@ for dev in /dev/dri/card* /dev/dri/render* /dev/video* /dev/snd/*; do
     echo "Granted chromium access to ${dev} (gid ${node_gid}, group ${node_grp})"
 done
 
-# Launch the Node Management Service as the non-root 'chromium' user
-echo "Starting Node.js server session..."
-exec su -w "$environment" chromium -c "node /usr/src/app/server.js"
+# Supervise the browser session and reconnect whenever the display block restarts.
+# The display block deletes and recreates the Wayland socket on every restart; we run
+# as root here, so we can re-apply the socket permissions and relaunch Chromium each
+# time. We poll the socket's INODE (not just its existence) so a delete+recreate that
+# happens between two polls is still detected (the new socket has a different inode).
+while true; do
+  echo "Waiting for display server to expose the Wayland socket..."
+  until [ -S "${WAYLAND_SOCKET}" ]; do sleep 1; done
+  echo "Wayland socket detected. Applying connection permissions."
+
+  # Apply permissive permissions so the unprivileged 'chromium' user can reach the (new) socket
+  chmod 777 "${XDG_RUNTIME_DIR}" || true
+  chmod 666 "${WAYLAND_SOCKET}"  || true
+  connected_socket_inode=$(stat -c %i "${WAYLAND_SOCKET}")
+
+  # Launch the Node Management Service as the non-root 'chromium' user.
+  # setsid gives it its own process group so we can reap node + Chromium together.
+  echo "Starting Node.js server session..."
+  setsid su -w "$environment" chromium -c "node /usr/src/app/server.js" &
+  browser_session_pid=$!
+
+  # Run until the session exits OR the socket is replaced/removed (display restarted).
+  # A deleted socket makes stat fail -> empty string -> inode mismatch -> loop exits.
+  while kill -0 "${browser_session_pid}" 2>/dev/null \
+        && [ "$(stat -c %i "${WAYLAND_SOCKET}" 2>/dev/null)" = "${connected_socket_inode}" ]; do
+    sleep 1
+  done
+
+  echo "Display socket changed or session ended; restarting browser session."
+  kill -- -"${browser_session_pid}" 2>/dev/null || true   # reap node + Chromium (process group)
+  wait 2>/dev/null || true
+done
