@@ -84,6 +84,7 @@ The following environment variables allow configuration of the `browser` block:
 |`PERSISTENT`|`0`, `1`|`0`|Enables/disables user profile data being stored on the device. **Note: you'll need to create a settings volume. See example above** <br/> `0` = off, `1` = on|
 |`ENABLE_GPU`|`0`, `1`|0|Master hardware-acceleration switch. Enables GPU **rendering** (rasterization, compositing, WebGL/canvas) and, by default, best-effort hardware **video decode**. On Raspberry Pi, decode is handled by the Pi-patched Chromium (verify via `MojoVideoDecoder`/`V4L2VideoDecoder` in `chrome://media-internals`); on x86 it enables the Mesa VA-API path. <br/> `0` = off, `1` = on|
 |`DISABLE_VIDEO_DECODE`|`0`, `1`|0|Opt **out** of hardware video decode while keeping GPU rendering on. Use on devices where the decode path misbehaves. No effect unless `ENABLE_GPU=1`. <br/> `0` = decode stays on, `1` = decode off|
+|`AUDIO_OUTPUT_DEVICE`|`hdmi`, `hdmi0`-`hdmi3`, `analog`/`jack`, `usb`, `dac`, `auto`|`auto`|Selects the ALSA audio output. Resolved to an ALSA device at startup (writes `/etc/asound.conf`). Unset/`auto` keeps the ALSA default. See [Audio](#audio)|
 |`API_PORT`|port number|5011|Specifies the port number the API runs on|
 |`ENABLE_REMOTE_DEBUG`|`0`, `1`|`0`|Exposes Chromium's remote debugging interface on `REMOTE_DEBUG_PORT` so it can be reached from another host (see [Remote debugging](#remote-debugging)). **No authentication or encryption.** <br/> `0` = off, `1` = on|
 |`REMOTE_DEBUG_PORT`|port number|35173|Port the remote debugging relay listens on when `ENABLE_REMOTE_DEBUG=1`. Has no effect otherwise|
@@ -131,24 +132,44 @@ devices (`/dev/snd/*`); see [`src/start.sh`](src/start.sh). `privileged: true`
 (already set in the example `docker-compose.yml`) is required so those devices are
 visible to the container.
 
-In practice audio is emitted on the device's active output. For example, with an
-HDMI screen connected the sound travels over HDMI, and the 3.5mm headphone jack
-works when used (verified on a Raspberry Pi 4). The kernel/ALSA default decides
-which output is used; the browser block does not currently expose a knob to
-select a specific output.
+By default audio is emitted on whatever ALSA picks as the default output, which on
+multi-output hardware (e.g. an Intel NUC with both an analog jack and HDMI) is often
+not the one you want. Set the `AUDIO_OUTPUT_DEVICE` environment variable to choose:
 
-To force a specific output without any additional container, you can bake an
-[`/etc/asound.conf`](https://www.alsa-project.org/wiki/Asoundrc) into a derived
-image that pins ALSA's default device to the card you want — for example the
-Raspberry Pi 4 headphone jack:
+| Token | Output |
+| --- | --- |
+| *(unset)* / `auto` | the ALSA default (no change) |
+| `hdmi` | the first HDMI output |
+| `hdmi0` … `hdmi3` | a specific HDMI output |
+| `analog` / `jack` | the analog / headphone output |
+| `usb` | a USB audio card |
+| `dac` | an attached DAC |
 
-```Dockerfile
-FROM bh.cr/balenalabs/browser-<device-type>
-RUN printf 'pcm.!default {\n  type plug\n  slave.pcm "hw:Headphones"\n}\nctl.!default {\n  type hw\n  card Headphones\n}\n' > /etc/asound.conf
+Tokens are case-insensitive, so `hdmi` and `HDMI` (audio-block style) both work.
+
+```yaml
+services:
+  browser:
+    image: bh.cr/balenalabs/browser-<device-type>
+    environment:
+      AUDIO_OUTPUT_DEVICE: hdmi
 ```
 
-Use the card name as reported by `aplay -l` (e.g. `Headphones`, `vc4hdmi0`,
-`vc4hdmi1`); names are more stable across reboots than numeric indices.
+At startup the block resolves the token to an ALSA device and writes
+`/etc/asound.conf`; the result is logged (e.g. `Audio: AUDIO_OUTPUT_DEVICE='hdmi'
+-> hw:0,3`). If the token can't be matched it logs a warning and falls back to the
+ALSA default.
+
+> **Multiple HDMI outputs:** Intel GPUs expose several HDMI converters (`hdmi0`,
+> `hdmi1`, …) regardless of how many ports the device has, and only the connected
+> one carries audio. Enable [diagnostics](#diagnostics) and check the `AUDIO`
+> section of the report (or run `aplay -l`) to see which converter your monitor is
+> on, then pick the matching `hdmiN`.
+
+**Adding more tokens.** The token list lives in
+[`src/audio-output.sh`](src/audio-output.sh) as a small `case` statement that maps
+each token to an `aplay -l` keyword. To support another output, add a case there —
+no other changes are needed.
 
 For richer routing — selecting a specific sink at runtime, Bluetooth output, or
 sharing audio across multiple containers — run a dedicated sound server such as

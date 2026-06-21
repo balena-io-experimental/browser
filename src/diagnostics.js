@@ -13,6 +13,7 @@
 const fs = require('fs');
 const os = require('os');
 const util = require('util');
+const { execSync } = require('child_process');
 const CDP = require('chrome-remote-interface');
 
 const ENABLE_DIAGNOSTICS = process.env.ENABLE_DIAGNOSTICS || '0';
@@ -185,6 +186,20 @@ function tailChromiumLog(lines = 200) {
   }
 }
 
+/**
+ * Sound outputs as ALSA sees them, so "no audio" reports are self-diagnosing.
+ * The raw `aplay -l` listing is enough: it shows every output (and on Intel GPUs
+ * marks the connected HDMI converter with a `*`), which is what a user needs to
+ * pick the right AUDIO_OUTPUT_DEVICE token.
+ */
+function getAudioInfo() {
+  try {
+    return execSync('aplay -l', { encoding: 'utf8' }).trim();
+  } catch (err) {
+    return `(aplay unavailable: ${err.code || err.message})`;
+  }
+}
+
 // ----------------------------------------------------------------------------
 // Report formatting (plain text, sectioned for quick human reading)
 // ----------------------------------------------------------------------------
@@ -218,6 +233,7 @@ function formatRuntime(r) {
   return [
     `ENABLE_GPU           : ${r.enableGpu}`,
     `DISABLE_VIDEO_DECODE : ${r.disableVideoDecode}`,
+    `AUDIO_OUTPUT_DEVICE  : ${r.audioOutputDevice || '(default)'}`,
     `kiosk                : ${r.kioskMode}`,
     `current URL          : ${r.currentUrl || '(none)'}`,
     '',
@@ -295,6 +311,7 @@ function formatReport(data) {
     section('CHROMIUM', formatChromium(data.chromium)),
     section('GPU (chrome://gpu)', formatGpu(data.gpu)),
     section('MEDIA PLAYERS', formatMedia(data.media)),
+    section('AUDIO (aplay -l)', data.audio),
     section('RECENT BLOCK LOG', data.log.block.length ? data.log.block.join('\n') : '(empty)'),
     section('RECENT CHROMIUM LOG', data.log.chromium)
   ].join('\n');
@@ -374,6 +391,7 @@ function register(app, { debugPort, getRuntimeConfig }) {
       chromium: null,
       gpu: null,
       media: null,
+      audio: getAudioInfo(),
       log: { block: logBuffer.slice(), chromium: tailChromiumLog() }
     };
 

@@ -53,6 +53,9 @@ for dev in /dev/dri/card* /dev/dri/render* /dev/video* /dev/snd/*; do
     echo "Granted chromium access to ${dev} (gid ${node_gid}, group ${node_grp})"
 done
 
+# Optionally pin the ALSA default output from AUDIO_OUTPUT_DEVICE (see audio-output.sh)
+. "$(dirname "$0")/audio-output.sh"
+
 # Supervise the browser session and reconnect whenever the display block restarts.
 # The display block deletes and recreates the Wayland socket on every restart; we run
 # as root here, so we can re-apply the socket permissions and relaunch Chromium each

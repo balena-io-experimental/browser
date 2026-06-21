@@ -166,6 +166,12 @@ In v3 this is **removed**. The browser now plays audio **directly via ALSA** to 
 hardware, with no extra container required — for most setups (HDMI sound, the 3.5mm jack) audio works
 out of the box with no configuration.
 
+To pick a specific output (the common static case), use the new **`AUDIO_OUTPUT_DEVICE`** variable on
+the `browser` service with a friendly token (`hdmi`, `hdmi0`-`hdmi3`, `analog`/`jack`, `usb`, `dac`).
+Note this is a different vocabulary from the audio block's `AUDIO_OUTPUT` (`RPI_HEADPHONES` etc.),
+which only applies if you opt back into the block. See
+[Audio](../readme.md#audio) in the README.
+
 ### Retaining the audio block
 
 If you relied on the audio block, you can opt back in, but you must now wire it up yourself by
@@ -199,7 +205,7 @@ services:
 The `PULSE_SERVER` host must match the audio service name. It defaults to `audio`; if you rename the
 service, update the env var accordingly (e.g. `ENV PULSE_SERVER=tcp:not-audio:4317`). See the audio
 block's [environment variables](https://github.com/balena-labs-projects/audio#environment-variables)
-for the full `AUDIO_OUTPUT` vocabulary (`RPI_HDMI0`, `RPI_HDMI1`, `DAC`, `USB`, `AUTO`, …).
+for the full `AUDIO_OUTPUT` options (`RPI_HDMI0`, `RPI_HDMI1`, `DAC`, `USB`, `AUTO`, …).
 
 > The `audio` block is **unmaintained** (no updates or testing in ~4 years). The supported, tested
 > path is the default ALSA-direct one; use the audio block at your own risk. It is also the only way

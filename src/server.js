@@ -49,6 +49,10 @@ let kioskMode = process.env.KIOSK || '0';
 let enableGpu = process.env.ENABLE_GPU || '0';
 let disableVideoDecode = process.env.DISABLE_VIDEO_DECODE || '0';
 
+// Friendly token selecting the ALSA output (resolved + applied in start.sh via
+// audio-output.sh). Read here only so it shows up in logs and diagnostics.
+const audioOutputDevice = process.env.AUDIO_OUTPUT_DEVICE || null;
+
 let DEFAULT_FLAGS = [];
 let currentUrl = '';
 let flags = [];
@@ -533,6 +537,7 @@ app.post('/scan', (req, res) => {
 
 app.listen(API_PORT, () => {
   console.log('Browser API running on port: ' + API_PORT);
+  console.log('Audio output device: ' + (audioOutputDevice || '(default)'));
 });
 
 // Holds the TCP relay server when remote debugging is exposed.
@@ -582,6 +587,7 @@ diagnostics.register(app, {
   getRuntimeConfig: () => ({
     enableGpu,
     disableVideoDecode,
+    audioOutputDevice,
     kioskMode,
     currentUrl,
     flags,
