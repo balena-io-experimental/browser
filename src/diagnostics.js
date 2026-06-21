@@ -4,15 +4,16 @@
  * Everything here is gated behind ENABLE_DIAGNOSTICS (default off) because it
  * exposes internal Chromium/GPU/system state. When enabled it:
  *   - captures recent block + Chromium logs,
- *   - exposes the existing /diagnostics/{version,gpu,media} JSON endpoints,
+ *   - exposes the /diagnostics/{version,gpu,media,vainfo} endpoints,
  *   - adds /diagnostics/report: a single, human-readable .txt bundling
- *     device/host info, runtime config, Chromium/GPU/media state and recent logs
- *     (useful for testers now and end-user bug reports later).
+ *     device/host info, runtime config, Chromium/GPU/media/VA-API state and
+ *     recent logs (useful for testers now and end-user bug reports later).
  */
 
 const fs = require('fs');
 const os = require('os');
 const util = require('util');
+const { execFile } = require('child_process');
 const CDP = require('chrome-remote-interface');
 
 const ENABLE_DIAGNOSTICS = process.env.ENABLE_DIAGNOSTICS || '0';
@@ -145,6 +146,27 @@ async function getMediaState(port) {
       await client.close();
     }
   }
+}
+
+/**
+ * Raw `vainfo` output: the VA-API profiles the installed driver exposes (e.g.
+ * VAProfileH264* decode entries on Intel). Independent of whether a video is
+ * playing, so it confirms driver/codec support directly. vainfo is only
+ * installed on amd64 (Intel/AMD); elsewhere it ENOENTs and we say so. Never
+ * rejects — returns the raw text (or a note) so the report always has a section.
+ */
+function getVaInfo() {
+  return new Promise((resolve) => {
+    execFile('vainfo', { timeout: 5000 }, (err, stdout, stderr) => {
+      if (err && err.code === 'ENOENT') {
+        return resolve('(vainfo not installed on this platform)');
+      }
+      // vainfo can exit non-zero yet still print useful diagnostics, so keep
+      // whatever it wrote rather than discarding it on error.
+      const output = `${stdout || ''}${stderr || ''}`.trim();
+      resolve(output || `(vainfo produced no output${err ? `: ${err.message}` : ''})`);
+    });
+  });
 }
 
 /**
@@ -294,6 +316,7 @@ function formatReport(data) {
     section('RUNTIME CONFIG', formatRuntime(data.runtime)),
     section('CHROMIUM', formatChromium(data.chromium)),
     section('GPU (chrome://gpu)', formatGpu(data.gpu)),
+    section('VA-API (vainfo)', data.vainfo || '(not collected)'),
     section('MEDIA PLAYERS', formatMedia(data.media)),
     section('RECENT BLOCK LOG', data.log.block.length ? data.log.block.join('\n') : '(empty)'),
     section('RECENT CHROMIUM LOG', data.log.chromium)
@@ -361,6 +384,12 @@ function register(app, { debugPort, getRuntimeConfig }) {
     }
   });
 
+  // Raw `vainfo` output: VA-API profiles the installed driver exposes.
+  app.get('/diagnostics/vainfo', diagnosticsGuard, async (req, res) => {
+    res.type('text/plain');
+    return res.status(200).send(await getVaInfo());
+  });
+
   // Single downloadable, human-readable report bundling everything above.
   app.get('/diagnostics/report', diagnosticsGuard, async (req, res) => {
     const generatedAt = new Date().toISOString().replace(/:/g, '').replace(/\.\d+Z$/, 'Z');
@@ -374,6 +403,7 @@ function register(app, { debugPort, getRuntimeConfig }) {
       chromium: null,
       gpu: null,
       media: null,
+      vainfo: await getVaInfo(),
       log: { block: logBuffer.slice(), chromium: tailChromiumLog() }
     };
 

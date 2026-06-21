@@ -37,9 +37,22 @@ fi
 # which is not provided by the upstream package
 ln -sf /usr/bin/chromium /usr/bin/chromium-browser
 
+# Intel GPUs need Intel's own VA-API driver for hardware video decode: mesa-va-drivers
+# only provides VA-API for AMD/gallium, so on Intel libva exposes zero decode profiles
+# and Chromium falls back to software for every codec. These packages are x86-only
+# (Intel hardware), so we only add them on amd64; AMD x86 keeps using mesa-va-drivers.
+#   - intel-media-va-driver (iHD): Gen8+ (covers e.g. Kaby Lake, Raptor Lake)
+#   - i965-va-driver:               pre-Gen8 Intel
+# Both live in Debian main and handle H.264/HEVC decode (no non-free codecs needed).
+# vainfo (libva-utils) is bundled so the diagnostics report can enumerate VA profiles.
+ARCH_PACKAGES=""
+if [ "$(dpkg --print-architecture)" = "amd64" ]; then
+    ARCH_PACKAGES="intel-media-va-driver i965-va-driver vainfo"
+fi
+
 # Install hardware acceleration libraries and base system libraries
-# Notice the inclusion of $PLATFORM_SPECIFIC_PACKAGES at the end of the package list
 apt-get update && apt-get install -y --no-install-recommends \
+    ${ARCH_PACKAGES} \
     chromium \
     chromium-common \
     ca-certificates \
