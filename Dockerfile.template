@@ -40,6 +40,11 @@ COPY ./recorder-scripts /usr/src/app/recorder-scripts
 
 RUN chmod +x ./*.sh
 
+# The app runs as the non-root 'chromium' user, so ensure the recorder scripts
+# are readable regardless of the source file permissions in the build context
+# (a 0600 source file would otherwise cause EACCES when reading the recording).
+RUN chmod -R a+rX /usr/src/app/recorder-scripts
+
 ENV UDEV=1
 
 RUN mkdir -p /etc/chromium/policies
