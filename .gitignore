@@ -4,3 +4,4 @@ Dockerfile.raspberrypi4-64
 node_modules/
 package-lock.json
 
+.recorder-test-out/

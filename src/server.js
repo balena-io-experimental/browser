@@ -4,9 +4,9 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const chromeLauncher = require('chrome-launcher');
 const puppeteer = require('puppeteer-core');
-const { createRunner, PuppeteerRunnerExtension } = require('@puppeteer/replay');
 const bent = require('bent')
 const mdns = require('./mdns');
+const recorder = require('./recorder');
 const {
   setIntervalAsync,
   clearIntervalAsync
@@ -289,113 +289,44 @@ async function executeRecorderScript(port) {
     console.log(`  On auth page: ${isOnAuthPage}`);
     console.log(`  Needs login: ${needsLogin}`);
 
-    // The recording was captured against one Home Assistant origin
-    // (scheme://host:port). Because mDNS discovery / LAUNCH_URL may have landed
-    // us on a different IP or host, retarget the recording at the origin we
-    // actually loaded so login works on any network instead of the baked-in one.
-    let currentOrigin = null;
-    try { currentOrigin = new URL(pageUrl).origin; } catch (e) { /* not a URL */ }
-    const firstNav = (recording.steps || []).find((s) => s.type === 'navigate' && s.url);
-    let recordedOrigin = null;
-    if (firstNav) { try { recordedOrigin = new URL(firstNav.url).origin; } catch (e) { /* ignore */ } }
-    const retargetUrl = (url) =>
-      (url && recordedOrigin && currentOrigin) ? url.split(recordedOrigin).join(currentOrigin) : url;
-    if (recordedOrigin && currentOrigin && recordedOrigin !== currentOrigin) {
-      console.log(`Retargeting recording origin: ${recordedOrigin} -> ${currentOrigin}`);
-    }
+    // Retarget helper shared with the login-preparation logic (see src/recorder.js).
+    const { retargetUrl } = recorder.computeRetarget(recording, pageUrl, console.log);
 
     if (needsLogin) {
-      console.log("Login required - executing full recorder script");
+      let loggedIn = false;
 
-      // Replace username and password placeholders with environment variables
-      if (HA_USERNAME || HA_PASSWORD) {
-        console.log("Replacing credentials with environment variables...");
-        let replacedCount = 0;
-
-        recording.steps.forEach((step, index) => {
-          if (step.type === 'change' && step.value) {
-            // Check if this is a username or password field based on selectors
-            const selectors = JSON.stringify(step.selectors || []).toLowerCase();
-
-            if (HA_USERNAME && selectors.includes('username')) {
-              console.log(`  ✓ Replacing username in step ${index + 1}`);
-              step.value = HA_USERNAME;
-              replacedCount++;
-            } else if (HA_PASSWORD && selectors.includes('password')) {
-              console.log(`  ✓ Replacing password in step ${index + 1}`);
-              step.value = HA_PASSWORD;
-              replacedCount++;
-            }
-          }
-        });
-
-        console.log(`✓ Replaced ${replacedCount} credential value(s)`);
-      } else {
-        console.log("⚠ No HA_USERNAME or HA_PASSWORD environment variables set - using values from recording file");
-      }
-
-      // Drop the recorded auth navigations: the browser is already on the
-      // correct auth page (from discovery/LAUNCH_URL), and their embedded
-      // client_id/redirect_uri point at the recorded origin. Retarget any other
-      // navigation (e.g. the final dashboard) to the origin we actually loaded.
-      const originalLen = recording.steps.length;
-      recording.steps = recording.steps.filter((step) => {
-        if (step.type === 'navigate' && step.url) {
-          let pathname = '';
-          try { pathname = new URL(step.url).pathname; } catch (e) { /* ignore */ }
-          if (pathname.startsWith('/auth/')) {
-            console.log(`  ↷ dropping recorded auth navigation: ${step.url.slice(0, 60)}...`);
-            return false;
-          }
-          step.url = retargetUrl(step.url);
-        }
-        // assertedEvents carry the recorded origin too (the runner waits on them)
-        if (Array.isArray(step.assertedEvents)) {
-          step.assertedEvents.forEach((ev) => { if (ev && ev.url) ev.url = retargetUrl(ev.url); });
-        }
-        return true;
-      });
-      // For form fills, prefer a concrete CSS/xpath selector that resolves the
-      // real <input> over an aria/label selector. HA's login fields are inside
-      // shadow-DOM web components whose accessible name is on the wrapper, not
-      // the input, so aria selectors can be clicked but not reliably typed into.
-      recording.steps.forEach((step) => {
-        if (step.type === 'change' && Array.isArray(step.selectors) && step.selectors.length > 1) {
-          step.selectors.sort((a, b) => {
-            const aInput = JSON.stringify(a).includes('input') ? 0 : 1;
-            const bInput = JSON.stringify(b).includes('input') ? 0 : 1;
-            return aInput - bInput;
+      // Primary path: direct credential login using shadow-piercing selectors.
+      // Robust against web-component/shadow-DOM login forms (e.g. Home Assistant)
+      // where recorded CSS selectors can't reach the real <input> elements. On
+      // success the auth flow's redirect_uri returns to the requested dashboard.
+      if (HA_USERNAME && HA_PASSWORD) {
+        try {
+          console.log("Attempting direct credential login...");
+          loggedIn = await recorder.smartLogin({
+            page, username: HA_USERNAME, password: HA_PASSWORD, timeout: 20000, log: console.log,
           });
+          if (loggedIn) {
+            console.log("✓ Logged in via direct credential fill.");
+          } else {
+            console.log("Direct login did not complete - falling back to recorded script.");
+          }
+        } catch (e) {
+          console.log(`Direct login unavailable (${e.message}) - falling back to recorded script.`);
         }
-      });
-
-      console.log(`✓ Prepared ${recording.steps.length} steps (removed ${originalLen - recording.steps.length} navigation step(s))`);
-
-      console.log("Creating Puppeteer runner...");
-      // Runner extension that logs each step so a hang/timeout can be pinpointed.
-      class LoggingExtension extends PuppeteerRunnerExtension {
-        async beforeEachStep(step, flow) {
-          this._i = (this._i || 0) + 1;
-          const detail = step.url ? step.url : (step.selectors ? JSON.stringify(step.selectors[0]) : '');
-          console.log(`  ▶ step ${this._i}: ${step.type} ${detail}`.slice(0, 160));
-          if (super.beforeEachStep) { await super.beforeEachStep(step, flow); }
-        }
-        async afterEachStep(step, flow) {
-          console.log(`  ✓ step ${this._i} (${step.type}) done`);
-          if (super.afterEachStep) { await super.afterEachStep(step, flow); }
-        }
+      } else {
+        console.log("⚠ No HA_USERNAME or HA_PASSWORD set - using the recorded script's values.");
       }
-      const runner = await createRunner(recording, new LoggingExtension(browser, page, {
-        timeout: 30000
-      }));
-      console.log("✓ Runner created");
 
-      console.log("========================================");
-      console.log("EXECUTING RECORDED ACTIONS...");
-      console.log("========================================");
-
-      // Execute the recording
-      await runner.run();
+      // Fallback: replay the recording (retargeted, credentials injected).
+      if (!loggedIn) {
+        recorder.prepareLoginRecording(recording, {
+          pageUrl, username: HA_USERNAME, password: HA_PASSWORD, log: console.log,
+        });
+        console.log("========================================");
+        console.log("EXECUTING RECORDED ACTIONS...");
+        console.log("========================================");
+        await recorder.runLoginRecording({ browser, page, recording, timeout: 30000, log: console.log });
+      }
     } else {
       console.log("Already logged in (persistent session detected) - skipping login steps");
 
