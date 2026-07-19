@@ -98,7 +98,7 @@ The following environment variables allow configuration of the `browser` block:
 |`MDNS_NAME`|`string`|Balena device name / hostname|The service instance name to advertise (also used as the `<name>.local` hostname)|
 |`MDNS_DISCOVER`|`0`, `1`|`0`|Browse the LAN for an mDNS service and auto-display it in the kiosk (used only when `LAUNCH_URL` is not set, and takes precedence over the local port scan). <br/> `0` = off, `1` = on|
 |`MDNS_DISCOVER_NAME`|`string`|N\A|When discovering, only match a service whose name/fqdn contains this string. Leave unset to display the first `_http._tcp` service found (**note:** this may be a printer or other appliance — set a name to target a specific service)|
-|`MDNS_DISCOVER_TYPE`|`string`|`http`|The DNS-SD service type to browse for (without the leading underscore or `._tcp`), e.g. `http`|
+|`MDNS_DISCOVER_TYPE`|`string`|`http`|The DNS-SD service type(s) to browse for, without the leading underscore or `._tcp`. Accepts a comma-separated list to browse several at once, e.g. `http,https`. The displayed URL scheme is chosen from the matched service's type (`https` for `_https._tcp`, or any service on port 443)|
 |`MDNS_DISCOVER_TIMEOUT`|Number (seconds)|`5`|How long to wait for mDNS responses when discovering|
 
 ---

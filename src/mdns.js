@@ -29,8 +29,18 @@ function getBonjour() {
 function serviceToUrl(svc) {
   const ipv4 = (svc.addresses || []).find((a) => a.indexOf(':') === -1);
   const host = ipv4 || svc.host;
-  const protocol = svc.port === 443 ? 'https' : 'http';
+  // Prefer the advertised service type (`_https._tcp` vs `_http._tcp`) to pick
+  // the scheme, falling back to the port for services that only signal it there.
+  const secure = svc.type === 'https' || svc.port === 443;
+  const protocol = secure ? 'https' : 'http';
   return `${protocol}://${host}:${svc.port}`;
+}
+
+// Normalise a service type input (string, comma-separated string, or array)
+// into a de-duplicated array of type names, e.g. "http, https" -> ['http','https'].
+function toTypeList(type) {
+  const list = Array.isArray(type) ? type : String(type == null ? 'http' : type).split(',');
+  return [...new Set(list.map((t) => t.trim()).filter(Boolean))];
 }
 
 // Advertise this device's HTTP API as an `_http._tcp` service.
@@ -54,25 +64,28 @@ function advertise({ name, port, txt } = {}) {
   return published;
 }
 
-// Browse the LAN for services of the given type. Resolves with an array of
-// discovered services after `timeoutMs`.
+// Browse the LAN for services of the given type(s). `type` may be a single
+// type, a comma-separated string, or an array (e.g. 'http,https'). Resolves
+// with an array of discovered services after `timeoutMs`.
 function browse({ type = 'http', timeoutMs = 5000 } = {}) {
+  const types = toTypeList(type);
   return new Promise((resolve) => {
     const instance = getBonjour();
     const found = [];
-    const browser = instance.find({ type }, (service) => {
-      found.push(service);
-    });
+    const browsers = types.map((t) =>
+      instance.find({ type: t }, (service) => { found.push(service); })
+    );
     setTimeout(() => {
-      try { browser.stop(); } catch (e) { /* already stopped */ }
+      browsers.forEach((b) => { try { b.stop(); } catch (e) { /* already stopped */ } });
       resolve(found);
     }, timeoutMs);
   });
 }
 
-// Discover a single HTTP service on the LAN and return a loadable URL, or null
-// if none is found. If `name` is given, only services whose name/fqdn matches
-// are considered. Our own advertised service is always ignored.
+// Discover an HTTP/HTTPS service on the LAN and return a loadable URL, or null
+// if none is found. `type` may include multiple types (e.g. 'http,https'). If
+// `name` is given, only services whose name/fqdn matches are considered. Our
+// own advertised service is always ignored.
 async function discoverUrl({ type = 'http', name = null, timeoutMs = 5000 } = {}) {
   const services = await browse({ type, timeoutMs });
   const candidates = services.filter((svc) => {
