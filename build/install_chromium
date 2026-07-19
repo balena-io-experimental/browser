@@ -22,23 +22,6 @@ then
 
     cp -a "${BASE_DIR}/rpi/raspi.list" "/etc/apt/sources.list.d/"
     cp -a "${BASE_DIR}/rpi/raspberrypi-archive-stable.gpg" "/etc/apt/trusted.gpg.d/"
-
-    # Debian 13 (trixie) verifies apt repository signatures with Sequoia (sqv),
-    # which since 2026-02-01 rejects the SHA1 self-signature on the Raspberry Pi
-    # archive key, making the repo appear "not signed" and breaking apt-get update.
-    # SHA1's second-preimage resistance is still sound (only collision resistance
-    # is broken), so rather than disable verification we copy apt's default crypto
-    # policy and push the SHA1 second-preimage cutoff into the future.
-    # Ref: https://michael-prokop.at/blog/2026/01/31/apt-sha-1-keys-2026-02-01/
-    if [ -f /usr/share/apt/default-sequoia.config ]
-    then
-        echo "Relaxing SHA1 crypto policy for the Raspberry Pi archive key"
-        mkdir -p /etc/crypto-policies/back-ends/
-        cp /usr/share/apt/default-sequoia.config /etc/crypto-policies/back-ends/apt-sequoia.config
-        # Drop any existing SHA1 second-preimage cutoff, then re-add a far-future one
-        sed -i '/sha1\.second_preimage_resistance/d' /etc/crypto-policies/back-ends/apt-sequoia.config
-        sed -i 's/^\[hash_algorithms\]/[hash_algorithms]\nsha1.second_preimage_resistance = 2035-01-01/' /etc/crypto-policies/back-ends/apt-sequoia.config
-    fi
 fi
 
 # The node library launches /usr/bin/chromium-browser
