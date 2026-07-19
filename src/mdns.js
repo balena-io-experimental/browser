@@ -82,11 +82,20 @@ function browse({ type = 'http', timeoutMs = 5000 } = {}) {
   });
 }
 
+// Append a path to a discovered base URL, tolerating leading/trailing slashes.
+// e.g. joinUrlPath('http://host:8123', '/lovelace/board') -> 'http://host:8123/lovelace/board'
+function joinUrlPath(base, path) {
+  if (!path) return base;
+  return `${base.replace(/\/+$/, '')}/${String(path).replace(/^\/+/, '')}`;
+}
+
 // Discover an HTTP/HTTPS service on the LAN and return a loadable URL, or null
-// if none is found. `type` may include multiple types (e.g. 'http,https'). If
-// `name` is given, only services whose name/fqdn matches are considered. Our
-// own advertised service is always ignored.
-async function discoverUrl({ type = 'http', name = null, timeoutMs = 5000 } = {}) {
+// if none is found. `type` may include multiple types (e.g. 'http,https' or
+// 'home-assistant'). If `name` is given, only services whose name/fqdn matches
+// are considered. If `path` is given it is appended to the discovered host:port
+// (services only advertise a host and port, never a path). Our own advertised
+// service is always ignored.
+async function discoverUrl({ type = 'http', name = null, path = null, timeoutMs = 5000 } = {}) {
   const services = await browse({ type, timeoutMs });
   const candidates = services.filter((svc) => {
     if (published && svc.name === published.name) return false; // skip ourselves
@@ -94,7 +103,7 @@ async function discoverUrl({ type = 'http', name = null, timeoutMs = 5000 } = {}
     return true;
   });
   if (candidates.length === 0) return null;
-  return serviceToUrl(candidates[0]);
+  return joinUrlPath(serviceToUrl(candidates[0]), path);
 }
 
 // Tear down advertising and the multicast socket (used on shutdown).
@@ -106,4 +115,4 @@ function stop() {
   published = null;
 }
 
-module.exports = { advertise, browse, discoverUrl, stop, serviceToUrl };
+module.exports = { advertise, browse, discoverUrl, stop, serviceToUrl, joinUrlPath };

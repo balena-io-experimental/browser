@@ -38,6 +38,7 @@ const MDNS_NAME = process.env.MDNS_NAME || process.env.BALENA_DEVICE_NAME_AT_INI
 const MDNS_DISCOVER = process.env.MDNS_DISCOVER || '0';
 const MDNS_DISCOVER_NAME = process.env.MDNS_DISCOVER_NAME || null;
 const MDNS_DISCOVER_TYPE = process.env.MDNS_DISCOVER_TYPE || 'http';
+const MDNS_DISCOVER_PATH = process.env.MDNS_DISCOVER_PATH || null;
 const MDNS_DISCOVER_TIMEOUT = parseInt(process.env.MDNS_DISCOVER_TIMEOUT) || 5;
 
 // Environment variables which can be overriden from the API
@@ -83,6 +84,7 @@ async function getUrlToDisplayAsync() {
         const discovered = await mdns.discoverUrl({
           type: MDNS_DISCOVER_TYPE,
           name: MDNS_DISCOVER_NAME,
+          path: MDNS_DISCOVER_PATH,
           timeoutMs: MDNS_DISCOVER_TIMEOUT * 1000,
         });
         if (discovered) {
