@@ -120,6 +120,11 @@ async function main() {
     try {
       const accepted = await recorder.smartLogin({ page, username: u, password: p, timeout: 20000, log: console.log });
       ok = accepted;
+      if (accepted) {
+        // Re-open the display URL so query params (e.g. ?kiosk) apply, matching
+        // what the device does — the screenshot then reflects the real view.
+        try { console.log(`Re-opening display URL: ${URL_ARG}`); await page.goto(URL_ARG, { waitUntil: 'networkidle2', timeout: 30000 }); } catch (e) {}
+      }
       console.log(accepted
         ? '\n✓✓✓ SMART LOGIN ACCEPTED — navigated to the app.'
         : '\n⚠ Fields filled and submitted, but still on auth page (expected with placeholder creds).');

@@ -307,6 +307,17 @@ async function executeRecorderScript(port) {
           });
           if (loggedIn) {
             console.log("✓ Logged in via direct credential fill.");
+            // The auth redirect returns to the dashboard but drops query params
+            // (e.g. ?kiosk that hides the HA sidebar). Re-open the exact display
+            // URL so those params take effect.
+            if (currentUrl) {
+              try {
+                console.log(`Re-opening display URL: ${currentUrl}`);
+                await page.goto(currentUrl, { waitUntil: 'networkidle2', timeout: 30000 });
+              } catch (e) {
+                console.log(`Post-login navigation warning: ${e.message}`);
+              }
+            }
           } else {
             console.log("Direct login did not complete - falling back to recorded script.");
           }
