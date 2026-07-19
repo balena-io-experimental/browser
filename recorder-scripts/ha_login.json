@@ -11,43 +11,6 @@
       "isLandscape": false
     },
     {
-      "type": "click",
-      "target": "main",
-      "selectors": [
-        [
-          "ha-auth-form-string:nth-of-type(1) label"
-        ],
-        [
-          "xpath//html/body/div[1]/ha-authorize/div[1]/ha-auth-flow/form/ha-auth-form/div/ha-auth-form-string[1]/ha-auth-textfield/label"
-        ],
-        [
-          "pierce/ha-auth-form-string:nth-of-type(1) label"
-        ]
-      ],
-      "offsetY": 19,
-      "offsetX": 110.5
-    },
-    {
-      "type": "click",
-      "target": "main",
-      "selectors": [
-        [
-          "aria/Username*"
-        ],
-        [
-          "ha-auth-form-string:nth-of-type(1) input"
-        ],
-        [
-          "xpath//html/body/div[1]/ha-authorize/div[1]/ha-auth-flow/form/ha-auth-form/div/ha-auth-form-string[1]/ha-auth-textfield/label/input"
-        ],
-        [
-          "pierce/ha-auth-form-string:nth-of-type(1) input"
-        ]
-      ],
-      "offsetY": 10.75,
-      "offsetX": 90.5
-    },
-    {
       "type": "change",
       "value": "PLACEHOLDER_USERNAME",
       "selectors": [
@@ -65,26 +28,6 @@
         ]
       ],
       "target": "main"
-    },
-    {
-      "type": "click",
-      "target": "main",
-      "selectors": [
-        [
-          "aria/Password*"
-        ],
-        [
-          "ha-auth-form-string:nth-of-type(2) input"
-        ],
-        [
-          "xpath//html/body/div[1]/ha-authorize/div[1]/ha-auth-flow/form/ha-auth-form/div/ha-auth-form-string[2]/ha-auth-textfield/label/input"
-        ],
-        [
-          "pierce/ha-auth-form-string:nth-of-type(2) input"
-        ]
-      ],
-      "offsetY": 5.25,
-      "offsetX": 49.5
     },
     {
       "type": "change",
@@ -131,23 +74,6 @@
           "title": "Home Assistant"
         }
       ]
-    },
-    {
-      "type": "click",
-      "target": "main",
-      "selectors": [
-        [
-          "home-assistant",
-          "home-assistant-main",
-          "ha-sidebar",
-          "ha-md-list-item:nth-of-type(4) > span"
-        ],
-        [
-          "pierce/ha-md-list-item:nth-of-type(4) > span"
-        ]
-      ],
-      "offsetY": 16.5,
-      "offsetX": 70
     },
     {
       "type": "navigate",
