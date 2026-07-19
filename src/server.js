@@ -6,6 +6,7 @@ const chromeLauncher = require('chrome-launcher');
 const puppeteer = require('puppeteer-core');
 const { createRunner, PuppeteerRunnerExtension } = require('@puppeteer/replay');
 const bent = require('bent')
+const mdns = require('./mdns');
 const {
   setIntervalAsync,
   clearIntervalAsync
@@ -31,6 +32,14 @@ const ENABLE_RECORDER_SCRIPT = process.env.ENABLE_RECORDER_SCRIPT || '0';
 const HA_USERNAME = process.env.HA_USERNAME || null;
 const HA_PASSWORD = process.env.HA_PASSWORD || null;
 
+// mDNS / DNS-SD configuration
+const MDNS_ADVERTISE = process.env.MDNS_ADVERTISE || '1';
+const MDNS_NAME = process.env.MDNS_NAME || process.env.BALENA_DEVICE_NAME_AT_INIT || os.hostname() || 'balena-browser';
+const MDNS_DISCOVER = process.env.MDNS_DISCOVER || '0';
+const MDNS_DISCOVER_NAME = process.env.MDNS_DISCOVER_NAME || null;
+const MDNS_DISCOVER_TYPE = process.env.MDNS_DISCOVER_TYPE || 'http';
+const MDNS_DISCOVER_TIMEOUT = parseInt(process.env.MDNS_DISCOVER_TIMEOUT) || 5;
+
 // Environment variables which can be overriden from the API
 let kioskMode = process.env.KIOSK || '0';
 let enableGpu = process.env.ENABLE_GPU || '0';
@@ -44,8 +53,9 @@ let timer = {};
 
 // Returns the URL to display, adhering to the hieracrchy:
 // 1) the configured LAUNCH_URL
-// 2) a discovered HTTP service on the device
-// 3) the default static HTML
+// 2) an HTTP service discovered on the LAN via mDNS (if MDNS_DISCOVER=1)
+// 3) a discovered HTTP service on the device
+// 4) the default static HTML
 async function getUrlToDisplayAsync() {
   let launchUrl = process.env.LAUNCH_URL || null;
     if (null !== launchUrl)
@@ -62,6 +72,29 @@ async function getUrlToDisplayAsync() {
     }
 
     console.log("LAUNCH_URL environment variable not set.")
+
+    // Optionally browse the LAN for a service advertised over mDNS.
+    if (MDNS_DISCOVER === '1') {
+      console.log(
+        `Looking for an mDNS "_${MDNS_DISCOVER_TYPE}._tcp" service on the LAN` +
+        (MDNS_DISCOVER_NAME ? ` named "${MDNS_DISCOVER_NAME}"` : '')
+      );
+      try {
+        const discovered = await mdns.discoverUrl({
+          type: MDNS_DISCOVER_TYPE,
+          name: MDNS_DISCOVER_NAME,
+          timeoutMs: MDNS_DISCOVER_TIMEOUT * 1000,
+        });
+        if (discovered) {
+          console.log(`mDNS service found at: ${discovered}`);
+          return discovered;
+        }
+        console.log("No matching mDNS service found on the LAN");
+      } catch (e) {
+        console.log(`mDNS discovery error: ${e.message}`);
+      }
+    }
+
     console.log("Looking for local HTTP/S services.")
 
     // make a HTTP/S request for each supported port to the localhost
@@ -547,10 +580,45 @@ app.post('/scan', (req, res) => {
   return res.status(200).send('ok');
 });
 
+// mDNS endpoint - reports what we advertise and what we can currently see
+app.get('/mdns', async (req, res) => {
+  try {
+    const services = await mdns.browse({
+      type: MDNS_DISCOVER_TYPE,
+      timeoutMs: MDNS_DISCOVER_TIMEOUT * 1000,
+    });
+    return res.status(200).json({
+      advertising: MDNS_ADVERTISE === '1'
+        ? { name: MDNS_NAME, type: '_http._tcp', port: API_PORT }
+        : null,
+      discovered: services.map((s) => ({
+        name: s.name,
+        host: s.host,
+        port: s.port,
+        addresses: s.addresses,
+        fqdn: s.fqdn,
+        url: mdns.serviceToUrl(s),
+      })),
+    });
+  } catch (e) {
+    return res.status(500).send('mDNS error: ' + e.message);
+  }
+});
+
 app.listen(API_PORT, () => {
   console.log('Browser API running on port: ' + API_PORT);
+
+  // Advertise this device's API on the LAN over mDNS.
+  if (MDNS_ADVERTISE === '1') {
+    mdns.advertise({
+      name: MDNS_NAME,
+      port: API_PORT,
+      txt: { role: 'balena-browser' },
+    });
+  }
 });
 
 process.on('SIGINT', () => {
+  mdns.stop();
   process.exit();
 });

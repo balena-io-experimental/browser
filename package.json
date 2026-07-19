@@ -4,38 +4,38 @@
     "description": "balenaBlock that provides a chromium browser wrapped in some balena genius",
     "main": "index.js",
     "scripts": {
-      "test": "exit 0"
+        "test": "exit 0"
     },
     "repository": {
-      "type": "git",
-      "url": "git+https://github.com/balena-labs-projects/browser.git"
+        "type": "git",
+        "url": "git+https://github.com/balena-labs-projects/browser.git"
     },
-  "private": true,
+    "private": true,
     "keywords": [
-      "balena",
-      "browser",
-      "chromium"
+        "balena",
+        "browser",
+        "chromium"
     ],
     "author": "Phil Wilson <phil@balena.io>",
     "license": "Apache-2.0",
     "jshintConfig": {
-      "esversion": 8
+        "esversion": 8
     },
     "bugs": {
-      "url": "https://github.com/balena-labs-projects/browser/issues"
+        "url": "https://github.com/balena-labs-projects/browser/issues"
     },
     "homepage": "https://github.com/balena-labs-projects/browser#readme",
     "dependencies": {
-        "chrome-launcher": "^0.13.4",
-        "puppeteer-core": "^22.0.0",
         "@puppeteer/replay": "^3.0.0",
+        "bent": "7.3.10",
         "body-parser": "^1.19.0",
+        "bonjour-service": "^1.4.3",
+        "chrome-launcher": "^0.13.4",
         "compression": "^1.7.4",
         "dateformat": "^3.0.3",
         "debug": "^4.1.1",
         "express": "^4.17.1",
-        "bent": "7.3.10",
+        "puppeteer-core": "^22.0.0",
         "set-interval-async": "^1.0.34"
     }
-  }
-  
+}
