@@ -289,6 +289,21 @@ async function executeRecorderScript(port) {
     console.log(`  On auth page: ${isOnAuthPage}`);
     console.log(`  Needs login: ${needsLogin}`);
 
+    // The recording was captured against one Home Assistant origin
+    // (scheme://host:port). Because mDNS discovery / LAUNCH_URL may have landed
+    // us on a different IP or host, retarget the recording at the origin we
+    // actually loaded so login works on any network instead of the baked-in one.
+    let currentOrigin = null;
+    try { currentOrigin = new URL(pageUrl).origin; } catch (e) { /* not a URL */ }
+    const firstNav = (recording.steps || []).find((s) => s.type === 'navigate' && s.url);
+    let recordedOrigin = null;
+    if (firstNav) { try { recordedOrigin = new URL(firstNav.url).origin; } catch (e) { /* ignore */ } }
+    const retargetUrl = (url) =>
+      (url && recordedOrigin && currentOrigin) ? url.split(recordedOrigin).join(currentOrigin) : url;
+    if (recordedOrigin && currentOrigin && recordedOrigin !== currentOrigin) {
+      console.log(`Retargeting recording origin: ${recordedOrigin} -> ${currentOrigin}`);
+    }
+
     if (needsLogin) {
       console.log("Login required - executing full recorder script");
 
@@ -319,6 +334,25 @@ async function executeRecorderScript(port) {
         console.log("⚠ No HA_USERNAME or HA_PASSWORD environment variables set - using values from recording file");
       }
 
+      // Drop the recorded auth navigations: the browser is already on the
+      // correct auth page (from discovery/LAUNCH_URL), and their embedded
+      // client_id/redirect_uri point at the recorded origin. Retarget any other
+      // navigation (e.g. the final dashboard) to the origin we actually loaded.
+      const originalLen = recording.steps.length;
+      recording.steps = recording.steps.filter((step) => {
+        if (step.type === 'navigate' && step.url) {
+          let pathname = '';
+          try { pathname = new URL(step.url).pathname; } catch (e) { /* ignore */ }
+          if (pathname.startsWith('/auth/')) {
+            console.log(`  ↷ dropping recorded auth navigation: ${step.url.slice(0, 60)}...`);
+            return false;
+          }
+          step.url = retargetUrl(step.url);
+        }
+        return true;
+      });
+      console.log(`✓ Prepared ${recording.steps.length} steps (removed ${originalLen - recording.steps.length} navigation step(s))`);
+
       console.log("Creating Puppeteer runner...");
       // Create a runner for the recording
       const runner = await createRunner(recording, new PuppeteerRunnerExtension(browser, page, {
@@ -341,8 +375,9 @@ async function executeRecorderScript(port) {
         .pop();
 
       if (finalNavStep && finalNavStep.url) {
-        console.log(`Navigating directly to: ${finalNavStep.url}`);
-        await page.goto(finalNavStep.url, { waitUntil: 'networkidle0', timeout: 30000 });
+        const target = retargetUrl(finalNavStep.url);
+        console.log(`Navigating directly to: ${target}`);
+        await page.goto(target, { waitUntil: 'networkidle0', timeout: 30000 });
         console.log("✓ Navigation complete");
       } else {
         console.log("No final navigation step found in recording");
