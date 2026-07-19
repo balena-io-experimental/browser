@@ -349,6 +349,10 @@ async function executeRecorderScript(port) {
           }
           step.url = retargetUrl(step.url);
         }
+        // assertedEvents carry the recorded origin too (the runner waits on them)
+        if (Array.isArray(step.assertedEvents)) {
+          step.assertedEvents.forEach((ev) => { if (ev && ev.url) ev.url = retargetUrl(ev.url); });
+        }
         return true;
       });
       console.log(`✓ Prepared ${recording.steps.length} steps (removed ${originalLen - recording.steps.length} navigation step(s))`);

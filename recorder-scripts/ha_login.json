@@ -1,186 +1,164 @@
 {
-    "title": "Recording 1/27/2026 at 9:08:32 PM",
-    "steps": [
+  "title": "Recording 1/27/2026 at 9:08:32 PM",
+  "steps": [
+    {
+      "type": "setViewport",
+      "width": 2005,
+      "height": 928,
+      "deviceScaleFactor": 1,
+      "isMobile": false,
+      "hasTouch": false,
+      "isLandscape": false
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        [
+          "ha-auth-form-string:nth-of-type(1) label"
+        ],
+        [
+          "xpath//html/body/div[1]/ha-authorize/div[1]/ha-auth-flow/form/ha-auth-form/div/ha-auth-form-string[1]/ha-auth-textfield/label"
+        ],
+        [
+          "pierce/ha-auth-form-string:nth-of-type(1) label"
+        ]
+      ],
+      "offsetY": 19,
+      "offsetX": 110.5
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        [
+          "aria/Username*"
+        ],
+        [
+          "ha-auth-form-string:nth-of-type(1) input"
+        ],
+        [
+          "xpath//html/body/div[1]/ha-authorize/div[1]/ha-auth-flow/form/ha-auth-form/div/ha-auth-form-string[1]/ha-auth-textfield/label/input"
+        ],
+        [
+          "pierce/ha-auth-form-string:nth-of-type(1) input"
+        ]
+      ],
+      "offsetY": 10.75,
+      "offsetX": 90.5
+    },
+    {
+      "type": "change",
+      "value": "PLACEHOLDER_USERNAME",
+      "selectors": [
+        [
+          "aria/Username*"
+        ],
+        [
+          "ha-auth-form-string:nth-of-type(1) input"
+        ],
+        [
+          "xpath//html/body/div[1]/ha-authorize/div[1]/ha-auth-flow/form/ha-auth-form/div/ha-auth-form-string[1]/ha-auth-textfield/label/input"
+        ],
+        [
+          "pierce/ha-auth-form-string:nth-of-type(1) input"
+        ]
+      ],
+      "target": "main"
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        [
+          "aria/Password*"
+        ],
+        [
+          "ha-auth-form-string:nth-of-type(2) input"
+        ],
+        [
+          "xpath//html/body/div[1]/ha-authorize/div[1]/ha-auth-flow/form/ha-auth-form/div/ha-auth-form-string[2]/ha-auth-textfield/label/input"
+        ],
+        [
+          "pierce/ha-auth-form-string:nth-of-type(2) input"
+        ]
+      ],
+      "offsetY": 5.25,
+      "offsetX": 49.5
+    },
+    {
+      "type": "change",
+      "value": "PLACEHOLDER_PASSWORD",
+      "selectors": [
+        [
+          "aria/Password*"
+        ],
+        [
+          "ha-auth-form-string:nth-of-type(2) input"
+        ],
+        [
+          "xpath//html/body/div[1]/ha-authorize/div[1]/ha-auth-flow/form/ha-auth-form/div/ha-auth-form-string[2]/ha-auth-textfield/label/input"
+        ],
+        [
+          "pierce/ha-auth-form-string:nth-of-type(2) input"
+        ]
+      ],
+      "target": "main"
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        [
+          "aria/Log in",
+          "aria/[role=\"generic\"]"
+        ],
+        [
+          "div.card-content ha-button",
+          "slot.label"
+        ],
+        [
+          "pierce/div.card-content ha-button",
+          "pierce/slot.label"
+        ]
+      ],
+      "offsetY": 6,
+      "offsetX": 15.671875,
+      "assertedEvents": [
         {
-            "type": "setViewport",
-            "width": 2005,
-            "height": 928,
-            "deviceScaleFactor": 1,
-            "isMobile": false,
-            "hasTouch": false,
-            "isLandscape": false
-        },
-        {
-            "type": "navigate",
-            "url": "http://10.0.0.78:8123/auth/authorize?response_type=code&redirect_uri=http%3A%2F%2F10.0.0.78%3A8123%2F%3Fauth_callback%3D1&client_id=http%3A%2F%2F10.0.0.78%3A8123%2F&state=eyJoYXNzVXJsIjoiaHR0cDovLzEwLjAuMC43ODo4MTIzIiwiY2xpZW50SWQiOiJodHRwOi8vMTAuMC4wLjc4OjgxMjMvIn0%3D",
-            "assertedEvents": [
-                {
-                    "type": "navigation",
-                    "url": "http://10.0.0.78:8123/auth/authorize?response_type=code&redirect_uri=http%3A%2F%2F10.0.0.78%3A8123%2F%3Fauth_callback%3D1&client_id=http%3A%2F%2F10.0.0.78%3A8123%2F&state=eyJoYXNzVXJsIjoiaHR0cDovLzEwLjAuMC43ODo4MTIzIiwiY2xpZW50SWQiOiJodHRwOi8vMTAuMC4wLjc4OjgxMjMvIn0%3D",
-                    "title": "Home Assistant"
-                }
-            ]
-        },
-        {
-            "type": "navigate",
-            "url": "http://10.0.0.78:8123/auth/authorize?response_type=code&redirect_uri=http%3A%2F%2F10.0.0.78%3A8123%2F%3Fauth_callback%3D1&client_id=http%3A%2F%2F10.0.0.78%3A8123%2F&state=eyJoYXNzVXJsIjoiaHR0cDovLzEwLjAuMC43ODo4MTIzIiwiY2xpZW50SWQiOiJodHRwOi8vMTAuMC4wLjc4OjgxMjMvIn0%3D",
-            "assertedEvents": [
-                {
-                    "type": "navigation",
-                    "url": "http://10.0.0.78:8123/auth/authorize?response_type=code&redirect_uri=http%3A%2F%2F10.0.0.78%3A8123%2F%3Fauth_callback%3D1&client_id=http%3A%2F%2F10.0.0.78%3A8123%2F&state=eyJoYXNzVXJsIjoiaHR0cDovLzEwLjAuMC43ODo4MTIzIiwiY2xpZW50SWQiOiJodHRwOi8vMTAuMC4wLjc4OjgxMjMvIn0%3D",
-                    "title": ""
-                }
-            ]
-        },
-        {
-            "type": "click",
-            "target": "main",
-            "selectors": [
-                [
-                    "ha-auth-form-string:nth-of-type(1) label"
-                ],
-                [
-                    "xpath//html/body/div[1]/ha-authorize/div[1]/ha-auth-flow/form/ha-auth-form/div/ha-auth-form-string[1]/ha-auth-textfield/label"
-                ],
-                [
-                    "pierce/ha-auth-form-string:nth-of-type(1) label"
-                ]
-            ],
-            "offsetY": 19,
-            "offsetX": 110.5
-        },
-        {
-            "type": "click",
-            "target": "main",
-            "selectors": [
-                [
-                    "aria/Username*"
-                ],
-                [
-                    "ha-auth-form-string:nth-of-type(1) input"
-                ],
-                [
-                    "xpath//html/body/div[1]/ha-authorize/div[1]/ha-auth-flow/form/ha-auth-form/div/ha-auth-form-string[1]/ha-auth-textfield/label/input"
-                ],
-                [
-                    "pierce/ha-auth-form-string:nth-of-type(1) input"
-                ]
-            ],
-            "offsetY": 10.75,
-            "offsetX": 90.5
-        },
-        {
-            "type": "change",
-            "value": "PLACEHOLDER_USERNAME",
-            "selectors": [
-                [
-                    "aria/Username*"
-                ],
-                [
-                    "ha-auth-form-string:nth-of-type(1) input"
-                ],
-                [
-                    "xpath//html/body/div[1]/ha-authorize/div[1]/ha-auth-flow/form/ha-auth-form/div/ha-auth-form-string[1]/ha-auth-textfield/label/input"
-                ],
-                [
-                    "pierce/ha-auth-form-string:nth-of-type(1) input"
-                ]
-            ],
-            "target": "main"
-        },
-        {
-            "type": "click",
-            "target": "main",
-            "selectors": [
-                [
-                    "aria/Password*"
-                ],
-                [
-                    "ha-auth-form-string:nth-of-type(2) input"
-                ],
-                [
-                    "xpath//html/body/div[1]/ha-authorize/div[1]/ha-auth-flow/form/ha-auth-form/div/ha-auth-form-string[2]/ha-auth-textfield/label/input"
-                ],
-                [
-                    "pierce/ha-auth-form-string:nth-of-type(2) input"
-                ]
-            ],
-            "offsetY": 5.25,
-            "offsetX": 49.5
-        },
-        {
-            "type": "change",
-            "value": "PLACEHOLDER_PASSWORD",
-            "selectors": [
-                [
-                    "aria/Password*"
-                ],
-                [
-                    "ha-auth-form-string:nth-of-type(2) input"
-                ],
-                [
-                    "xpath//html/body/div[1]/ha-authorize/div[1]/ha-auth-flow/form/ha-auth-form/div/ha-auth-form-string[2]/ha-auth-textfield/label/input"
-                ],
-                [
-                    "pierce/ha-auth-form-string:nth-of-type(2) input"
-                ]
-            ],
-            "target": "main"
-        },
-        {
-            "type": "click",
-            "target": "main",
-            "selectors": [
-                [
-                    "aria/Log in",
-                    "aria/[role=\"generic\"]"
-                ],
-                [
-                    "div.card-content ha-button",
-                    "slot.label"
-                ],
-                [
-                    "pierce/div.card-content ha-button",
-                    "pierce/slot.label"
-                ]
-            ],
-            "offsetY": 6,
-            "offsetX": 15.671875,
-            "assertedEvents": [
-                {
-                    "type": "navigation",
-                    "url": "http://10.0.0.78:8123/?auth_callback=1",
-                    "title": "Home Assistant"
-                }
-            ]
-        },
-        {
-            "type": "click",
-            "target": "main",
-            "selectors": [
-                [
-                    "home-assistant",
-                    "home-assistant-main",
-                    "ha-sidebar",
-                    "ha-md-list-item:nth-of-type(4) > span"
-                ],
-                [
-                    "pierce/ha-md-list-item:nth-of-type(4) > span"
-                ]
-            ],
-            "offsetY": 16.5,
-            "offsetX": 70
-        },
-        {
-            "type": "navigate",
-            "url": "http://10.0.0.78:8123/lovelace-tvboard/tvboard?kiosk",
-            "assertedEvents": [
-                {
-                    "type": "navigation",
-                    "url": "http://10.0.0.78:8123/lovelace-tvboard/tvboard?kiosk",
-                    "title": "Home Assistant"
-                }
-            ]
+          "type": "navigation",
+          "url": "http://recorded-ha-host:8123/?auth_callback=1",
+          "title": "Home Assistant"
         }
-    ]
+      ]
+    },
+    {
+      "type": "click",
+      "target": "main",
+      "selectors": [
+        [
+          "home-assistant",
+          "home-assistant-main",
+          "ha-sidebar",
+          "ha-md-list-item:nth-of-type(4) > span"
+        ],
+        [
+          "pierce/ha-md-list-item:nth-of-type(4) > span"
+        ]
+      ],
+      "offsetY": 16.5,
+      "offsetX": 70
+    },
+    {
+      "type": "navigate",
+      "url": "http://recorded-ha-host:8123/lovelace-tvboard/tvboard?kiosk",
+      "assertedEvents": [
+        {
+          "type": "navigation",
+          "url": "http://recorded-ha-host:8123/lovelace-tvboard/tvboard?kiosk",
+          "title": "Home Assistant"
+        }
+      ]
+    }
+  ]
 }
