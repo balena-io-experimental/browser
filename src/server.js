@@ -355,11 +355,37 @@ async function executeRecorderScript(port) {
         }
         return true;
       });
+      // For form fills, prefer a concrete CSS/xpath selector that resolves the
+      // real <input> over an aria/label selector. HA's login fields are inside
+      // shadow-DOM web components whose accessible name is on the wrapper, not
+      // the input, so aria selectors can be clicked but not reliably typed into.
+      recording.steps.forEach((step) => {
+        if (step.type === 'change' && Array.isArray(step.selectors) && step.selectors.length > 1) {
+          step.selectors.sort((a, b) => {
+            const aInput = JSON.stringify(a).includes('input') ? 0 : 1;
+            const bInput = JSON.stringify(b).includes('input') ? 0 : 1;
+            return aInput - bInput;
+          });
+        }
+      });
+
       console.log(`✓ Prepared ${recording.steps.length} steps (removed ${originalLen - recording.steps.length} navigation step(s))`);
 
       console.log("Creating Puppeteer runner...");
-      // Create a runner for the recording
-      const runner = await createRunner(recording, new PuppeteerRunnerExtension(browser, page, {
+      // Runner extension that logs each step so a hang/timeout can be pinpointed.
+      class LoggingExtension extends PuppeteerRunnerExtension {
+        async beforeEachStep(step, flow) {
+          this._i = (this._i || 0) + 1;
+          const detail = step.url ? step.url : (step.selectors ? JSON.stringify(step.selectors[0]) : '');
+          console.log(`  ▶ step ${this._i}: ${step.type} ${detail}`.slice(0, 160));
+          if (super.beforeEachStep) { await super.beforeEachStep(step, flow); }
+        }
+        async afterEachStep(step, flow) {
+          console.log(`  ✓ step ${this._i} (${step.type}) done`);
+          if (super.afterEachStep) { await super.afterEachStep(step, flow); }
+        }
+      }
+      const runner = await createRunner(recording, new LoggingExtension(browser, page, {
         timeout: 30000
       }));
       console.log("✓ Runner created");
