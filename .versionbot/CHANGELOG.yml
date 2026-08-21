@@ -1,4 +1,22 @@
 - commits:
+    - subject: Update GPG signature for the RPi repo
+      hash: c3c3e0643ddc4eb664529796a192b9f2a457b6ac
+      body: |
+        The current (legacy) signature file that we ship in the repo uses SHA1
+        and doesn't work anymore.
+
+        This patch replaces it with the updated version from RaspiOS.
+      footer:
+        Change-type: patch
+        change-type: patch
+        Signed-off-by: Michal Toman <michalt@balena.io>
+        signed-off-by: Michal Toman <michalt@balena.io>
+      author: Michal Toman
+      nested: []
+  version: 2.12.1
+  title: ""
+  date: 2026-08-21T16:09:47.831Z
+- commits:
     - subject: Enable vulkan on the Raspberry Pi 5
       hash: 303749d3175312dfbc9ba52b2615cd50e24bbc38
       body: |
