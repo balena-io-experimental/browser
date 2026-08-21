@@ -21,7 +21,7 @@ then
     echo "Enabling raspios repository"
 
     cp -a "${BASE_DIR}/rpi/raspi.list" "/etc/apt/sources.list.d/"
-    cp -a "${BASE_DIR}/rpi/raspberrypi-archive-stable.gpg" "/etc/apt/trusted.gpg.d/"
+    cp -a "${BASE_DIR}/rpi/raspberrypi-archive.asc" "/etc/apt/trusted.gpg.d/"
 fi
 
 # The node library launches /usr/bin/chromium-browser
