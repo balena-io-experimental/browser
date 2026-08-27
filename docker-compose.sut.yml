@@ -1,3 +1,6 @@
+# TEST FLEET - Docker Compose only for testing 
+# You can test environments and stuff
+
 version: '2'
 
 volumes:

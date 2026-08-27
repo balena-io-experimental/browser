@@ -1,0 +1,17 @@
+ARG NODEJS_VERSION="16.19.1"
+
+FROM balenalib/%%BALENA_MACHINE_NAME%%-debian-node:${NODEJS_VERSION}-bullseye-run
+
+WORKDIR /usr/tests/
+
+COPY server server 
+COPY package* ./
+RUN npm ci && install_packages jq
+
+# COPY testImage.png testImage.png
+
+# Entrypoint
+COPY entry.sh .
+CMD [ "/bin/bash", "/usr/tests/entry.sh" ]
+
+# ENTRYPOINT ["tail", "-f", "/dev/null"]
