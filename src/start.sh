@@ -44,14 +44,31 @@ then
 	fi
 fi
 
-# Inject X11 config on the RPi 5 as the defaults do not work
-# We do this in the startup script and only for the RPi 5 because
-# we build the images per-architecture and we do not want to break
-# other aarch64-based device types
 if [ "${BALENA_DEVICE_TYPE}" = "raspberrypi5" ]
 then
+    # Inject X11 config on the RPi 5 as the defaults do not work
+    # We do this in the startup script and only for the RPi 5 because
+    # we build the images per-architecture and we do not want to break
+    # other aarch64-based device types
     echo "Raspberry Pi 5 detected, injecting X.org config"
     cp -a "/usr/src/build/rpi/99-vc4.conf" "/etc/X11/xorg.conf.d/"
+elif [ "${BALENA_DEVICE_TYPE}" = "raspberrypi0-2w-64" ]
+then
+    # The low memory warning which the chromium wrapper script generates 
+    # on this platform can't be dismissed if the device is being used
+    # as a display kiosk only and doesn't have a mouse/pointer device 
+    # attached
+    echo "Disabling low memory warning (always triggers on ${BALENA_DEVICE_TYPE})"
+    if [ -z "$EXTRA_FLAGS" ]
+    then
+        export EXTRA_FLAGS="--no-memcheck"
+    else
+        # insert --no-memcheck before the content of EXTRA_FLAGS 
+        # passed in from the docker-compose.yml environment so 
+        # that --memcheck will be honoured if the author of the 
+        # docker-compose.yml chooses to specify it there
+        export EXTRA_FLAGS="--no-memcheck $EXTRA_FLAGS"
+    fi
 fi
 
 # set up the user data area
@@ -67,6 +84,7 @@ environment=$(env | grep -v -w '_' | awk -F= '{ st = index($0,"=");print substr(
 environment="${environment::-1}"
 
 # launch Chromium and whitelist the enVars so that they pass through to the su session
+
 su -w "$environment" -c "export DISPLAY=:$DISPLAY_NUM && startx /usr/src/app/startx.sh $CURSOR" - chromium
 
 sleep infinity
