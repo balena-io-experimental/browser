@@ -1,0 +1,94 @@
+# This file can be used with the VSCode Rest Client extension (https://marketplace.visualstudio.com/items?itemName=humao.rest-client) to play with the browser block API.
+@baseUrl=http://your-device-hostname:5011
+
+### Ping the browser block
+GET {{baseUrl}}/ping
+
+### Refresh the currently displayed page
+POST {{baseUrl}}/refresh
+
+### Automatically refresh the browser window every 30 seconds
+POST {{baseUrl}}/autorefresh/30
+
+### Disable automatic refresh
+POST {{baseUrl}}/autorefresh/0
+
+### Re-scan for local HTTP or HTTPS services
+POST {{baseUrl}}/scan
+
+### Get the URL currently being displayed
+GET {{baseUrl}}/url
+
+### Set the URL to be displayed
+PUT {{baseUrl}}/url
+Content-Type: application/x-www-form-urlencoded
+
+url=http://www.balena.io
+
+### Set the URL with GPU and Kiosk settings
+PUT {{baseUrl}}/url
+Content-Type: application/x-www-form-urlencoded
+
+url=http://www.balena.io&gpu=1&kiosk=1
+
+### Get the status of the GPU
+GET {{baseUrl}}/gpu
+
+### Enable the GPU
+PUT {{baseUrl}}/gpu/1
+
+### Disable the GPU
+PUT {{baseUrl}}/gpu/0
+
+### Get the status of Kiosk mode
+GET {{baseUrl}}/kiosk
+
+### Enable Kiosk mode
+POST {{baseUrl}}/kiosk/1
+
+### Disable Kiosk mode
+POST {{baseUrl}}/kiosk/0
+
+### Get the flags Chromium was started with
+GET {{baseUrl}}/flags
+
+### Get the version of Chromium
+GET {{baseUrl}}/version
+
+### Take a screenshot of the Chromium window
+GET {{baseUrl}}/screenshot
+
+### Get the display state
+GET {{baseUrl}}/display
+
+### Set the display state to on
+POST {{baseUrl}}/display
+Content-Type: application/json
+
+{
+  "state": "on"
+}
+
+### Set the display state to off
+POST {{baseUrl}}/display
+Content-Type: application/json
+
+{
+  "state": "off"
+}
+
+### Set the display state to on using PUT
+PUT {{baseUrl}}/display
+Content-Type: application/json
+
+{
+  "state": "on"
+}
+
+### Set the display state to off using PUT
+PUT {{baseUrl}}/display
+Content-Type: application/json
+
+{
+  "state": "off"
+}

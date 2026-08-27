@@ -66,6 +66,13 @@ environment=$(env | grep -v -w '_' | awk -F= '{ st = index($0,"=");print substr(
 # remove the last comma
 environment="${environment::-1}"
 
+# forward the chromium remote debugging port from 0.0.0.0 to localhost to deal with the dropped support to listen on all interfaces (https://issues.chromium.org/issues/41487252)
+REMOTE_DEBUG_PORT=${REMOTE_DEBUG_PORT:-35173}
+REMOTE_DEBUG_FORWARD_PORT=$(($REMOTE_DEBUG_PORT+1))
+echo "Forwarding remote debugging port 0.0.0.0:$REMOTE_DEBUG_FORWARD_PORT to (internal) localhost:$REMOTE_DEBUG_PORT"
+socat TCP-LISTEN:${REMOTE_DEBUG_FORWARD_PORT},fork,reuseaddr TCP:localhost:${REMOTE_DEBUG_PORT} &
+# TODO: We should use REMOTE_DEBUG_PORT as the main env var, and handle the forwarding internally instead of this workaround-convention. The main api to a user should remain REMOTE_DEBUG_PORT
+
 # launch Chromium and whitelist the enVars so that they pass through to the su session
 su -w "$environment" -c "export DISPLAY=:$DISPLAY_NUM && startx /usr/src/app/startx.sh $CURSOR" - chromium
 

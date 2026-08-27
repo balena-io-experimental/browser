@@ -60,6 +60,9 @@ RUN usermod -a -G audio,video,tty chromium
 RUN curl -skL https://raw.githubusercontent.com/balena-labs-projects/audio/master/scripts/alsa-bridge/debian-setup.sh| sh
 ENV PULSE_SERVER=tcp:audio:4317
 
+# install socat to forard chromiums debug port
+RUN install_packages socat
+
 COPY VERSION .
 
 # Start app

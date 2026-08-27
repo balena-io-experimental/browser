@@ -10,6 +10,7 @@ const {
 } = require('set-interval-async/dynamic')
 const { spawn } = require('child_process');
 const { readFile, unlink } = require('fs').promises;
+const { exec } = require('child_process');
 const path = require('path');
 const os = require('os');
 
@@ -36,6 +37,8 @@ let flags = [];
 // Refresh timer object
 let timer = {};
 
+// store the display state
+let displayState = 'on';
 // Returns the URL to display, adhering to the hieracrchy:
 // 1) the configured LAUNCH_URL
 // 2) a discovered HTTP service on the device
@@ -398,6 +401,72 @@ app.post('/scan', (req, res) => {
     process.exit(1);
   });
   return res.status(200).send('ok');
+});
+
+// Function to enable the display
+function enableDisplay() {
+  exec('xset dpms force on', (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error enabling display: ${error}`);
+      return;
+    }
+    console.log('Display enabled');
+  });
+}
+
+// Function to disable the display
+function disableDisplay() {
+  exec('xset dpms force off', (error, stdout, stderr) => {
+    if (error) {
+      console.error(`Error disabling display: ${error}`);
+      return;
+    }
+    console.log('Display disabled');
+  });
+}
+
+app.post('/display', (req, res) => {
+  if (!req.body.state) {
+    return res.status(400).send('Bad request: missing state in the body element');
+  }
+
+  const state = req.body.state.toLowerCase();
+  if (state !== 'on' && state !== 'off') {
+    return res.status(400).send('Bad request: state must be "on" or "off"');
+  }
+
+  displayState = state;
+  if (displayState === 'on') {
+    enableDisplay();
+  } else {
+    disableDisplay();
+  }
+
+  return res.status(204).send(`Display state set to ${displayState}`);
+});
+
+app.put('/display', (req, res) => {
+  if (!req.body.state) {
+    return res.status(400).send('Bad request: missing state in the body element');
+  }
+
+  const state = req.body.state.toLowerCase();
+  if (state !== 'on' && state !== 'off') {
+    return res.status(400).send('Bad request: state must be "on" or "off"');
+  }
+
+  displayState = state;
+  if (displayState === 'on') {
+    enableDisplay();
+  } else {
+    disableDisplay();
+  }
+
+  return res.status(204).send(`Display state set to ${displayState}`);
+});
+
+app.get('/display', (req, res) => {
+  return res.status(200).send(displayState);
 });
 
 app.listen(API_PORT, () => {

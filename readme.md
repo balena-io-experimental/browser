@@ -14,6 +14,7 @@ The block provides an API for dynamic configuration, and also exposes the Chromi
 - Automatically displays local HTTP (port 80 or 8080) or HTTPS (443) service endpoints.
 - API for remote configuration and management
 - Chromium remote debugging port
+- Remotely enable/disable display
 ---
 
 ## Usage
@@ -92,7 +93,7 @@ The following environment variables allow configuration of the `browser` block:
 |`WINDOW_SIZE`|`x,y`|Detected screen resolution|Sets the browser window size, such as `800,600`. <br/> **Note:** Reverse the dimensions if you also rotate the display to `left` or `right` |
 |`WINDOW_POSITION`|`x,y`|`0,0`|Specifies the browser window position on the screen|
 |`API_PORT`|port number|5011|Specifies the port number the API runs on|
-|`REMOTE_DEBUG_PORT`|port number|35173|Specifies the port number the chrome remote debugger runs on|
+|`REMOTE_DEBUG_PORT`|port number|35173|Specifies the port number the chrome remote debugger runs on. The actual port a client (like chrome) might connect to it will be REMOTE_DEBUG_PORT + 1 due to a deprecation of [this chromium feature](https://issues.chromium.org/issues/41487252).|
 |`AUTO_REFRESH`|interval|0 (disabled)|Specifies the number of seconds before the page automatically refreshes|
 
 ---
@@ -221,6 +222,24 @@ Returns the version of Chromium that `browser` is running
 #### **GET** /screenshot
 Uses [scrot](https://opensource.com/article/17/11/taking-screen-captures-linux-command-line-scrot) to take a screenshot of the chromium window. 
 The screenshot will be saved as a temporary file in the container.
+
+
+#### **GET** /display
+Returns `on` or `off` depending on the display status
+
+#### **PUT** or **POST** /display
+Expects json payload with `state` key. 
+
+Turn display on:
+```bash
+curl -X PUT -H "Content-Type: application/json" -d '{"state": "on"}' http://localhost:5011/display
+```
+
+Turn display off:
+```bash
+curl -X PUT -H "Content-Type: application/json" -d '{"state": "off"}' http://localhost:5011/display
+```
+
 
 ---
 
